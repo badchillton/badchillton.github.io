@@ -8,6 +8,9 @@
     <title>Document</title>
     <!-- Add your project's config here -->
 
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
     <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 
@@ -20,22 +23,31 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 </head>
 
 <body>
-    <div id="game_record">
-        <table>
-            <tr>
-                <th>名字</th>
-                <th>勝場</th>
-                <th>敗場</th>
-                <th>總場數</th>
-                <th>勝率</th>
-                <th>當前分數</th>
-            </tr>
-        </table>
+    <div class="row">
+        <div class="col-3">
+            <div id="game_record">
+                <table>
+                    <tr>
+                        <th>名字</th>
+                        <th>勝場</th>
+                        <th>敗場</th>
+                        <th>總場數</th>
+                        <th>勝率</th>
+                        <th>當前分數</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="col-9">
+            <div id="container" style="height: 100%"></div>
+        </div>
     </div>
+
 
 </body>
 
@@ -57,6 +69,7 @@
     firebase.analytics();
     // 獲取資料庫的引用
     var database = firebase.database();
+    let echart_data = []
     // 寫入資料
     function writeData(user_name, history_score) {
         let today = new Date();
@@ -107,7 +120,9 @@
                     <td>${parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win))}%</td>
                     <td>${today_people[key].score}</td> 
                 </tr>`)
+                echart_data.push([key, today_people[key].score])
             })
+            render_echart(echart_data)
 
 
 
@@ -126,3 +141,54 @@
 </script>
 
 </html>
+
+<script type="text/javascript">
+    function render_echart(echart_data) {
+        var dom = document.getElementById('container');
+        console.log("echart")
+        var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+        });
+        var app = {};
+
+        var option;
+
+        option = {
+            dataset: [
+                {
+                    dimensions: ['name', 'score'],
+                    source: echart_data
+                },
+                {
+                    transform: {
+                        type: 'sort',
+                        config: { dimension: 'score', order: 'desc' }
+                    }
+                }
+            ],
+            xAxis: {
+                type: 'category',
+                axisLabel: { interval: 0, rotate: 30 }
+            },
+            yAxis: {},
+            series: {
+                type: 'bar',
+                encode: { x: 'name', y: 'score' },
+                datasetIndex: 1,
+                label: {
+                    show: true,
+                    position: 'top' // 可以設置 label 的位置，如 top、inside、right 等等
+                }
+            }
+        };
+
+
+        if (option && typeof option === 'object') {
+            myChart.setOption(option);
+        }
+
+        window.addEventListener('resize', myChart.resize);
+    }
+
+</script>

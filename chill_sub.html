@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>和雲羽chill社 </title>
+    <!-- 引入 Bootstrap 的 CSS 檔案 -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        div {
+            overflow-x: scroll;
+        }
+
+        .even {
+            background-color: rgb(122, 176, 223);
+        }
+
+        .odd {
+            background-color: antiquewhite;
+        }
+
+        .court {
+            background-color: rgb(236, 236, 244);
+            border: 2px solid white;
+            /* overflow-x: scroll; */
+        }
+
+        .row>div {
+            padding: 5px;
+        }
+
+        .court td {
+            /* margin-top: 10px; */
+            height: 120px;
+        }
+
+        .court .net {
+            background-color: aliceblue;
+            height: 5px;
+        }
+
+        .container {
+            background-color: gray;
+        }
+
+        .gameStart {
+            background-color: greenyellow;
+            width: 45%;
+        }
+
+        .gameEnd {
+            background-color: red;
+            width: 45%;
+            color: aliceblue;
+        }
+
+        .person-span {
+            margin: 3px;
+            border: 1px solid black;
+            /* background-color: white; */
+        }
+
+        .court-5 {
+            background-color: burlywood;
+        }
+
+        .court-1 {
+            /* background-color: lightgreen; */
+            background-color: MediumSeaGreen;
+        }
+
+        .court-2 {
+            background-color: lightgreen;
+        }
+
+        .court-3 {
+            /* background-color: lightgreen; */
+            background-color: MediumSeaGreen;
+        }
+
+        .court-4 {
+            background-color: lightgreen;
+            /* background-color: lightyellow; */
+        }
+
+        .analysis td {
+            height: auto;
+        }
+
+        .personal_table {
+            background-color: aliceblue;
+            margin: 2px;
+            border-radius: 3px;
+        }
+
+        .json {
+            width: 100%;
+        }
+
+        .gameEnd {
+            display: none;
+        }
+
+        .gameStart {
+            display: none;
+        }
+
+        .person-wait {
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="user_account" hidden>
+            <input type="text" id="user_name">
+            <button id="user_register">註冊</button>
+            <button id="user_login">登入</button>
+
+        </div>
+        <div class="row court-container">
+            <div class="col-2">
+                <h2>即將上場</h2>
+                <table class="table table-bordered court-5 court">
+                    <tr>
+                        <td class="player1"></td>
+                        <td class="player4"></td>
+                    </tr>
+                    <tr>
+                        <td class='net'> </td>
+                        <td class='net'> </td>
+                    </tr>
+                    <tr>
+                        <td class="player2"></td>
+                        <td class="player3"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-4">
+                <h1>戰績表</h1>
+                <table id="game_record" class="table-bordered"></table>
+            </div>
+            <div class="col-8">
+                <h1> 備戰區</h1>
+                <div class="row person-wait"></div>
+                <h1> 休息區</h1>
+                <div class="row person-sleep"></div>
+                <div id="bulletin_board">
+                    <h1>📰公布欄📰</h1>
+                    <div id="bulletin_board_message"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table id="game_record" class="table-bordered"></table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 引入 jQuery 和 Bootstrap 的 JS 檔案 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
+
+<script>
+    //這四個變數會寫入local storage
+    let todayPeople = [];
+    let prepare_PK = [];
+    let empty_court_arr = [1, 2, 3, 4];
+    let game_record = [];
+    let bulletin_board_message = []
+    //這三個變數 每次進來會重置成這樣
+    let min_idle = 0;
+    let hide_score = '1';
+    let score_count = '0';
+    //產生4個主要比賽場地
+    for (let i = 1; i < 5; i++) {
+        $(".court-container").append(court_generate(i))
+    }
+    $(".court-container").append(`<div class='col-2'><h1>我<br>是<br>講<br>台</h1><div>`)
+    //從local storage 載入資料 若沒有資料則產生假資料
+    if (!load_data()) {
+        for (let i = 1; i <= 28; i++) {
+            todayPeople.push({ id: i, name: `Object ${i}`, score: 500 - i, court: 0, idleRounds: 0, player: 0, partner_id: 0 });
+        }
+    }
+    function personal_card(person) {
+        // <br>⚔️：${hide_score == 1 ? '???' : person.score}
+        return (`<span style="writing-mode: vertical-rl;">${person.name}<span>`)
+    }
+    function show_player_data_to_court(topTeamPlayers, bottomTeamPlayers, court) {
+        //topTeamPlayers, bottomTeamPlayers 都是array 放了兩個選手的資料
+        //court 是 int 表示第幾場次
+        console.log(topTeamPlayers)
+        console.log("flag")
+        $(`.court-${court} .player1`).html(personal_card(topTeamPlayers[0]))
+        $(`.court-${court} .player2`).html(personal_card(bottomTeamPlayers[0]))
+        $(`.court-${court} .player3`).html(personal_card(bottomTeamPlayers[1]))
+        $(`.court-${court} .player4`).html(personal_card(topTeamPlayers[1]))
+        $(`.net-left-${court}`).html(`↑：${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
+        $(`.net-right-${court}`).html(`↓：${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
+    }
+    function empty_data_to_court(court) {
+        $(`.court-${court} .player1`).empty()
+        $(`.court-${court} .player2`).empty()
+        $(`.court-${court} .player3`).empty()
+        $(`.court-${court} .player4`).empty()
+        $(`.analysis-${court} .top`).empty()
+        $(`.analysis-${court} .bottom`).empty()
+    }
+    function court_generate(court_number) {
+        return (`<div class="col-2">
+            <h2>${court_number}號場</h2>
+                <table class="table table-bordered court-${court_number} court">
+                    <tr>
+                        <td class="player1"></td>
+                        <td class="player4"></td>
+                    </tr>
+                    <tr>
+                        <td class='net net-left-${court_number}'> </td>
+                        <td class='net net-right-${court_number}'> </td>
+                    </tr>
+                    <tr>
+                        <td class="player2"></td>
+                        <td class="player3"></td>
+                    </tr>
+                </table>
+                
+            </div>`)
+    }
+    function auto_choose_players(allPlayers) {
+        //將全部人員的資料輸入 
+        //先找出不在場比賽的人
+        const result = allPlayers.filter(obj => obj.court === 0);
+        // 找出 idleRounds 最高的人
+        const oldestPerson = result.reduce((prev, current) => {
+            return (prev.idleRounds > current.idleRounds) ? prev : current;
+        });
+        // 找出和這個人 score 最接近的其他三人
+        let otherPeople = result.filter(person => person.name !== oldestPerson.name && person.idleRounds >= min_idle);
+        if (otherPeople.length < 3) {
+            otherPeople = result.filter(person => person.name !== oldestPerson.name && person.idleRounds >= 0);
+        }
+        otherPeople.sort((a, b) => {
+            const diffA = Math.abs(a.score - oldestPerson.score);
+            const diffB = Math.abs(b.score - oldestPerson.score);
+            return diffA - diffB;
+        });
+        const closestPeople = otherPeople.slice(0, 3);
+        // 重組陣列
+        const combinedArray = [oldestPerson, ...closestPeople];
+        // 按照分數高低排序
+        combinedArray.sort((a, b) => b.score - a.score);
+        return combinedArray
+    }
+    function pickPeople() {
+        console.log(auto_choose_players(todayPeople))
+        const pickedPeople = auto_choose_players(todayPeople)
+        prepare_PK_refresh(pickedPeople)
+        show_player_data_to_court([pickedPeople[0], pickedPeople[3]], [pickedPeople[1], pickedPeople[2]], 5)
+
+    }
+    function prepare_PK_refresh(pickedPeople) {
+        prepare_PK = pickedPeople
+    }
+    function go_to_PK() {
+        //把資料改上去 並顯示人員在對的位置
+        if (empty_court_arr.length == 0) {
+            alert("現在沒有空場 無法進行比賽")
+        } else {
+            const court = empty_court_arr.length > 0 ? empty_court_arr[0] : 0
+            if (prepare_PK.length != 4) {
+                return (alert("請先選人 再去PK"))
+            }
+            prepare_PK.forEach((person, index) => {
+                person.court = court;
+                person.player = index + 1
+            });
+            show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], court)
+            empty_court_arr.shift()
+            prepare_PK = [];
+            empty_data_to_court(5)
+            todayPeople.forEach(person => {
+                if (person.court == 0) {
+                    person.idleRounds += 1;
+                } else {
+                    person.idleRounds = 0;
+                }
+            })
+            idle_people_update_to_div()
+        }
+
+    }
+    function idle_people_update_to_div() {
+        const idle_people = todayPeople.filter(obj => obj.court === 0).sort((a, b) => b.idleRounds - a.idleRounds)
+        $(".person-wait").empty()
+        for (x in idle_people) {
+            if (idle_people[x].idleRounds < 0) {
+                $(".person-sleep").append(idle_personal_card(idle_people[x]))
+            } else {
+                $(".person-wait").append(idle_personal_card(idle_people[x]))
+            }
+        }
+    }
+    function idle_personal_card(person) {
+        return (`
+        <table class='personal_table table-bordered'> 
+            <tr>
+                <td>${person.name}</td>
+            </tr>
+            <tr>
+                <td>${hide_score == 1 ? '???' : person.score}</td>
+            </tr>
+            <tr>
+                <td>${person.idleRounds}</td>
+            </tr>
+            <tr>
+                <td>${person.partner_id == 0 ? '單身狗' : '隊友：' + todayPeople[person.partner_id - 1].name
+            }</td >
+            </tr >
+        </table >
+        `)
+    }
+    function handle_end_game(e) {
+        const str = e.target.id;
+        const sixthChar = str.charAt(5); // 取得第六個字 (從 0 開始算)
+        const court_number = parseInt(sixthChar, 10); // 將第六個字轉換成數字 (10 代表使用十進制)
+        console.log($(`.${court_number}-top-p input`).val())
+        console.log($(`.${court_number}-bottom-p input`).val())
+        if (empty_court_arr.includes(court_number)) {
+            alert(`第${court_number}場還是空的 無法結束比賽`)
+        }
+        else if ($(`.${court_number}-top-p input`).val() == "" || $(`.${court_number}-bottom-p input`).val() == "") {
+            alert("請填入比分 在結束比賽")
+        } else {
+            off_court(court_number, $(`.${court_number}-top-p input`).val(), $(`.${court_number}-bottom-p input`).val())
+        }
+
+    }
+    function off_court(court_number, team_top_score, team_bottom_score) {
+        const result = todayPeople.filter(obj => obj.court === court_number);
+        result.forEach(obj => obj.court = 0)
+        empty_data_to_court(court_number)
+        empty_court_arr.push(Number(court_number))
+        const win_point = Number(team_top_score) - Number(team_bottom_score)
+        console.log(win_point)
+        let temp_game_record = ['0', '1', '2', '3', '4', '5', '6']
+        result.forEach(obj => {
+            if (obj.player == 1 || obj.player == 4) {
+                obj.score += (score_count == 0 ? win_point > 0 ? 100 : -100 : score_count == 1 ? 10 * win_point : 20 * win_point)
+            } else {
+                obj.score -= (score_count == 0 ? win_point > 0 ? 100 : -100 : score_count == 1 ? 10 * win_point : 20 * win_point)
+            }
+            temp_game_record[Number(obj.player) - 1] = obj.name
+        })
+        temp_game_record[4] = team_top_score
+        temp_game_record[5] = team_bottom_score
+        temp_game_record[6] = new Date();
+        game_record.push(temp_game_record)
+        idle_people_update_to_div()
+    }
+    function handle_check_info() {
+        console.log(todayPeople)
+        console.log(empty_court_arr)
+        console.log(prepare_PK)
+        console.log(game_record)
+        const todayPeople_json = JSON.stringify(todayPeople);
+        const empty_court_arr_json = JSON.stringify(empty_court_arr);
+        const prepare_PK_json = JSON.stringify(prepare_PK);
+        const game_record_json = JSON.stringify(game_record);
+        $("#all_data_area").append(`<textarea id="todayPeople_data" class="json" >${todayPeople_json}</textarea>`)
+        $("#all_data_area").append(`<textarea id="empty_court_arr_data" class="json" >${empty_court_arr_json}</textarea>`)
+        $("#all_data_area").append(`<textarea id="prepare_PK_data" class="json" >${prepare_PK_json}</textarea>`)
+        $("#all_data_area").append(`<textarea id="game_record_data" class="json" >${game_record_json}</textarea>`)
+        $("#all_data_area").append(`非必要不要使用這個功能 格式錯就會GG喔`)
+        $("#all_data_area").append(`<button id="edit_save">儲存修改的資料 </button>`)
+        $("#all_data_area").append(`<button id="edit_off">退出編輯模式 </button>`)
+        $("#edit_save").on("click", handle_edit_save)
+        $("#edit_off").on("click", handle_edit_off)
+    }
+    function save_data() {
+        // 將物件陣列轉換為 JSON 字串
+        const todayPeople_json = JSON.stringify(todayPeople);
+        const empty_court_arr_json = JSON.stringify(empty_court_arr);
+        const prepare_PK_json = JSON.stringify(prepare_PK);
+        const game_record_json = JSON.stringify(game_record);
+        // 將 JSON 字串存入本地存儲中
+        localStorage.setItem('todayPeople', todayPeople_json);
+        localStorage.setItem('empty_court_arr', empty_court_arr_json);
+        localStorage.setItem('prepare_PK', prepare_PK_json);
+        localStorage.setItem('game_record', game_record_json);
+    }
+    function load_data() {
+        if (localStorage.getItem('todayPeople') == undefined || localStorage.getItem('empty_court_arr') == undefined || localStorage.getItem('prepare_PK') == undefined) {
+            return false
+        }
+        // 從本地存儲中取出 JSON 字串 並且轉換 放入 正在用的資料
+        todayPeople = JSON.parse(localStorage.getItem('todayPeople'));
+        empty_court_arr = JSON.parse(localStorage.getItem('empty_court_arr'));
+        prepare_PK = JSON.parse(localStorage.getItem('prepare_PK'));
+        game_record = JSON.parse(localStorage.getItem('game_record'));
+        put_todayPeople_to_court()
+        return true
+    }
+    function put_todayPeople_to_court() {
+        for (let court = 1; court < 5; court++) {
+            const temp_arr = todayPeople.filter(obj => obj.court == court)
+            if (temp_arr.length != 0) {
+                temp_arr.sort((a, b) => a.player - b.player);
+                show_player_data_to_court([temp_arr[0], temp_arr[3]], [temp_arr[1], temp_arr[2]], court)
+            }
+        }
+    }
+    function set_min_idle(e) {
+        console.log('將 min_idle 設置為：' + $(this).val())
+        min_idle = $(this).val()
+    }
+    function set_prepare_PK() {
+        console.log($("#prepare_PK_person").val())
+        console.log($("#prepare_PK_set_player").val())
+        if (prepare_PK.length < 4) {
+            return (alert("請先按上場人員 再做調整"))
+        }
+        prepare_PK[Number($("#prepare_PK_set_player").val()) - 1] = todayPeople[Number($("#prepare_PK_person").val()) - 1]
+        show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
+
+    }
+    function set_idle() {
+        console.log($("#delete").val())
+        console.log($("#idle_round_set").val())
+        console.log(todayPeople)
+        todayPeople[Number($("#delete").val()) - 1].idleRounds = Number($("#idle_round_set").val())
+    }
+    function processInput() {
+        // 獲取輸入框中的內容
+        const input = document.getElementById('input').value;
+        // 處理輸入
+        console.log(input);
+        // 將資料轉換為陣列
+        const arr = input.split('\n');
+        const newArr = arr.filter(item => Object.keys(item).length !== 0);
+        // 將陣列中的每個元素轉換為物件
+        const objArr = newArr.map((item, index) => ({ id: index + 1, name: item }));
+        // 輸出轉換後的物件陣列
+        console.log(objArr);
+        todayPeople = []
+        prepare_PK = [];
+        empty_court_arr = [1, 2, 3, 4];
+        for (let i = 1; i <= objArr.length; i++) {
+            todayPeople.push({ id: i, name: objArr[i - 1].name, score: 500 - i, court: 0, idleRounds: 0, player: 0 });
+        }
+        for (let i = 1; i < 6; i++) {
+            empty_data_to_court(i)
+        }
+        idle_people_update_to_div()
+    }
+    function prepare_to_delete() {
+        $("#delete").empty()
+        $("#prepare_PK_person").empty()
+        for (i = 0; i < todayPeople.length; i++) {
+            $("#delete").append(`<option value='${todayPeople[i].id}'>${todayPeople[i].name}</option>`)
+        }
+        for (i = 0; i < todayPeople.length; i++) {
+            $("#prepare_PK_person").append(`<option value='${todayPeople[i].id}'>${todayPeople[i].name}</option>`)
+        }
+        for (i = 0; i < todayPeople.length; i++) {
+            $("#personal_record").append(`<option value='${todayPeople[i].id}'>${todayPeople[i].name}</option>`)
+        }
+
+    }
+    function handle_hide_score_change() {
+        console.log('將 hide_score 設置為：' + $(this).val())
+        hide_score = $(this).val()
+        put_todayPeople_to_court()
+        idle_people_update_to_div()
+    }
+    function handle_score_count_change() {
+        console.log('將 score_count 設置為：' + $(this).val())
+        score_count = $(this).val()
+    }
+    function handle_show_game_record() {
+        $("#game_record").empty()
+        for (x in game_record) {
+            let y = game_record.length - x - 1
+            let even_or_odd = y % 2 == 0 ? 'even' : "odd"
+            $("#game_record").append(`
+            <tr class='${even_or_odd}'><td>${game_record[y][0]}、${game_record[y][3]}</td><td>${game_record[y][1]}、${game_record[y][2]}</td></tr>
+            <tr class='${even_or_odd}'><td>${game_record[y][4]}</td><td>${game_record[y][5]}</td></tr>
+            `)
+        }
+    }
+    function handle_set_personal_record() {
+        console.log($("#personal_record").val())
+        const the_name = todayPeople[Number($("#personal_record").val()) - 1].name
+        $("#game_record").empty()
+        for (x in game_record) {
+            let y = game_record.length - x - 1
+            if (game_record[y].includes(the_name))
+                $("#game_record").append(`
+                    <tr>
+                        <td>${game_record[y][0]}、${game_record[y][3]}</td>
+                        <td>${game_record[y][1]}、${game_record[y][2]}</td>
+                    </tr>
+                    <tr><td>${game_record[y][4]}</td><td>${game_record[y][5]}</td></tr>
+                `)
+        }
+    }
+    function handle_edit_save() {
+        const todayPeople_json = $("#todayPeople_data").val()
+        const empty_court_arr_json = $("#empty_court_arr_data").val()
+        const prepare_PK_json = $("#prepare_PK_data").val()
+        const game_record_json = $("#game_record_data").val()
+        // 將 JSON 字串存入本地存儲中
+        localStorage.setItem('todayPeople', todayPeople_json);
+        localStorage.setItem('empty_court_arr', empty_court_arr_json);
+        localStorage.setItem('prepare_PK', prepare_PK_json);
+        localStorage.setItem('game_record', game_record_json);
+        load_data()
+    }
+    function handle_edit_off() {
+        $("#all_data_area").empty()
+    }
+    function refresh_bulletin_board_message() {
+        $("#bulletin_board_message").empty()
+        bulletin_board_message.forEach(obj => $("#bulletin_board_message").prepend(obj))
+    }
+    idle_people_update_to_div()
+    $("#pickPeople").on("click", pickPeople)
+    $("#go_to_pk").on("click", go_to_PK)
+    $(".gameEnd").on("click", handle_end_game)
+    $("#check-info").on("click", handle_check_info)
+    $("#refresh-idle").on("click", idle_people_update_to_div)
+    $("#save-data").on("click", save_data)
+    $("#prepare_to_delete").on("click", prepare_to_delete)
+    $("#min_idle").on("change", set_min_idle)
+    $('#set_idle').on("click", set_idle)
+    $('#set_prepare_PK').on("click", set_prepare_PK)
+    $("#hide_score").on("change", handle_hide_score_change)
+    $("#score_count").on("change", handle_score_count_change)
+    $("#show_game_record").on('click', handle_show_game_record)
+    $("#set_personal_record").on('click', handle_set_personal_record)
+
+    var client = mqtt.connect("wss://test.mosquitto.org:8081/") // you add a ws:// url here
+    client.on('connect', () => {
+        console.log('connected.');
+        // client.subscribe('Try/MQTT/test')
+        client.subscribe('Chill/server/data_refresh')
+        // client.subscribe('Chill/#')
+        client.on("message", function (topic, payload) {
+            var my_string = new TextDecoder().decode(payload);
+            if (topic == 'Chill/server/data_refresh') {
+                const data_obj = JSON.parse(my_string);
+                todayPeople = data_obj.todayPeople;
+                game_record = data_obj.game_record;
+                prepare_PK = data_obj.prepare_PK;
+                bulletin_board_message = data_obj.bulletin_board_message;
+                put_todayPeople_to_court()
+                idle_people_update_to_div()
+                handle_show_game_record()
+                refresh_bulletin_board_message()
+                if (prepare_PK.length == 4) {
+                    show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
+                }
+
+            }
+            // client.end()
+        });
+        client.publish('Chill/client/ask_for_data_refresh', 'new connect need data refresh')
+
+        // client.publish("mee", "hello",'Try/MQTT/test');    
+    });
+
+</script>

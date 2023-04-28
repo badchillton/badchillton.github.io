@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Add your project's config here -->
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
+    <!-- Add the Firebase Analytics SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+
+    <!-- Add the Firebase Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- 引入 jQuery 和 Bootstrap 的 JS 檔案 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+    <div id="game_record">
+        <table>
+            <tr>
+                <th>名字</th>
+                <th>勝場</th>
+                <th>敗場</th>
+                <th>總場數</th>
+                <th>勝率</th>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+
+<script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCLXKg7Ru5p5dtgyRs28-qg8LQaG69yME",
+        // authDomain: "friendly-sensor-137111.firebaseapp.com",
+        databaseURL: "https://friendly-sensor-137111-default-rtdb.firebaseio.com",
+        projectId: "friendly-sensor-137111",
+        storageBucket: "friendly-sensor-137111.appspot.com",
+        // messagingSenderId: "824581584416",
+        appId: "1:824581584416:web:fdd5462dd85230d8caae45",
+        measurementId: "G-2HYJ96RDLV"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    // 獲取資料庫的引用
+    var database = firebase.database();
+    // 寫入資料
+    function writeData(userId, name, email) {
+        database.ref('users/' + userId).set({
+            username: name,
+            email: email
+        });
+    }
+    // 讀取資料
+    function readData() {
+        var userRef = database.ref('Chung_Shan_elementary_school/Tuesday/');
+        userRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            console.log(data);
+            const data1 = data.date_0427.bulletin_board_message
+            // 使用正規表達式從字串中提取所需的數據
+            let regex = /\《(.+?)\》.*?\《(.+?)\》.*?\《(.+?)\》.*?\[(.+?)\]/g;
+            let matches;
+            let results = parseInput(data1)
+            const data2 = JSON.parse(data.date_0427.game_record)
+            const data3 = JSON.parse(data.date_0427.today_people)
+            console.log(results);
+            let today_people = {}
+            data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0 } })
+            data2.forEach(obj => {
+                //top team win
+                let top_team_win = obj[4] > obj[5] ? true : false
+                today_people[obj[0]].win += top_team_win ? 1 : 0;
+                today_people[obj[3]].win += top_team_win ? 1 : 0;
+                today_people[obj[1]].lose += top_team_win ? 1 : 0;
+                today_people[obj[2]].lose += top_team_win ? 1 : 0;
+                today_people[obj[0]].lose += top_team_win ? 0 : 1;
+                today_people[obj[3]].lose += top_team_win ? 0 : 1;
+                today_people[obj[1]].win += top_team_win ? 0 : 1;
+                today_people[obj[2]].win += top_team_win ? 0 : 1;
+            })
+            console.log(today_people)
+            Object.keys(today_people).forEach(key => {
+                $("#game_record table").append(`
+                <tr id='${key}'> 
+                    <td>${key}</td>
+                    <td>${today_people[key].win}</td>
+                    <td>${today_people[key].lose}</td>
+                    <td>${today_people[key].win + today_people[key].lose}</td>
+                    <td>${today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)}%</td>
+                </tr>`)
+            })
+
+
+
+        })
+    }
+    function parseInput(str) {
+        const regex = /《(.*?)》 和 《(.*?)》 VS 《(.*?)》 和 《(.*?)》，請至第\d球場比賽。 \[ (.*?) \]/g;
+        const matches = [];
+        let match;
+        while ((match = regex.exec(str)) !== null) {
+            matches.push([match[1], match[2], match[3], match[4], match[5]]);
+        }
+        return matches;
+    }
+    readData()
+</script>
+
+</html>

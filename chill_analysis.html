@@ -32,6 +32,7 @@
                 <th>敗場</th>
                 <th>總場數</th>
                 <th>勝率</th>
+                <th>當前分數</th>
             </tr>
         </table>
     </div>
@@ -57,10 +58,14 @@
     // 獲取資料庫的引用
     var database = firebase.database();
     // 寫入資料
-    function writeData(userId, name, email) {
-        database.ref('users/' + userId).set({
-            username: name,
-            email: email
+    function writeData(user_name, history_score) {
+        let today = new Date();
+        let month = String(today.getMonth() + 1).padStart(2, '0');
+        let date = String(today.getDate()).padStart(2, '0');
+        let currentDate = month + date;
+        database.ref(`users/${user_name}/history_score/${currentDate}`).set({
+            currentDate: name,
+
         });
     }
     // 讀取資料
@@ -78,7 +83,7 @@
             const data3 = JSON.parse(data.date_0427.today_people)
             console.log(results);
             let today_people = {}
-            data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0 } })
+            data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
             data2.forEach(obj => {
                 //top team win
                 let top_team_win = obj[4] > obj[5] ? true : false
@@ -99,7 +104,8 @@
                     <td>${today_people[key].win}</td>
                     <td>${today_people[key].lose}</td>
                     <td>${today_people[key].win + today_people[key].lose}</td>
-                    <td>${today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)}%</td>
+                    <td>${parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win))}%</td>
+                    <td>${today_people[key].score}</td> 
                 </tr>`)
             })
 

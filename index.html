@@ -12,13 +12,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.1/math.min.js"></script>
     <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-
     <!-- Add the Firebase Analytics SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
-
     <!-- Add the Firebase Realtime Database SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- 引入 jQuery 和 Bootstrap 的 JS 檔案 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- 引入 Toastify 的 CSS & JS文件  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css"
+        integrity="sha512-UiKdzM5DL+I+2YFxK+7TDedVyVm7HMp/bN85NeWMJNYortoll+Nd6PU9ZDrZiaOsdarOyk9egQm6LOJZi36L2g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"
+        integrity="sha512-79j1YQOJuI8mLseq9icSQKT6bLlLtWknKwj1OpJZMdPt2pFBry3vQTt+NZuJw7NSd1pHhZlu0s12Ngqfa371EA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
         .team-color-board {
@@ -367,10 +376,7 @@
         </div>
 
     </div>
-    <!-- 引入 jQuery 和 Bootstrap 的 JS 檔案 -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 
 </html>
@@ -401,18 +407,16 @@
         }
     }
     function show_message(message) {
-        // 獲取message-box元素
-        const messageBox = document.getElementById("message-box");
-        // 設置訊息內容
-        messageBox.innerHTML = message;
-        // 顯示message-box元素
-        messageBox.style.display = "block";
-        // 設置定時器
-        setTimeout(function () {
-            // 隱藏message-box元素
-            messageBox.style.display = "none";
-        }, 2000);
-
+        Toastify({
+            text: message,
+            duration: 3000, // 設定顯示時間（毫秒）
+            newWindow: true,
+            close: true,
+            gravity: "top", // 設定顯示位置
+            position: "center",
+            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+            stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
+        }).showToast();
     }
     function personal_card(person) {
         return (`${person.name}<br>⚔️：${hide_score == 1 ? '???' : person.score}`)
@@ -566,7 +570,7 @@
             prepare_PK = [];
             empty_data_to_court(5)
             todayPeople.forEach(person => {
-                if (person.court == 0) {
+                if (person.court == 0 || person.court == -1) {
                     person.idleRounds += 1;
                 } else {
                     person.idleRounds = 0;
@@ -582,17 +586,19 @@
     }
     function idle_people_update_to_div() {
         console.log(todayPeople)
-        const idle_people = todayPeople.filter(obj => obj.court === 0).sort((a, b) => b.idleRounds - a.idleRounds)
+        const idle_people = todayPeople.filter(obj => obj.court === 0 || obj.court === -1).sort((a, b) => b.idleRounds - a.idleRounds)
         $(".person-wait").empty()
         $(".person-sleep").empty()
         for (x in idle_people) {
-            if (idle_people[x].idleRounds < 0) {
+            if (idle_people[x].court == -1) {
                 $(".person-sleep").append(idle_personal_card(idle_people[x]))
-            } else {
+            }
+            if (idle_people[x].court == 0) {
                 $(".person-wait").append(idle_personal_card(idle_people[x]))
             }
             idle_people[x].choosed = 0;
         }
+
         console.log(binding_team_list)
         binding_team_list.forEach((obj, index) => {
             obj.forEach((in_obj, in_index) => {
@@ -668,11 +674,14 @@
     function off_court_new(court_number) {
         const result = todayPeople.filter(obj => obj.court === court_number);
         const temp_id_list = [1, 2, 3, 4]
+        let temp_name_list = []
         result.forEach(obj => {
             temp_id_list[Number(obj.player) - 1] = obj.id
             obj.court = 0;
         })
         wait_to_register_list.push(temp_id_list)
+        temp_id_list.forEach(obj => temp_name_list.push(todayPeople[obj - 1].name))
+        upload_wait_to_register_to_firebase(temp_name_list)
         empty_data_to_court(court_number)
         empty_court_arr.push(Number(court_number))
         idle_people_update_to_div()
@@ -740,12 +749,14 @@
         const prepare_PK_json = JSON.stringify(prepare_PK);
         const game_record_json = JSON.stringify(game_record);
         const bulletin_board_message_json = JSON.stringify(bulletin_board_message);
+        const wait_to_register_list_json = JSON.stringify(wait_to_register_list);
         // 將 JSON 字串存入本地存儲中
         localStorage.setItem('todayPeople', todayPeople_json);
         localStorage.setItem('empty_court_arr', empty_court_arr_json);
         localStorage.setItem('prepare_PK', prepare_PK_json);
         localStorage.setItem('game_record', game_record_json);
         localStorage.setItem('bulletin_board_message', bulletin_board_message_json);
+        localStorage.setItem('wait_to_register_list', wait_to_register_list_json);
     }
     function load_data() {
         if (localStorage.getItem('todayPeople') == undefined || localStorage.getItem('empty_court_arr') == undefined || localStorage.getItem('prepare_PK') == undefined) {
@@ -756,6 +767,7 @@
         empty_court_arr = JSON.parse(localStorage.getItem('empty_court_arr'));
         prepare_PK = JSON.parse(localStorage.getItem('prepare_PK'));
         game_record = JSON.parse(localStorage.getItem('game_record'));
+        wait_to_register_list = JSON.parse(localStorage.getItem('wait_to_register_list')) ? JSON.parse(localStorage.getItem('wait_to_register_list')) : [];
         bulletin_board_message = JSON.parse(localStorage.getItem('bulletin_board_message')) ? JSON.parse(localStorage.getItem('bulletin_board_message')) : [];
         put_todayPeople_to_court()
         return true
@@ -996,7 +1008,7 @@
             return (show_message("沒有選人 操作無效"))
         }
         choosed_people.forEach(obj => {
-            obj.idleRounds = -999;
+            obj.court = -1;
             obj.choosed = 0;
         })
         idle_people_update_to_div()
@@ -1007,7 +1019,7 @@
             return (show_message("沒有選人 操作無效"))
         }
         choosed_people.forEach(obj => {
-            obj.idleRounds = 5;
+            obj.court = 0;
             obj.choosed = 0;
         })
         idle_people_update_to_div()
@@ -1045,7 +1057,17 @@
         if (isNaN(top_team_score) || isNaN(bottom_team_score)) {
             return (alert("請先填入分數 再進行登記"))
         }
+        record_score(now_which_game, top_team_score, bottom_team_score)
+        $('#myModal').modal('hide');
+    }
+    function record_score(now_which_game_p, top_team_score_p, bottom_team_score_p) {
+        const record_database = database
+        const now_which_game = parseInt(now_which_game_p)
+        const top_team_score = parseInt(top_team_score_p)
+        const bottom_team_score = parseInt(bottom_team_score_p)
+        const player_list = [todayPeople[wait_to_register_list[now_which_game][0] - 1].name, todayPeople[wait_to_register_list[now_which_game][1] - 1].name, todayPeople[wait_to_register_list[now_which_game][2] - 1].name, todayPeople[wait_to_register_list[now_which_game][3] - 1].name]
         const temp_game_record = []
+        console.log(now_which_game)
         temp_game_record.push(todayPeople[wait_to_register_list[now_which_game][0] - 1].name)
         temp_game_record.push(todayPeople[wait_to_register_list[now_which_game][1] - 1].name)
         temp_game_record.push(todayPeople[wait_to_register_list[now_which_game][2] - 1].name)
@@ -1055,6 +1077,7 @@
         temp_game_record.push(new Date())
 
         game_record.push(temp_game_record)
+
         const score_diff_scale = score_count == '1' ? 10 : score_count == 2 ? 20 : 10
         //計算分數：
         const score_diff = top_team_score - bottom_team_score
@@ -1062,25 +1085,32 @@
         todayPeople[wait_to_register_list[now_which_game][1] - 1].score += (score_diff * score_diff_scale * -1)
         todayPeople[wait_to_register_list[now_which_game][2] - 1].score += (score_diff * score_diff_scale * -1)
         todayPeople[wait_to_register_list[now_which_game][3] - 1].score += (score_diff * score_diff_scale)
-        console.log(todayPeople[wait_to_register_list[now_which_game][0] - 1])
-        console.log(todayPeople[wait_to_register_list[now_which_game][1] - 1])
-        console.log(todayPeople[wait_to_register_list[now_which_game][2] - 1])
-        console.log(todayPeople[wait_to_register_list[now_which_game][3] - 1])
 
         //設置最低分是100
         todayPeople[wait_to_register_list[now_which_game][0] - 1].score = todayPeople[wait_to_register_list[now_which_game][0] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][0] - 1].score
         todayPeople[wait_to_register_list[now_which_game][1] - 1].score = todayPeople[wait_to_register_list[now_which_game][1] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][1] - 1].score
         todayPeople[wait_to_register_list[now_which_game][2] - 1].score = todayPeople[wait_to_register_list[now_which_game][2] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][2] - 1].score
         todayPeople[wait_to_register_list[now_which_game][3] - 1].score = todayPeople[wait_to_register_list[now_which_game][3] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][3] - 1].score
+        //將雲端登記列表更新
+        record_database.ref(`Chung_Shan_elementary_school/wait_to_register/`).once('value').then(snapshot => {
+            console.log(snapshot.val())
+            const data = snapshot.val()
+            for (const key in data) {
+                if (data[key].player1 == player_list[0] && data[key].player2 == player_list[1] && data[key].player3 == player_list[2] && data[key].player4 == player_list[3]) {
+                    record_database.ref(`Chung_Shan_elementary_school/wait_to_register/${key}`).update({
+                        register_name: "大會",
+                        register_time: get_now_time(),
+                        score_bottom: bottom_team_score,
+                        score_top: top_team_score
 
-        wait_to_register_list.splice(now_which_game, 1)
-
-        $('#myModal').modal('hide');
+                    })
+                }
+            }
+        })
+        // wait_to_register_list.splice(now_which_game, 1)
         show_message("完成登記")
         idle_people_update_to_div()
         refresh_wait_to_register_text()
-
-
     }
     function handle_open_modal_of_record_score() {
         if (wait_to_register_list.length == 0) {
@@ -1156,7 +1186,102 @@
         let currentDate = month + date;
         write_today_data_to_firebase(todayPeople_json, game_record_json, bulletin_board_message_json, currentDate);
     }
+    function get_now_time() {
+        // 创建Date对象并获取当前时间
+        const now = new Date();
+        // 将当前时间格式化为字符串
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const miliseconds = String(now.getMilliseconds()).padStart(2, '0');
+        // 创建包含当前时间的字符串
+        const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${miliseconds}`;
+        // 在控制台输出当前时间
+        console.log(currentTime);
+        return (currentTime)
+    }
+    function upload_wait_to_register_to_firebase(name_list) {
+        database.ref(`Chung_Shan_elementary_school/wait_to_register/${get_now_time()}`).set({
+            player1: name_list[0],
+            player2: name_list[1],
+            player3: name_list[2],
+            player4: name_list[3],
+            create_time: get_now_time(),
+            score_top: "待登記",
+            score_bottom: "待登記",
+            register_name: "待登記",
+            register_time: "待登記"
+        }
+        )
+    }
 
+    function add_listener_to_client_do_from_firebase(database) {
+        var userRef = database.ref('Chung_Shan_elementary_school/client_do/');
+        userRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            console.log(data)
+            if (data.action == 'check-in') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    console.log(`收到來自用戶端 ${action_person[0].name} 的'報到'操作`)
+                    action_person[0].court = 0
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'報到'操作 但查無此人`)
+                }
+            }
+            if (data.action == 'go_to_sleep') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    console.log(`收到來自用戶端 ${action_person[0].name} 的'去休息區'操作`)
+                    action_person[0].court = -1
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去休息區'操作 但查無此人`)
+                }
+            }
+            if (data.action == 'go_to_wait') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    console.log(`收到來自用戶端 ${action_person[0].name} 的'去等待區'操作`)
+                    action_person[0].court = 0
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`)
+                }
+            }
+            if (data.action == 'register_score') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    console.log(`收到來自用戶端 ${action_person[0].name} 的'登記分數操作'操作`)
+                    // 解析要分析的分數登記 是否符合現在的未登記情形
+                    const data_obj = JSON.parse(data.data)
+                    console.log(data_obj)
+                    wait_to_register_list.forEach((obj, index) => {
+                        const check1 = (data_obj[0] == todayPeople[obj[0] - 1].name)
+                        const check2 = (data_obj[1] == todayPeople[obj[1] - 1].name)
+                        const check3 = (data_obj[2] == todayPeople[obj[2] - 1].name)
+                        const check4 = (data_obj[3] == todayPeople[obj[3] - 1].name)
+                        if (check1 && check2 && check3 && check4) {
+                            //檢查成功 確實有需要登記的場次與資料相符
+                            show_message(`收到登記資料並執行：
+                            ${data_obj[0]}  和 ${data_obj[1]} 對上 ${data_obj[2]} 和 ${data_obj[3]}
+                            分數為 ${data_obj[4]} 比 ${data_obj[5]}`)
+                            console.log("成功收到正確")
+                            record_score(index, data_obj[4], data_obj[5])
+                        }
+                    })
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`)
+                }
+            }
+
+        })
+    }
     refresh_wait_to_register_text()
     idle_people_update_to_div()
     $("#pickPeople").on("click", pickPeople)
@@ -1210,6 +1335,7 @@
     firebase.analytics();
     // 獲取資料庫的引用
     var database = firebase.database();
+    add_listener_to_client_do_from_firebase(database)
     function write_today_data_to_firebase(today_people_data, game_record_data, bulletin_board_message_data, today_date) {
         database.ref(`Chung_Shan_elementary_school/Tuesday/date_${today_date}/`).set({
             today_people: today_people_data,

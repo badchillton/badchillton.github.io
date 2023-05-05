@@ -39,9 +39,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
+    <!-- 引入 Toastify 的 CSS & JS文件  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css"
+        integrity="sha512-UiKdzM5DL+I+2YFxK+7TDedVyVm7HMp/bN85NeWMJNYortoll+Nd6PU9ZDrZiaOsdarOyk9egQm6LOJZi36L2g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"
+        integrity="sha512-79j1YQOJuI8mLseq9icSQKT6bLlLtWknKwj1OpJZMdPt2pFBry3vQTt+NZuJw7NSd1pHhZlu0s12Ngqfa371EA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 </head>
 
 <body>
+    <!-- header組件 -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">羽Chill社 分析網</a>
@@ -51,9 +60,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item active">
+                    <!-- <li class="nav-item active">
                         <a class="nav-link" href="#" data-content="home">首頁</a>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-content="statistics">戰績統計資料</a>
                     </li>
@@ -67,7 +76,9 @@
             </div>
         </div>
     </nav>
+    <!-- 主要內容區 -->
     <div class="container mt-4">
+        <!-- 分頁 統計圖表 -->
         <div id="statistics" class="content">
             <div class="row">
                 <div class="col-12">
@@ -90,13 +101,37 @@
                 </div>
             </div>
         </div>
+        <!-- 分頁 首頁 -->
         <div id="home" class="content" style="display:none;">
             施工中...
         </div>
+        <!-- 分頁 聯絡我們 -->
         <div id="contact" class="content" style="display:none;">
-            施工中...
-            可以email到zzhowwoh.am03@g2.nctu.edu.tw或是聯絡總召
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h1 class="text-center mb-4">意見回饋</h1>
+                    <form id="feedback-form">
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" class="form-control" id="name" placeholder="請輸入您的姓名或綽號(如果想匿名 則留空)">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">電子郵件</label>
+                            <input type="email" class="form-control" id="email"
+                                placeholder="請輸入您的電子郵件(如果不願意留下聯絡資訊 則留空)">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">意見與建議</label>
+                            <textarea class="form-control" id="message" rows="5" placeholder="請輸入您的意見與建議"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">提交</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
+        <!-- 分頁 分析圖表 -->
         <div id="analysis" class="content" style="display:none;">
             <div class="row">
                 <div class="col-12">
@@ -106,7 +141,7 @@
         </div>
         <div class="row" style="display:none;">
             <div class="col">
-                <button id="upload_newest">上傳雲端newest</button>
+                <!-- <button id="upload_newest">上傳雲端newest</button> -->
             </div>
         </div>
     </div>
@@ -120,6 +155,7 @@
     });
 
     let echart_data = []
+
     //開場綁定 
     $(document).ready(function () {
         $('.nav-link').click(function (event) {
@@ -130,6 +166,7 @@
             if (content == "analysis") {
                 console.log("render analysis")
                 render_echart(echart_data)
+                console.log(echart_data)
                 analysis_echart.resize();
             }
         });
@@ -259,7 +296,6 @@
 
 <script type="text/javascript">
     function render_echart(echart_data) {
-
         var app = {};
         var option;
         option = {
@@ -298,4 +334,48 @@
 
 
     $("#upload_newest").click(writeData_all_users_json)
+
+    function get_now_time() {
+        // 创建Date对象并获取当前时间
+        const now = new Date();
+        // 将当前时间格式化为字符串
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const miliseconds = String(now.getMilliseconds()).padStart(2, '0');
+        // 创建包含当前时间的字符串
+        const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${miliseconds}`;
+        // 在控制台输出当前时间
+        console.log(currentTime);
+        return (currentTime)
+    }
+    $(function () {
+        // 监听表单提交事件
+        $("#feedback-form").submit(function (event) {
+            // 阻止表单默认提交行为
+            event.preventDefault();
+            // 获取表单数据
+            var name = $("#name").val();
+            var email = $("#email").val();
+            var message = $("#message").val();
+            database.ref(`feedback/${get_now_time()}`).set({ name, email, message, time: get_now_time() })
+            show_message("成功送出")
+        });
+    });
+
+    function show_message(message) {
+        Toastify({
+            text: message,
+            duration: 3000, // 設定顯示時間（毫秒）
+            newWindow: true,
+            close: true,
+            gravity: "top", // 設定顯示位置
+            position: "center",
+            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+            stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
+        }).showToast();
+    }
 </script>

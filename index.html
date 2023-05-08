@@ -276,7 +276,6 @@
                         <button class="button" id="refresh-idle">刷新閒置人員資料</button>
                         <button class="button" id="save-data">存資料</button>
                         <button class="button" id="prepare_to_delete">準備設定人員 </button>
-                        <button class="button" id="send_data">發送資料 </button>
                         <button class="button" id="delete_today_data">刪除本地端當日資料 </button>
                     </div>
                     <fieldset>
@@ -398,7 +397,7 @@
     firebase.analytics();
     // 獲取資料庫的引用
     const database = firebase.database();
-    //這四個變數會寫入local storage
+    //這些變數會寫入local storage
     let todayPeople = [];
     let prepare_PK = [];
     let empty_court_arr = [1, 2, 3, 4];
@@ -406,7 +405,7 @@
     let bulletin_board_message = []
     let binding_team_list = []
     let wait_to_register_list = []
-    //這4個變數 每次進來會重置成這樣
+    //這些變數 每次進來會重置成這樣
     let simplify = '1';
     let min_idle = 0;
     let hide_score = '0';
@@ -451,7 +450,6 @@
             $(".team-color-board").removeClass('team-color-3')
             id_list.forEach(obj => $(`#${obj}`).addClass('team-color-3'))
         }
-
     }
     function empty_data_to_court(court) {
         $(`.court-${court} .player1`).empty()
@@ -484,68 +482,7 @@
                 <button class="gameEnd" id="court${court_number}end">比賽結束</button>
             </div>`)
     }
-    function auto_choose_players(allPlayers) {
-        //將全部人員的資料輸入 
-        //先找出不在場比賽的人
-        const result = allPlayers.filter(obj => obj.court === 0);
-        if (result.length < 4) {
-            return (alert('人數不足4人 無法匹配人選'))
-        }
-        // 找出 idleRounds 最高的人
-        const oldestPerson = result.reduce((prev, current) => {
-            return (prev.idleRounds > current.idleRounds) ? prev : current;
-        });
-        let top_team = []
-        //為等最久的人 配對 他的隊友 若有夫妻檔直接組隊 沒有則找最接近的
-        if (oldestPerson.partner_id == 0) {
-            // 找出和這個人 score 最接近的其他1人 要是單身  
-            let otherPeople = result.filter(person => person.name !== oldestPerson.name && person.idleRounds >= min_idle && person.partner_id == 0);
-            if (otherPeople.length < 3) {
-                otherPeople = result.filter(person => person.name !== oldestPerson.name && person.idleRounds >= 0 && person.partner_id == 0);
-            }
-            otherPeople.sort((a, b) => {
-                const diffA = Math.abs(a.score - oldestPerson.score);
-                const diffB = Math.abs(b.score - oldestPerson.score);
-                return diffA - diffB;
-            });
-            const closestPerson = otherPeople.slice(0, 1);
-            top_team = [oldestPerson, closestPerson[0]]
-        } else {
-            top_team = [oldestPerson, todayPeople[oldestPerson.partner_id - 1]]
-        }
-        // 找出和這組 實力接近的隊伍
-        console.log(top_team)
-        let otherPeople = result.filter(person => person.name !== top_team[0].name && person.name !== top_team[1].name && person.idleRounds >= min_idle);
-        if (otherPeople.length < 3) {
-            otherPeople = result.filter(person => person.name !== top_team[0].name && person.name !== top_team[1].name && person.idleRounds >= 0);
-        }
-        let partner_team = []
-        otherPeople.forEach(obj => {
-            if (obj.partner_id != 0) {
-                partner_team.push([obj, todayPeople[obj.partner_id - 1]])
-            }
-        });
-        let other_single_people = otherPeople.filter(obj => obj.partner_id == 0)
-        other_single_people.sort((a, b) => b.score - a.score)
-        for (let x = 0; x < other_single_people.length - 1; x++) {
-            partner_team.push([other_single_people[x], other_single_people[x + 1]])
-        }
-        partner_team.sort((a, b) => {
-            const diffA = Math.abs(a[0].score + a[1].score - top_team[0].score - top_team[1].score);
-            const diffB = Math.abs(b[0].score + b[1].score - top_team[0].score - top_team[1].score);
-            return diffA - diffB;
-        })
-        // 重組陣列
-        // const combinedArray = [oldestPerson, ...closestPeople];
-        // // 按照分數高低排序
-        // combinedArray.sort((a, b) => b.score - a.score);
-        combinedArray = [top_team[0], partner_team[0][0], partner_team[0][1], top_team[1]]
-        console.log(combinedArray)
-        return combinedArray
-    }
     function pickPeople() {
-        // const pickedPeople = auto_choose_players(todayPeople)
-        // const pickedPeople = auto_choose_players(todayPeople)
         const four_people = letsPlay(todayPeople)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         prepare_PK_refresh(pickedPeople)
@@ -649,28 +586,6 @@
 
 
     }
-    function handle_end_game(e) {
-        const str = e.target.id;
-        const sixthChar = str.charAt(5); // 取得第六個字 (從 0 開始算)
-        const court_number = parseInt(sixthChar, 10); // 將第六個字轉換成數字 (10 代表使用十進制)
-        const top_score = $(`.${court_number}-top-p input`).val()
-        const bottom_score = $(`.${court_number}-bottom-p input`).val()
-        if (empty_court_arr.includes(court_number)) {
-            alert(`第${court_number}場還是空的 無法結束比賽`)
-        }
-        else if ($(`.${court_number}-top-p input`).val() == "" || $(`.${court_number}-bottom-p input`).val() == "") {
-            alert("請填入比分 在結束比賽")
-        } else {
-            if (off_court_check == '1') {
-                var confirmed = confirm(`第${court_number}球場的比賽 比分是 ${top_score}比${bottom_score} 確認執行結果嗎？`);
-                if (confirmed) {
-                    off_court(court_number, $(`.${court_number}-top-p input`).val(), $(`.${court_number}-bottom-p input`).val())
-                }
-            } else {
-                off_court(court_number, $(`.${court_number}-top-p input`).val(), $(`.${court_number}-bottom-p input`).val())
-            }
-        }
-    }
     function handle_end_game_new(e) {
         const str = e.target.id;
         const sixthChar = str.charAt(5); // 取得第六個字 (從 0 開始算)
@@ -687,7 +602,6 @@
         } else {
             off_court_new(court_number)
         }
-
     }
     function off_court_new(court_number) {
         const result = todayPeople.filter(obj => obj.court === court_number);
@@ -708,37 +622,9 @@
             go_to_PK()
             pickPeople()
         }
-        send_data()
+        //可能要送資料
         refresh_wait_to_register_text();
     }
-    // function off_court(court_number, team_top_score, team_bottom_score) {
-    //     const result = todayPeople.filter(obj => obj.court === court_number);
-    //     result.forEach(obj => obj.court = 0)
-    //     empty_data_to_court(court_number)
-    //     empty_court_arr.push(Number(court_number))
-    //     const win_point = Number(team_top_score) - Number(team_bottom_score)
-    //     console.log(win_point)
-    //     let temp_game_record = ['0', '1', '2', '3', '4', '5', '6']
-    //     result.forEach(obj => {
-    //         if (obj.player == 1 || obj.player == 4) {
-    //             obj.score += (score_count == 0 ? win_point > 0 ? 100 : -100 : score_count == 1 ? 10 * win_point : 20 * win_point)
-    //         } else {
-    //             obj.score -= (score_count == 0 ? win_point > 0 ? 100 : -100 : score_count == 1 ? 10 * win_point : 20 * win_point)
-    //         }
-    //         temp_game_record[Number(obj.player) - 1] = obj.name
-    //     })
-    //     temp_game_record[4] = team_top_score
-    //     temp_game_record[5] = team_bottom_score
-    //     temp_game_record[6] = new Date();
-    //     game_record.push(temp_game_record)
-    //     idle_people_update_to_div()
-    //     save_data()
-    //     if (simplify == '1') {
-    //         go_to_PK()
-    //         pickPeople()
-    //     }
-    //     send_data()
-    // }
     function handle_check_info() {
         console.log(todayPeople)
         console.log(empty_court_arr)
@@ -768,6 +654,7 @@
         const game_record_json = JSON.stringify(game_record);
         const bulletin_board_message_json = JSON.stringify(bulletin_board_message);
         const wait_to_register_list_json = JSON.stringify(wait_to_register_list);
+        const binding_team_list_json = JSON.stringify(binding_team_list)
         // 將 JSON 字串存入本地存儲中
         localStorage.setItem('todayPeople', todayPeople_json);
         localStorage.setItem('empty_court_arr', empty_court_arr_json);
@@ -775,6 +662,7 @@
         localStorage.setItem('game_record', game_record_json);
         localStorage.setItem('bulletin_board_message', bulletin_board_message_json);
         localStorage.setItem('wait_to_register_list', wait_to_register_list_json);
+        localStorage.setItem('binding_team_list', binding_team_list_json);
     }
     function load_data() {
         if (localStorage.getItem('todayPeople') == undefined || localStorage.getItem('empty_court_arr') == undefined || localStorage.getItem('prepare_PK') == undefined) {
@@ -787,6 +675,7 @@
         game_record = JSON.parse(localStorage.getItem('game_record'));
         wait_to_register_list = JSON.parse(localStorage.getItem('wait_to_register_list')) ? JSON.parse(localStorage.getItem('wait_to_register_list')) : [];
         bulletin_board_message = JSON.parse(localStorage.getItem('bulletin_board_message')) ? JSON.parse(localStorage.getItem('bulletin_board_message')) : [];
+        binding_team_list = JSON.parse(localStorage.getItem('binding_team_list')) ? JSON.parse(localStorage.getItem('binding_team_list')) : [];
         put_todayPeople_to_court()
         return true
     }
@@ -843,7 +732,7 @@
         prepare_PK = [];
         empty_court_arr = [1, 2, 3, 4];
         for (let i = 1; i <= result.length; i++) {
-            todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
+            todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
         }
         for (let i = 1; i < 6; i++) {
             empty_data_to_court(i)
@@ -980,10 +869,6 @@
         // 播放语音
         window.speechSynthesis.speak(msg);
     }
-    function send_data() {
-        const data_obj = { todayPeople: todayPeople, game_record: game_record, prepare_PK: prepare_PK, bulletin_board_message: bulletin_board_message }
-        client.publish('Chill/server/data_refresh', JSON.stringify(data_obj));
-    }
     function handle_delete_today_data() {
         const confirmed = confirm('確定刪除今日的資料嗎？(一般只在存好資料後，要開始打之前刪除，刪除後請套用當日球有資料再開始使用)')
         if (confirmed) {
@@ -992,6 +877,7 @@
             empty_court_arr = [1, 2, 3, 4];
             game_record = [];
             bulletin_board_message = []
+            wait_to_register_list = []
             save_data()
             load_data()
         }
@@ -1256,7 +1142,13 @@
                 let action_person = todayPeople.filter(obj => obj.name == data.creater)
                 if (action_person.length == 1) {
                     console.log(`收到來自用戶端 ${action_person[0].name} 的'去休息區'操作`)
-                    action_person[0].court = -1
+                    if (action_person[0].court != 0) {
+                        show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作失敗 
+                        因為並不在等待區 可能是已經上場 或是已經在休息區了`)
+                    } else {
+                        show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作成功`)
+                        action_person[0].court = -1
+                    }
                     idle_people_update_to_div()
                 } else {
                     console.log(`收到來自用戶端 ${data.creater} 的'去休息區'操作 但查無此人`)
@@ -1265,8 +1157,13 @@
             if (data.action == 'go_to_wait') {
                 let action_person = todayPeople.filter(obj => obj.name == data.creater)
                 if (action_person.length == 1) {
-                    console.log(`收到來自用戶端 ${action_person[0].name} 的'去等待區'操作`)
-                    action_person[0].court = 0
+                    if (action_person[0].court != -1) {
+                        show_message(`收到用戶端${action_person[0].name}的'去等待區'操作 操作失敗 
+                        因為並不在休息區 可能是已經上場 或是已經在等待區了`)
+                    } else {
+                        show_message(`收到用戶端${action_person[0].name}的'去等待區'操作 操作成功`)
+                        action_person[0].court = 0
+                    }
                     idle_people_update_to_div()
                 } else {
                     console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`)
@@ -1301,6 +1198,7 @@
 
         })
     }
+
     refresh_wait_to_register_text()
     idle_people_update_to_div()
     $("#pickPeople").on("click", pickPeople)
@@ -1341,6 +1239,8 @@
 
 
     add_listener_to_client_do_from_firebase(database)
+
+    //通常整天結束的時候 使用這個功能 這個上傳的資料會永久保存 (按日期算) 
     function write_today_data_to_firebase(today_people_data, game_record_data, bulletin_board_message_data, today_date) {
         database.ref(`Chung_Shan_elementary_school/Tuesday/date_${today_date}/`).set({
             today_people: today_people_data,
@@ -1356,6 +1256,8 @@
                 console.log("發生錯誤：", error);
             });
     }
+    //上傳wait_to_register到firebase 讓client端可以查看登記 
+    //上傳時機為 結束比賽時（比賽結束按鈕按下去時）
     function upload_wait_to_register_to_firebase(name_list) {
         database.ref(`Chung_Shan_elementary_school/wait_to_register/${get_now_time()}`).set({
             player1: name_list[0],
@@ -1371,54 +1273,22 @@
         )
     }
     //目前是放在idle_people_update_to_div()裡面
+    // 可能要視情況調整上傳時機 以避免使用量過大 每日免費配額360MB
     function upload_real_time_data_to_firebase() {
         database.ref(`Chung_Shan_elementary_school/real_time_data`).set({
             todayPeople: todayPeople,
-            prepare_PK,
-            wait_to_register_list
+            prepare_PK: prepare_PK,
+            wait_to_register_list: wait_to_register_list
         }
         )
     }
 
 
-    var client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
-
-    client.on('connect', () => {
-        console.log('connected.');
-
-        $("#send_data").click(function () {
-            const data_obj = { todayPeople: todayPeople, game_record: game_record, prepare_PK: prepare_PK, bulletin_board_message: bulletin_board_message }
-            client.publish('Chill/server/data_refresh', JSON.stringify(data_obj));
-        })
-        client.publish('Chill/test', "start");
-        client.subscribe('Chill/#')
-        client.on("message", function (topic, payload) {
-            console.log(topic);
-            var my_string = new TextDecoder().decode(payload);
-            if (topic == 'Chill/client/register_personal_data') {
-                const personal_data_obj = JSON.parse(my_string)
-                console.log(personal_data_obj)
-                if (todayPeople.filter(obj => obj.name == personal_data_obj.name).length == 0) {
-                    todayPeople.push({ id: todayPeople.length, name: `${personal_data_obj.name} `, score: 500, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0 });
-                    put_todayPeople_to_court();
-                    idle_people_update_to_div();
-                    const return_obj = { success: '1', message: `您使用 ${personal_data_obj.name} 註冊成功`, name: personal_data_obj.name }
-                    client.publish('Chill/server/register', JSON.stringify(return_obj));
-                } else {
-                    const return_obj = { success: '0', message: `您使用 ${personal_data_obj.name} 註冊失敗，已經有這個名字了！`, name: personal_data_obj.name }
-                    client.publish('Chill/server/register', JSON.stringify(return_obj));
-                }
-            }
-            if (topic == 'Chill/client/ask_for_data_refresh') {
-                const data_obj = { todayPeople: todayPeople, game_record: game_record, prepare_PK: prepare_PK, bulletin_board_message: bulletin_board_message }
-                client.publish('Chill/server/data_refresh', JSON.stringify(data_obj));
-            }
-        });
-    });
 
 </script>
 
 <script>
+    //計算選人上場邏輯
     function isOverlap(choice_1, choice_2) {
         if (choice_1["Rank尾"] < choice_2["Rank頭"] || choice_2["Rank尾"] < choice_1["Rank頭"]) {
             return false;

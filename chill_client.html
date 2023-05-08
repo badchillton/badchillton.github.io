@@ -47,6 +47,10 @@
             background-color: white;
             /* border: 1px solid black */
         }
+
+        .score_register {
+            width: 50px;
+        }
     </style>
 </head>
 
@@ -97,7 +101,7 @@
                         <button type="button" id="check-in" class="btn btn-primary rounded-pill">報到</button>
                         <button type="button" id="go_to_sleep" class="btn btn-primary rounded-pill">去休息區</button>
                         <button type="button" id="go_to_wait" class="btn btn-primary rounded-pill">去等待區</button>
-                        <button type="button" id="button-in" class="btn btn-primary rounded-pill">登出</button>
+                        <button type="button" id="logout-button" class="btn btn-primary rounded-pill">登出</button>
                     </div>
                 </div>
             </div>
@@ -134,23 +138,36 @@
         <div id="pages_court" class="content">
             <div class="row">
                 <div class="col-6">
-                    <div class="wait-court-area court-area">
-                        <h1>準備上場</h1>
-                        <div class="wait-court-1 ">
-                            <table class="table-bordered table">
-                                <tr>
-                                    <td class="player1">玩家0</td>
-                                    <td class="net"></td>
-                                    <td class="player2">玩家0</td>
-                                </tr>
-                                <tr>
-                                    <td class="player4">玩家0</td>
-                                    <td class="net"></td>
-                                    <td class="player3">玩家0</td>
-                                </tr>
-                            </table>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="wait-court-area court-area">
+                                <h1>準備上場</h1>
+                                <div class="wait-court-1 ">
+                                    <table class="table-bordered table">
+                                        <tr>
+                                            <td class="player1">玩家0</td>
+                                            <td class="net"></td>
+                                            <td class="player2">玩家0</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="player4">玩家0</td>
+                                            <td class="net"></td>
+                                            <td class="player3">玩家0</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="all_people_list">
+                                <h1>已報到</h1>
+                                <div class="all_wait"></div>
+                                <h1>未報到＆休息</h1>
+                                <div class="all_sleep"></div>
+                            </div>
                         </div>
                     </div>
+
                 </div>
                 <div class="col-6">
                     <div class="court-area real-court-area">
@@ -293,40 +310,67 @@
             for (let i = 0; i < 4; i++) {
                 court_person.push([0, 0, 0, 0])
             }
+            console.log(court_person)
             data.forEach(obj => {
-                if (obj.player != 0) {
+                if (obj.player != 0 && obj.court != 0) {
                     court_person[obj.court - 1][obj.player - 1] = obj.name
                 }
             })
             console.log(court_person)
             // 把 court_person 放入場上
             court_person_to_div(court_person)
+            put_all_people_to_all_wait_or_sleep(today_people_from_firebase)
         }
         )
     }
-    get_today_people_form_firebase()
-
-    function get_today_people_form_firebase() {
-        var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople');
+    function put_all_people_to_all_wait_or_sleep(today_people_list) {
+        $(".all_sleep").empty()
+        $(".all_wait").empty()
+        today_people_list.forEach(obj => {
+            if (obj.court == -1) {
+                $(".all_sleep").append(`${obj.name}<br>`)
+            } else {
+                $(".all_wait").append(`${obj.name}<br>`)
+            }
+        })
+    }
+    function get_prepare_PK_form_firebase() {
+        var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/prepare_PK');
         userRef.on('value', (snapshot) => {
             const data = snapshot.val();
             today_people_from_firebase = data
             console.log(data)
-            const court_person = []
-            for (let i = 0; i < 4; i++) {
-                court_person.push([0, 0, 0, 0])
-            }
-            data.forEach(obj => {
-                if (obj.player != 0) {
-                    court_person[obj.court - 1][obj.player - 1] = obj.name
-                }
+            //把prepare_PK的人選放到場上
+            data.forEach((obj, index) => {
+                $(`.wait-court-area .wait-court-1 .player${index + 1}`).html(obj.name)
             })
-            console.log(court_person)
-            // 把 court_person 放入場上
-            court_person_to_div(court_person)
         }
         )
     }
+    get_prepare_PK_form_firebase()
+    get_today_people_form_firebase()
+
+    // function get_today_people_form_firebase() {
+    //     var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople');
+    //     userRef.on('value', (snapshot) => {
+    //         const data = snapshot.val();
+    //         today_people_from_firebase = data
+    //         console.log(data)
+    //         const court_person = []
+    //         for (let i = 0; i < 4; i++) {
+    //             court_person.push([0, 0, 0, 0])
+    //         }
+    //         data.forEach(obj => {
+    //             if (obj.player != 0) {
+    //                 court_person[obj.court - 1][obj.player - 1] = obj.name
+    //             }
+    //         })
+    //         console.log(court_person)
+    //         // 把 court_person 放入場上
+    //         court_person_to_div(court_person)
+    //     }
+    //     )
+    // }
 
     function get_wait_to_register_from_firebase() {
         var userRef = database.ref('Chung_Shan_elementary_school/wait_to_register');
@@ -340,10 +384,10 @@
                         <tr>
                             <td>${data[key].player1}</td>
                             <td>${data[key].player4}</td>
-                            <td><input type="number" /></td>
+                            <td><input type="number" class="score_register"/></td>
                             <td>${data[key].player2}</td>
                             <td>${data[key].player3}</td>
-                            <td><input type="number" /></td>
+                            <td><input type="number" class="score_register" /></td>
                             <td><button class="register-button" id="${key}">登記分數</button></td>
                         </tr>
                     `)
@@ -497,11 +541,11 @@
     }
     function handle_go_to_sleep() {
         send_client_action_to_firebase('go_to_sleep')
-        show_message("成功去休息區")
+        show_message("成功傳送資料[去休息區]")
     }
     function handle_go_to_wait() {
         send_client_action_to_firebase('go_to_wait')
-        show_message("成功去等待區")
+        show_message("成功傳送資料[去等待區]")
     }
     function handle_refresh_register() {
         get_wait_to_register_from_firebase()

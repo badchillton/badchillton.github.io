@@ -33,6 +33,20 @@
         .hidden {
             display: none;
         }
+
+        .court-area {
+            background-color: aliceblue;
+        }
+
+        .court-area table {
+            background-color: lightgreen;
+            /* border: 1px solid black */
+        }
+
+        .court-area table .net {
+            background-color: white;
+            /* border: 1px solid black */
+        }
     </style>
 </head>
 
@@ -53,7 +67,7 @@
                         <a class="nav-link" href="#" data-content="pages_action">個人操作區</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-content="analysis">上場狀況</a>
+                        <a class="nav-link" href="#" data-content="pages_court">上場狀況</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-content="contact">個人戰績查詢</a>
@@ -78,13 +92,24 @@
                 </table>
             </div>
             <div class="button-area">
-                <button id="check-in">報到</button>
-                <button id="go_to_sleep">去休息區</button>
-                <button id="go_to_wait">去等待區</button>
-                <button id="logout-button"> 登出</button>
-                <button id="refresh_register"> 刷新登記分數列表</button>
+                <div class="row">
+                    <div class="col">
+                        <button type="button" id="check-in" class="btn btn-primary rounded-pill">報到</button>
+                        <button type="button" id="go_to_sleep" class="btn btn-primary rounded-pill">去休息區</button>
+                        <button type="button" id="go_to_wait" class="btn btn-primary rounded-pill">去等待區</button>
+                        <button type="button" id="button-in" class="btn btn-primary rounded-pill">登出</button>
+                    </div>
+                </div>
             </div>
-            <div class="wait-to-register">
+            <div class="wait-to-register mt-4">
+                <h3>
+                    <span>
+                        登記分數區
+                    </span>
+                    <button type="button" id="refresh_register" class="btn btn-primary rounded-pill ml-3">
+                        刷新登記分數列表
+                    </button>
+                </h3>
                 <table class="table table-responsive">
                     <thead>
                         <tr>
@@ -105,13 +130,102 @@
                 </table>
             </div>
         </div>
+        <!-- court  -->
+        <div id="pages_court" class="content">
+            <div class="row">
+                <div class="col-6">
+                    <div class="wait-court-area court-area">
+                        <h1>準備上場</h1>
+                        <div class="wait-court-1 ">
+                            <table class="table-bordered table">
+                                <tr>
+                                    <td class="player1">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player2">玩家0</td>
+                                </tr>
+                                <tr>
+                                    <td class="player4">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player3">玩家0</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="court-area real-court-area">
+                        <h1>實際上場</h1>
+                        <div class="court-1 ">
+                            <table class="table-bordered table">
+                                <tr>
+                                    <td class="player1">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player2">玩家0</td>
+                                </tr>
+                                <tr>
+                                    <td class="player4">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player3">玩家0</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="court-2">
+                            <table class="table-bordered table">
+                                <tr>
+                                    <td class="player1">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player2">玩家0</td>
+                                </tr>
+                                <tr>
+                                    <td class="player4">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player3">玩家0</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="court-3">
+                            <table class="table-bordered table">
+                                <tr>
+                                    <td class="player1">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player2">玩家0</td>
+                                </tr>
+                                <tr>
+                                    <td class="player4">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player3">玩家0</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="court-4">
+                            <table class="table-bordered table">
+                                <tr>
+                                    <td class="player1">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player2">玩家0</td>
+                                </tr>
+                                <tr>
+                                    <td class="player4">玩家0</td>
+                                    <td class="net"></td>
+                                    <td class="player3">玩家0</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+        </div>
     </div>
 </body>
 
 </html>
 <script>
     let user_info = { name: "unknown", status: -1 };
-
+    let today_people_from_firebase = []
     //開場綁定 header的事件
     $(document).ready(function () {
         start_web()
@@ -160,6 +274,58 @@
         // 在控制台输出当前时间
         console.log(currentTime);
         return (currentTime)
+    }
+
+    function court_person_to_div(court_person_list) {
+        for (let i = 1; i < 5; i++) {
+            court_person_list[i - 1].forEach((obj, index) => {
+                $(`.real-court-area .court-${i} .player${index + 1}`).html(obj)
+            })
+        }
+    }
+    function get_today_people_form_firebase() {
+        var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople');
+        userRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            today_people_from_firebase = data
+            console.log(data)
+            const court_person = []
+            for (let i = 0; i < 4; i++) {
+                court_person.push([0, 0, 0, 0])
+            }
+            data.forEach(obj => {
+                if (obj.player != 0) {
+                    court_person[obj.court - 1][obj.player - 1] = obj.name
+                }
+            })
+            console.log(court_person)
+            // 把 court_person 放入場上
+            court_person_to_div(court_person)
+        }
+        )
+    }
+    get_today_people_form_firebase()
+
+    function get_today_people_form_firebase() {
+        var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople');
+        userRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            today_people_from_firebase = data
+            console.log(data)
+            const court_person = []
+            for (let i = 0; i < 4; i++) {
+                court_person.push([0, 0, 0, 0])
+            }
+            data.forEach(obj => {
+                if (obj.player != 0) {
+                    court_person[obj.court - 1][obj.player - 1] = obj.name
+                }
+            })
+            console.log(court_person)
+            // 把 court_person 放入場上
+            court_person_to_div(court_person)
+        }
+        )
     }
 
     function get_wait_to_register_from_firebase() {

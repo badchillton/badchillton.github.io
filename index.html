@@ -382,6 +382,22 @@
 </html>
 
 <script>
+    //firebase 相關設定 
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCLXKg7Ru5p5dtgyRs28-qg8LQaG69yME",
+        // authDomain: "friendly-sensor-137111.firebaseapp.com",
+        databaseURL: "https://friendly-sensor-137111-default-rtdb.firebaseio.com",
+        projectId: "friendly-sensor-137111",
+        storageBucket: "friendly-sensor-137111.appspot.com",
+        // messagingSenderId: "824581584416",
+        appId: "1:824581584416:web:fdd5462dd85230d8caae45",
+        measurementId: "G-2HYJ96RDLV"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    // 獲取資料庫的引用
+    const database = firebase.database();
     //這四個變數會寫入local storage
     let todayPeople = [];
     let prepare_PK = [];
@@ -403,7 +419,7 @@
     //從local storage 載入資料 若沒有資料則產生假資料
     if (!load_data()) {
         for (let i = 1; i <= 28; i++) {
-            todayPeople.push({ id: i, name: `Object ${i}`, score: 500 - i, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0 });
+            todayPeople.push({ id: i, name: `Object ${i}`, score: 500 - i, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
         }
     }
     function show_message(message) {
@@ -533,6 +549,7 @@
         const four_people = letsPlay(todayPeople)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         prepare_PK_refresh(pickedPeople)
+        send_prepare_PK_to_firebase()
         show_player_data_to_court([pickedPeople[0], pickedPeople[3]], [pickedPeople[1], pickedPeople[2]], 5)
 
     }
@@ -550,7 +567,8 @@
             }
             prepare_PK.forEach((person, index) => {
                 person.court = court;
-                person.player = index + 1
+                person.player = index + 1;
+                person.game_count += 1;
             });
             show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], court)
             const now = new Date();
@@ -562,8 +580,7 @@
             const seconds = currentTime.getSeconds().toString().padStart(2, '0');
             const currentTime_hms = `${hours}:${minutes}:${seconds}`
             const PK_court = empty_court_arr.shift()
-            bulletin_board_message.push(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 VS 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${PK_court}球場比賽。 [ ${currentTime_hms} ]<br>`)
-            client.publish('Chill/PY', `[${prepare_PK[0].name}] 和 [${prepare_PK[3].name}] VS [${prepare_PK[1].name}] 和 [${prepare_PK[2].name}]，請至第${PK_court}球場比賽。`)
+            bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, PK_court, currentTime_hms])
             refresh_bulletin_board_message()
             const speak_text = String(`大會報告：《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${PK_court}球場比賽。`)
             speak(speak_text);
@@ -582,7 +599,7 @@
     }
     function refresh_bulletin_board_message() {
         $("#bulletin_board_message").empty()
-        bulletin_board_message.forEach(obj => $("#bulletin_board_message").prepend(obj))
+        bulletin_board_message.forEach(obj => $("#bulletin_board_message").prepend((`《${obj[0]}》 和 《${obj[3]}》 對戰 《${obj[1]}》 和 《${obj[2]}》，請至第${obj[4]}球場比賽。<br>`)))
     }
     function idle_people_update_to_div() {
         console.log(todayPeople)
@@ -606,6 +623,7 @@
             })
         })
         $(".selectable").click(handle_personal_card_click)
+        upload_real_time_data_to_firebase()
     }
     function idle_personal_card(person) {
         return (`
@@ -825,7 +843,7 @@
         prepare_PK = [];
         empty_court_arr = [1, 2, 3, 4];
         for (let i = 1; i <= result.length; i++) {
-            todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0 });
+            todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
         }
         for (let i = 1; i < 6; i++) {
             empty_data_to_court(i)
@@ -1165,6 +1183,7 @@
             return (show_message('which_player 不可預期的錯誤'))
         }
         prepare_PK[which_player - 1] = choosed_people[0]
+        send_prepare_PK_to_firebase()
         choosed_people[0].choosed = 0
         idle_people_update_to_div()
         put_todayPeople_to_court()
@@ -1203,21 +1222,21 @@
         console.log(currentTime);
         return (currentTime)
     }
-    function upload_wait_to_register_to_firebase(name_list) {
-        database.ref(`Chung_Shan_elementary_school/wait_to_register/${get_now_time()}`).set({
-            player1: name_list[0],
-            player2: name_list[1],
-            player3: name_list[2],
-            player4: name_list[3],
-            create_time: get_now_time(),
-            score_top: "待登記",
-            score_bottom: "待登記",
-            register_name: "待登記",
-            register_time: "待登記"
-        }
-        )
-    }
 
+    function send_prepare_PK_to_firebase() {
+        database.ref(`Chung_Shan_elementary_school/real_time_data/`).update({
+            prepare_PK
+        }).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+            });
+        console.log(prepare_PK)
+    }
     function add_listener_to_client_do_from_firebase(database) {
         var userRef = database.ref('Chung_Shan_elementary_school/client_do/');
         userRef.on('value', (snapshot) => {
@@ -1320,21 +1339,7 @@
 
 
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCCLXKg7Ru5p5dtgyRs28-qg8LQaG69yME",
-        // authDomain: "friendly-sensor-137111.firebaseapp.com",
-        databaseURL: "https://friendly-sensor-137111-default-rtdb.firebaseio.com",
-        projectId: "friendly-sensor-137111",
-        storageBucket: "friendly-sensor-137111.appspot.com",
-        // messagingSenderId: "824581584416",
-        appId: "1:824581584416:web:fdd5462dd85230d8caae45",
-        measurementId: "G-2HYJ96RDLV"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    firebase.analytics();
-    // 獲取資料庫的引用
-    var database = firebase.database();
+
     add_listener_to_client_do_from_firebase(database)
     function write_today_data_to_firebase(today_people_data, game_record_data, bulletin_board_message_data, today_date) {
         database.ref(`Chung_Shan_elementary_school/Tuesday/date_${today_date}/`).set({
@@ -1351,6 +1356,30 @@
                 console.log("發生錯誤：", error);
             });
     }
+    function upload_wait_to_register_to_firebase(name_list) {
+        database.ref(`Chung_Shan_elementary_school/wait_to_register/${get_now_time()}`).set({
+            player1: name_list[0],
+            player2: name_list[1],
+            player3: name_list[2],
+            player4: name_list[3],
+            create_time: get_now_time(),
+            score_top: "待登記",
+            score_bottom: "待登記",
+            register_name: "待登記",
+            register_time: "待登記"
+        }
+        )
+    }
+    //目前是放在idle_people_update_to_div()裡面
+    function upload_real_time_data_to_firebase() {
+        database.ref(`Chung_Shan_elementary_school/real_time_data`).set({
+            todayPeople: todayPeople,
+            prepare_PK,
+            wait_to_register_list
+        }
+        )
+    }
+
 
     var client = mqtt.connect("wss://test.mosquitto.org:8081") // you add a ws:// url here
 

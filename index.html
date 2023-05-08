@@ -730,15 +730,21 @@
         console.log(result);
         todayPeople = []
         prepare_PK = [];
+        const today_play_list = []
         empty_court_arr = [1, 2, 3, 4];
         for (let i = 1; i <= result.length; i++) {
             todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
+            today_play_list.push(result[i - 1].name)
         }
         for (let i = 1; i < 6; i++) {
             empty_data_to_court(i)
         }
         idle_people_update_to_div()
         save_data()
+        //上傳firebase 的today_play_list
+        console.log(today_play_list)
+        reset_today_data_to_firebase()
+        send_today_play_list_to_firebase(today_play_list)
     }
     function prepare_to_delete() {
         $("#delete").empty()
@@ -1006,8 +1012,16 @@
                         register_time: get_now_time(),
                         score_bottom: bottom_team_score,
                         score_top: top_team_score
-
+                    }).then((result) => {
+                        console.log("成功的結果：", result);
+                        if (result == undefined) {
+                            show_message("雲端登記分數成功")
+                        }
                     })
+                        .catch((error) => {
+                            console.log("發生錯誤：", error);
+                            show_message("雲端登記分數出錯啦！")
+                        });
                 }
             }
         })
@@ -1109,19 +1123,49 @@
         return (currentTime)
     }
 
+    function reset_today_data_to_firebase() {
+        database.ref(`Chung_Shan_elementary_school/wait_to_register/`).set(
+            "reset"
+        )
+        database.ref(`Chung_Shan_elementary_school/real_time_data/`).set(
+            "reset"
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("重置今日即時資料成功")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("重置今日即時資料失敗")
+            });
+    }
+    function send_today_play_list_to_firebase(today_play_list) {
+        database.ref(`Chung_Shan_elementary_school/today_play_list/`).set(
+            today_play_list
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入今日上場人員資料成功")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+            });
+    }
     function send_prepare_PK_to_firebase() {
         database.ref(`Chung_Shan_elementary_school/real_time_data/`).update({
             prepare_PK
         }).then((result) => {
             console.log("成功的結果：", result);
             if (result == undefined) {
-                show_message("寫入資料成功")
+                show_message("寫入準備上場人員資料成功")
             }
         })
             .catch((error) => {
                 console.log("發生錯誤：", error);
+                show_message("寫入準備上場人員資料失敗")
             });
-        console.log(prepare_PK)
     }
     function add_listener_to_client_do_from_firebase(database) {
         var userRef = database.ref('Chung_Shan_elementary_school/client_do/');
@@ -1131,8 +1175,13 @@
             if (data.action == 'check-in') {
                 let action_person = todayPeople.filter(obj => obj.name == data.creater)
                 if (action_person.length == 1) {
-                    console.log(`收到來自用戶端 ${action_person[0].name} 的'報到'操作`)
-                    action_person[0].court = 0
+                    if (action_person[0].court != -1) {
+                        show_message(`收到用戶端${action_person[0].name}的'報到'操作 操作失敗 
+                        因為並不在休息區 可能是已經上場 或是已經在等待區了`)
+                    } else {
+                        show_message(`收到用戶端${action_person[0].name}的'報到'操作 操作成功`)
+                        action_person[0].court = 0
+                    }
                     idle_people_update_to_div()
                 } else {
                     console.log(`收到來自用戶端 ${data.creater} 的'報到'操作 但查無此人`)
@@ -1249,11 +1298,12 @@
         }).then((result) => {
             console.log("成功的結果：", result);
             if (result == undefined) {
-                show_message("寫入資料成功")
+                show_message("寫入資料成功(上傳當日總資料)")
             }
         })
             .catch((error) => {
                 console.log("發生錯誤：", error);
+                show_message("發生錯誤：write_today_data_to_firebase")
             });
     }
     //上傳wait_to_register到firebase 讓client端可以查看登記 
@@ -1270,7 +1320,16 @@
             register_name: "待登記",
             register_time: "待登記"
         }
-        )
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功(待登記資料)")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("發生錯誤：upload_wait_to_register_to_firebase")
+            });
     }
     //目前是放在idle_people_update_to_div()裡面
     // 可能要視情況調整上傳時機 以避免使用量過大 每日免費配額360MB
@@ -1280,7 +1339,16 @@
             prepare_PK: prepare_PK,
             wait_to_register_list: wait_to_register_list
         }
-        )
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功(即時資料)")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("發生錯誤：upload_real_time_data_to_firebase")
+            });
     }
 
 

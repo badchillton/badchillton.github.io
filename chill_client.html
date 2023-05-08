@@ -437,20 +437,13 @@
             return (console.log("有找到資料 直接進行登入"))
         }
         //從資料庫讀取使用者
-        var userRef = database.ref('Chung_Shan_elementary_school/people_data/');
+        var userRef = database.ref('Chung_Shan_elementary_school/today_play_list/');
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data)
-            user_data_obj = data
-            // obj 2 arr
-            const arr = [];
-            for (const key in user_data_obj) {
-                arr.push(user_data_obj[key]['name']);
-            }
-            console.log(arr);
-            //放入登入的選項
+            const today_play_list = data
             $("#login-select").empty()
-            arr.forEach(obj => {
+            today_play_list.forEach(obj => {
                 $("#login-select").append(`<option value="${obj}">${obj}</option>`)
             })
         })
@@ -458,7 +451,7 @@
 
 
     function auto_login() {
-        show_message("您已成功登入")
+        show_message("您已成功登入 如果還沒報到 記得去按報到喔！")
         $("#pages-play").removeClass("hidden")
         $("#pages-login").addClass("hidden")
         $('#user-info-table').append(`
@@ -480,7 +473,7 @@
         }
         localStorage.setItem("user", login_char)
         user_info.name = login_char
-        show_message("您已成功登入")
+        show_message("您已成功登入 如果還沒報到 記得去按報到喔！")
         $('.content').hide();
         $('#pages_action').show();
         $('#user-info-table').append(`
@@ -537,7 +530,7 @@
     }
     function handle_check_in() {
         send_client_action_to_firebase('check-in')
-        show_message("成功報到")
+        show_message("成功送出報到資料！ 請去上場情況頁面 看自己是否在備戰區了！")
     }
     function handle_go_to_sleep() {
         send_client_action_to_firebase('go_to_sleep')

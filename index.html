@@ -483,6 +483,11 @@
             </div>`)
     }
     function pickPeople() {
+        const people = todayPeople.filter(person => person['court'] == 0 && person['idleRounds'] >= 0);
+        if (people.length < 8) {
+            show_message("在備戰區的人數不足8人 演算法失靈")
+            return
+        }
         const four_people = letsPlay(todayPeople)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         prepare_PK_refresh(pickedPeople)
@@ -712,6 +717,10 @@
         todayPeople[Number($("#delete").val()) - 1].idleRounds = Number($("#idle_round_set").val())
     }
     function processInput() {
+        let confirmed = confirm("確定輸入嗎？ 此操作將導致今天的資料重置！")
+        if (confirmed == false) {
+            return
+        }
         // 獲取輸入框中的內容
         const input = document.getElementById('input').value;
         // 處理輸入
@@ -728,8 +737,13 @@
             result.push({ id, score, name });
         }
         console.log(result);
-        todayPeople = []
+        todayPeople = [];
         prepare_PK = [];
+        empty_court_arr = [1, 2, 3, 4];
+        game_record = [];
+        bulletin_board_message = []
+        wait_to_register_list = []
+
         const today_play_list = []
         empty_court_arr = [1, 2, 3, 4];
         for (let i = 1; i <= result.length; i++) {
@@ -1025,7 +1039,7 @@
                 }
             }
         })
-        // wait_to_register_list.splice(now_which_game, 1)
+        wait_to_register_list.splice(now_which_game, 1)
         show_message("完成登記")
         idle_people_update_to_div()
         refresh_wait_to_register_text()
@@ -1225,6 +1239,7 @@
                     // 解析要分析的分數登記 是否符合現在的未登記情形
                     const data_obj = JSON.parse(data.data)
                     console.log(data_obj)
+                    let check_success = false
                     wait_to_register_list.forEach((obj, index) => {
                         const check1 = (data_obj[0] == todayPeople[obj[0] - 1].name)
                         const check2 = (data_obj[1] == todayPeople[obj[1] - 1].name)
@@ -1237,8 +1252,12 @@
                             分數為 ${data_obj[4]} 比 ${data_obj[5]}`)
                             console.log("成功收到正確")
                             record_score(index, data_obj[4], data_obj[5])
+                            check_success = true
                         }
                     })
+                    if (check_success == false) {
+                        show_message("收到不存在的場次的分數登記")
+                    }
                     idle_people_update_to_div()
                 } else {
                     console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`)

@@ -29,6 +29,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"
         integrity="sha512-79j1YQOJuI8mLseq9icSQKT6bLlLtWknKwj1OpJZMdPt2pFBry3vQTt+NZuJw7NSd1pHhZlu0s12Ngqfa371EA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+    <!-- 引入 Datatable 和 Bootstrap 的 JS 檔案 -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css"
+        integrity="sha512-PT0RvABaDhDQugEbpNMwgYBCnGCiTZMh9yOzUsJHDgl/dMhD9yjHAwoumnUk3JydV3QTcIkNDuN40CJxik5+WQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+        integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         .hidden {
             display: none;
@@ -74,7 +84,7 @@
                         <a class="nav-link" href="#" data-content="pages_court">上場狀況</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" data-content="contact">個人戰績查詢</a>
+                        <a class="nav-link" href="#" data-content="pages_history">個人戰績查詢</a>
                     </li>
                 </ul>
             </div>
@@ -87,6 +97,14 @@
                 <option value="-1">請選擇</option>
             </select>
             <button id="login-button"> 登入</button>
+            <h6>hint:沒出現選項 可能是要先登出 或是網路不好</h6>
+        </div>
+        <!-- history  -->
+        <div id="pages_history" class="content">
+            <button id="refresh_history">刷新戰績表</button>
+            <div class="mt-4 w-100">
+                <table id="histroy" class="table table-bordered table-responsive w-100"></table>
+            </div>
         </div>
 
         <!-- Action  -->
@@ -544,12 +562,38 @@
         get_wait_to_register_from_firebase()
         show_message("成功刷新")
     }
+    function handle_refresh_history() {
+        var userRef = database.ref('Chung_Shan_elementary_school/wait_to_register');
+        userRef.once('value').then((snapshot) => {
+            const data = snapshot.val();
+            console.log(data)
+            const dataArray = [];
+            for (let prop in data) {
+                dataArray.push(data[prop]);
+            }
+            console.log(dataArray)
+            $("#histroy").DataTable({
+                data: dataArray,
+                columns: [
+                    { title: "player1", data: "player1" },
+                    { title: "player4", data: "player4" },
+                    { title: "score_top", data: "score_top" },
+                    { title: "player2", data: "player2" },
+                    { title: "player3", data: "player3" },
+                    { title: "score_bottom", data: "score_bottom" },
+                    { title: "register_time", data: "register_time" },
+                ]
+            })
 
+        })
+    }
     $("#login-button").click(login)
     $("#logout-button").click(logout)
     $("#check-in").click(handle_check_in)
     $("#go_to_sleep").click(handle_go_to_sleep)
     $("#go_to_wait").click(handle_go_to_wait)
     $("#refresh_register").click(handle_refresh_register)
+    $("#refresh_history").click(handle_refresh_history)
+
 
 </script>

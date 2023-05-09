@@ -67,6 +67,9 @@
                         <a class="nav-link" href="#" data-content="statistics">戰績統計資料</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="#" data-content="statistics2">全員分數表</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#" data-content="analysis">分數分析</a>
                     </li>
                     <li class="nav-item">
@@ -82,7 +85,7 @@
         <div id="statistics" class="content">
             <div class="row">
                 <div class="col-12">
-                    <h2>5月2號勝負一覽表</h2>
+                    <h2>5月9號勝負一覽表</h2>
                     <table id="example" class="display table-bordered table" style="width:100%">
                         <thead>
                             <tr>
@@ -92,6 +95,24 @@
                                 <th>敗場</th>
                                 <th>總場數</th>
                                 <th>勝率</th>
+                                <th>當前分數</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!-- 分頁 統計圖表2 -->
+        <div id="statistics2" class="content" style="display:none;">
+            <div class="row">
+                <div class="col-12">
+                    <h2>全員分數表</h2>
+                    <table id="example2" class="display table-bordered table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>名字</th>
                                 <th>當前分數</th>
                             </tr>
                         </thead>
@@ -198,16 +219,16 @@
     }
     // 寫入資料
     function writeData_all_users_json() {
-        var userRef = database.ref('Chung_Shan_elementary_school/Tuesday/');
+        var userRef = database.ref('Chung_Shan_elementary_school/temp_data/');
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data);
-            const data3 = JSON.parse(data.date_0503.today_people)
-            console.log(data3);
-            data3.forEach(obj => database.ref(`Chung_Shan_elementary_school/people_data/${obj.name}`).set({
-                name: obj.name,
-                score: obj.score
-            }))
+            // const data3 = JSON.parse(data.date_0503.today_people)
+            // console.log(data);
+            // data.forEach(obj => database.ref(`Chung_Shan_elementary_school/people_data/${obj.name}`).set({
+            //     name: obj.name,
+            //     score: obj.score
+            // }))
 
         })
     }
@@ -224,7 +245,7 @@
             let results = parseInput(data1)
             const data2 = JSON.parse(data.game_record)
             const data3 = JSON.parse(data.today_people)
-            console.log(results);
+            console.log(data2);
             let today_people = {}
             data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
             data2.forEach(obj => {
@@ -242,15 +263,6 @@
             console.log(today_people)
             const data_table = []
             Object.keys(today_people).forEach(key => {
-                $("#game_record table").append(`
-                <tr id='${key}'> 
-                    <td>${key}</td>
-                    <td>${today_people[key].win}</td>
-                    <td>${today_people[key].lose}</td>
-                    <td>${today_people[key].win + today_people[key].lose}</td>
-                    <td>${parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win))}%</td>
-                    <td>${today_people[key].score}</td> 
-                </tr>`)
                 data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
             })
             $('#example').DataTable({
@@ -261,23 +273,85 @@
                 }
             });
         });
+    }
 
-        database.ref('Chung_Shan_elementary_school/people_data').once("value").then((snapshot) => {
-            const data = snapshot.val()
 
+    function readData2() {
+        var readRef = database.ref('Chung_Shan_elementary_school');
+        readRef.once("value").then((snapshot) => {
+            const data = snapshot.val().wait_to_register
             console.log(data)
-            echart_data = []
-            Object.keys(data).forEach(key => {
-                echart_data.push([key, data[key].score])
+            const arr = []
+            for (let key in data) {
+                arr.push([data[key].player1, data[key].player2, data[key].player3, data[key].player4, data[key].score_top, data[key].score_bottom, data[key].create_time])
+            }
+            console.log(arr)
+            let data2 = arr;
+            let data3 = snapshot.val().real_time_data.todayPeople
+            let today_people = {}
+            data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
+            data2.forEach(obj => {
+                //top team win
+                let top_team_win = obj[4] > obj[5] ? true : false
+                today_people[obj[0]].win += top_team_win ? 1 : 0;
+                today_people[obj[3]].win += top_team_win ? 1 : 0;
+                today_people[obj[1]].lose += top_team_win ? 1 : 0;
+                today_people[obj[2]].lose += top_team_win ? 1 : 0;
+                today_people[obj[0]].lose += top_team_win ? 0 : 1;
+                today_people[obj[3]].lose += top_team_win ? 0 : 1;
+                today_people[obj[1]].win += top_team_win ? 0 : 1;
+                today_people[obj[2]].win += top_team_win ? 0 : 1;
             })
-            console.log(echart_data)
-            render_echart(echart_data)
+            console.log(today_people)
+            let data_table=[]
+            Object.keys(today_people).forEach(key => {
+                data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
+            })
+            $('#example').DataTable({
+                data: data_table,
+                rowId: 'row',
+                rowCallback: function (row, data, index) {
+                    $('td:eq(0)', row).html(index + 1);
+                }
+            });
+
+
+            const data22 = snapshot.val().people_data
+            console.log(data22)
+            let data_table2=[]
+            Object.keys(data22).forEach(key => {
+                data_table2.push(["", key, data22[key].score])
+            })
+            $('#example2').DataTable({
+                data: data_table2,
+                rowId: 'row',
+                rowCallback: function (row, data, index) {
+                    $('td:eq(0)', row).html(index + 1);
+                }
+            });
+
+
         })
 
 
+    };
+
+    database.ref('Chung_Shan_elementary_school/people_data').once("value").then((snapshot) => {
+        const data = snapshot.val()
+
+        console.log(data)
+        echart_data = []
+        Object.keys(data).forEach(key => {
+            echart_data.push([key, data[key].score])
+        })
+        console.log(echart_data)
+        render_echart(echart_data)
+    })
 
 
-    }
+
+
+
 
     function parseInput(str) {
         const regex = /《(.*?)》 和 《(.*?)》 VS 《(.*?)》 和 《(.*?)》，請至第\d球場比賽。 \[ (.*?) \]/g;
@@ -289,7 +363,7 @@
         return matches;
     }
 
-    readData()
+    readData2()
 </script>
 
 </html>

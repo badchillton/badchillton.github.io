@@ -279,7 +279,7 @@
     function readData2() {
         var readRef = database.ref('Chung_Shan_elementary_school');
         readRef.once("value").then((snapshot) => {
-            const data = snapshot.val().wait_to_register
+            const data = snapshot.val().analysis_use_data.date_0509.wait_to_register
             console.log(data)
             const arr = []
             for (let key in data) {
@@ -287,11 +287,14 @@
             }
             console.log(arr)
             let data2 = arr;
-            let data3 = snapshot.val().real_time_data.todayPeople
+            let data3 = snapshot.val().analysis_use_data.date_0509.today_people
             let today_people = {}
             data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
+            console.log(today_people)
+            console.log(data2)
             data2.forEach(obj => {
                 //top team win
+                console.log(obj)
                 let top_team_win = obj[4] > obj[5] ? true : false
                 today_people[obj[0]].win += top_team_win ? 1 : 0;
                 today_people[obj[3]].win += top_team_win ? 1 : 0;
@@ -303,7 +306,7 @@
                 today_people[obj[2]].win += top_team_win ? 0 : 1;
             })
             console.log(today_people)
-            let data_table=[]
+            let data_table = []
             Object.keys(today_people).forEach(key => {
                 data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
             })
@@ -318,7 +321,7 @@
 
             const data22 = snapshot.val().people_data
             console.log(data22)
-            let data_table2=[]
+            let data_table2 = []
             Object.keys(data22).forEach(key => {
                 data_table2.push(["", key, data22[key].score])
             })

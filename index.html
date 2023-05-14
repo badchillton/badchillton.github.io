@@ -101,21 +101,6 @@
             background-color: antiquewhite;
         }
 
-        #message-box {
-            position: fixed;
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: yellow;
-            border: 1px solid black;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            z-index: 9999;
-            display: none;
-        }
-
         .court {
             background-color: rgb(236, 236, 244);
             border: 2px solid white;
@@ -208,7 +193,6 @@
 </head>
 
 <body>
-    <div id="message-box">這是一個提示！</div>
     <div class="modal" id="myModal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -242,7 +226,11 @@
             </div>
         </div>
     </div>
-
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">羽Chill社 主控台</a>
+        </div>
+    </nav>
     <div class="container-fluid main-container">
         <div class="row court-container">
         </div>
@@ -278,27 +266,6 @@
                         <button class="button" id="prepare_to_delete">準備設定人員 </button>
                         <button class="button" id="delete_today_data">刪除本地端當日資料 </button>
                     </div>
-                    <fieldset>
-                        <legend>指定上場設定區</legend>
-                        <select name="prepare_PK_set_player" id="prepare_PK_set_player">
-                            <option value="1">player1(左上)</option>
-                            <option value="2">player2(左下)</option>
-                            <option value="3">player3(右下)</option>
-                            <option value="4">player4(右上)</option>
-                        </select>
-                        <select name="prepare_PK_person" id="prepare_PK_person">
-                        </select>
-                        <button id="set_prepare_PK">確認執行</button>
-                    </fieldset>
-                    <fieldset class="simplify_able">
-                        <legend>綁定組合區</legend>
-                        <select name="binding_partners_1" id="binding_partners_1">
-                        </select>
-                        <select name="binding_partners_2" id="binding_partners_2">
-                        </select>
-                        <button id="set_binding">確認執行綁定操作</button>
-                        <button id="set_unbinding">確認執行解除綁定操作</button>
-                    </fieldset>
                     <fieldset class="simplify_able">
                         <legend>idleRounds設定區</legend>
                         <select name="idle_round_set" id="idle_round_set">
@@ -332,8 +299,8 @@
                             <option value="0">不簡化操作流程</option>
                         </select>
                         <select id="off_court_check">
-                            <option value="0">下場不需要確認</option>
                             <option value="1">下場需要確認</option>
+                            <option value="0">下場不需要確認</option>
                         </select>
                     </fieldset>
                     <fieldset class="simplify_able">
@@ -381,6 +348,8 @@
 </html>
 
 <script>
+    //TODO: 刷新人會導致 上場顏色遺失 
+    //TODO: 重整頁面 會導致 prepare pk 資料不同 應每次變動都存檔
     //firebase 相關設定 
     const firebaseConfig = {
         apiKey: "AIzaSyCCLXKg7Ru5p5dtgyRs28-qg8LQaG69yME",
@@ -405,12 +374,13 @@
     let bulletin_board_message = []
     let binding_team_list = []
     let wait_to_register_list = []
+    //wait to register list 改變邏輯 變成 永久紀錄每一場 
     //這些變數 每次進來會重置成這樣
     let simplify = '1';
     let min_idle = 0;
     let hide_score = '0';
     let score_count = '1';
-    let off_court_check = '0';
+    let off_court_check = '1';
     //產生4個主要比賽場地
     for (let i = 1; i < 5; i++) {
         $(".court-container").append(court_generate(i))
@@ -421,7 +391,36 @@
             todayPeople.push({ id: i, name: `Object ${i}`, score: 500 - i, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
         }
     }
-    function show_message(message) {
+
+    /**
+     * 顯示訊息
+     * @param {string} message - 要顯示的訊息
+     * @param {string} [state="success"] - 訊息的狀態，可以是 "success"、"error"、"warning" 或 
+                "client_ok"、  "client_error" 中的任意一個（默認是 "success"）
+     * @returns {void}
+     * success 操作成功
+     * error 出現大錯了！ 正常操作 無論如何都不該出現！ 有出現就要去debug
+     * warning 正常操作下的違規操作   提醒此操作無效即可
+     */
+    function show_message(message, state = "success") {
+        const state_dict_map_backgroundColor = {
+            //綠色系版本：表成功
+            success: "linear-gradient(to right, #00b09b, #96c93d)",
+            //紅色系版本：表危險 錯誤
+            error: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            //黃色系版本：表警告
+            warning: "linear-gradient(to right, #fbb034, #ffdd00)",
+            //藍色系版本：來自client端的操作成功
+            client_ok: "linear-gradient(to right, #00bfff, #0072ff)",
+            //紫色系版本：來自client端的操作失敗
+            client_error: "linear-gradient(to right, #9b50ff, #a849ff)",
+        }
+        if (state_dict_map_backgroundColor[state] == undefined) {
+            return show_message("show_message收到不符合的 state", "error")
+        }
+        if (typeof message !== "string") {
+            return show_message("show_message收到不符合的 message", "error")
+        }
         Toastify({
             text: message,
             duration: 3000, // 設定顯示時間（毫秒）
@@ -429,16 +428,20 @@
             close: true,
             gravity: "top", // 設定顯示位置
             position: "center",
-            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+            backgroundColor: state_dict_map_backgroundColor[state],
             stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
         }).showToast();
     }
-    function personal_card(person) {
-        return (`${person.name}<br>⚔️：${hide_score == 1 ? '???' : person.score}`)
-    }
+    //court 相關的function
     function show_player_data_to_court(topTeamPlayers, bottomTeamPlayers, court) {
         //topTeamPlayers, bottomTeamPlayers 都是array 放了兩個選手的資料
         //court 是 int 表示第幾場次
+        if (topTeamPlayers.length != 2 || bottomTeamPlayers.length != 2) {
+            return (show_message("顯示選手資料到場地 發生錯誤(選手列表)"), "error")
+        }
+        if (court < 0 || court > 5) {
+            return (show_message("顯示選手資料到場地 發生錯誤(場地)"), "error")
+        }
         $(`.court-${court} .player1`).html(personal_card(topTeamPlayers[0]))
         $(`.court-${court} .player2`).html(personal_card(bottomTeamPlayers[0]))
         $(`.court-${court} .player3`).html(personal_card(bottomTeamPlayers[1]))
@@ -452,6 +455,9 @@
         }
     }
     function empty_data_to_court(court) {
+        if (court < 1 || court > 5) {
+            show_message("清空場地發生問題", "error")
+        }
         $(`.court-${court} .player1`).empty()
         $(`.court-${court} .player2`).empty()
         $(`.court-${court} .player3`).empty()
@@ -462,7 +468,17 @@
             $(".team-color-board").removeClass('team-color-3')
         }
     }
+    //產生文字檔類
+    function personal_card(person) {
+        if (person.name == undefined || person.score == undefined) {
+            show_message("personal card的參數有誤", "error")
+        }
+        return (`${person.name}<br>⚔️：${hide_score == 1 ? '???' : person.score}`)
+    }
     function court_generate(court_number) {
+        if (court_number < 1 || court_number > 5) {
+            show_message("生成場地資訊發生問題", "error")
+        }
         return (`<div class="col-sm">
                 <table class="table table-bordered court-${court_number} court">
                     <tr>
@@ -482,26 +498,27 @@
                 <button class="gameEnd" id="court${court_number}end">比賽結束</button>
             </div>`)
     }
+
+    //重要影響資料的函數-動作 
     function pickPeople() {
+        //觸發時機：當按下選人按鈕 或是 自動簡化模式時 按下下場按鈕時會自動選人
+        //主要影響 prepare_PK
         const people = todayPeople.filter(person => person['court'] == 0 && person['idleRounds'] >= 0);
         if (people.length < 8) {
-            show_message("在備戰區的人數不足8人 演算法失靈")
+            show_message("在備戰區的人數不足8人 演算法失靈", "error")
             return
         }
         const four_people = letsPlay(todayPeople)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         prepare_PK_refresh(pickedPeople)
-        send_prepare_PK_to_firebase()
-        show_player_data_to_court([pickedPeople[0], pickedPeople[3]], [pickedPeople[1], pickedPeople[2]], 5)
-
-    }
-    function prepare_PK_refresh(pickedPeople) {
-        prepare_PK = pickedPeople
     }
     function go_to_PK() {
-        //把資料改上去 並顯示人員在對的位置
+        // 觸發時機 按下去球場比賽 或自動簡化模式時 按下下場按鈕時會自動上場
+        // 主要影響 todayPeople 的court & player, prepare_PK , empty_court_arr
+        // 把資料改上去 並顯示人員在對的位置
         if (empty_court_arr.length == 0) {
             alert("現在沒有空場 無法進行比賽")
+            return
         } else {
             const court = empty_court_arr.length > 0 ? empty_court_arr[0] : 0
             if (prepare_PK.length != 4) {
@@ -526,8 +543,6 @@
             refresh_bulletin_board_message()
             const speak_text = String(`大會報告：《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${PK_court}球場比賽。`)
             speak(speak_text);
-            prepare_PK = [];
-            empty_data_to_court(5)
             todayPeople.forEach(person => {
                 if (person.court == 0 || person.court == -1) {
                     person.idleRounds += 1;
@@ -535,19 +550,46 @@
                     person.idleRounds = 0;
                 }
             })
+            prepare_PK_refresh([]);
             idle_people_update_to_div()
         }
+    }
+
+    // 操控 準備上場人員的函數 只要會動到prepare_PK 都應該透過這個函數操作
+    function prepare_PK_refresh(pickedPeople, index = -1) {
+        //只使用一個參數的時候 就是整個替換prepare_PK
+        //使用兩個參數的時候 index表示要替換哪一個prepare_PK的人 從0-3 表示player1-4
+        //這個函數 也同時控制賽場的顯示還有存地端和雲端
+        if (index == -1) {
+            prepare_PK = pickedPeople
+        }
+        if (index < 4 && index > -1) {
+            prepare_PK[index] = pickedPeople
+        }
+        save_data()
+        if (pickedPeople.length == 0) {
+            empty_data_to_court(5);
+        }
+        if (pickedPeople.length == 4) {
+            show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
+        }
+        send_prepare_PK_to_firebase()
 
     }
+
+    //展示資料類型
     function refresh_bulletin_board_message() {
         $("#bulletin_board_message").empty()
         bulletin_board_message.forEach(obj => $("#bulletin_board_message").prepend((`《${obj[0]}》 和 《${obj[3]}》 對戰 《${obj[1]}》 和 《${obj[2]}》，請至第${obj[4]}球場比賽。<br>`)))
     }
+
     function idle_people_update_to_div() {
-        console.log(todayPeople)
         const idle_people = todayPeople.filter(obj => obj.court === 0 || obj.court === -1).sort((a, b) => b.idleRounds - a.idleRounds)
         $(".person-wait").empty()
         $(".person-sleep").empty()
+        idle_people.forEach(obj => {
+
+        })
         for (x in idle_people) {
             if (idle_people[x].court == -1) {
                 $(".person-sleep").append(idle_personal_card(idle_people[x]))
@@ -557,7 +599,6 @@
             }
             idle_people[x].choosed = 0;
         }
-
         console.log(binding_team_list)
         binding_team_list.forEach((obj, index) => {
             obj.forEach((in_obj, in_index) => {
@@ -565,7 +606,7 @@
             })
         })
         $(".selectable").click(handle_personal_card_click)
-        upload_real_time_data_to_firebase()
+        upload_real_time_data_todayPeople_to_firebase()
     }
     function idle_personal_card(person) {
         return (`
@@ -595,6 +636,7 @@
         const str = e.target.id;
         const sixthChar = str.charAt(5); // 取得第六個字 (從 0 開始算)
         const court_number = parseInt(sixthChar, 10); // 將第六個字轉換成數字 (10 代表使用十進制)
+        console.log(empty_court_arr)
         console.log(court_number)
         if (empty_court_arr.includes(court_number)) {
             return (alert(`第${court_number}場還是空的 無法結束比賽`))
@@ -621,6 +663,7 @@
         upload_wait_to_register_to_firebase(temp_name_list)
         empty_data_to_court(court_number)
         empty_court_arr.push(Number(court_number))
+        console.log("empty_court_arr 增加" + court_number)
         idle_people_update_to_div()
         save_data()
         if (simplify == '1') {
@@ -695,22 +738,15 @@
         if (prepare_PK.length == 4) {
             show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
         }
+        //TODO:應該要上傳資料到firebase
     }
     function set_min_idle(e) {
+        //TODO: 應該可以刪掉了！
         console.log('將 min_idle 設置為：' + $(this).val())
         min_idle = $(this).val()
     }
-    function set_prepare_PK() {
-        console.log($("#prepare_PK_person").val())
-        console.log($("#prepare_PK_set_player").val())
-        if (prepare_PK.length < 4) {
-            return (alert("請先按上場人員 再做調整"))
-        }
-        prepare_PK[Number($("#prepare_PK_set_player").val()) - 1] = todayPeople[Number($("#prepare_PK_person").val()) - 1]
-        show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
-
-    }
     function set_idle() {
+        //TODO: 應該可以刪掉了
         console.log($("#delete").val())
         console.log($("#idle_round_set").val())
         console.log(todayPeople)
@@ -725,10 +761,8 @@
         const input = document.getElementById('input').value;
         // 處理輸入
         console.log(input);
-        // 將資料轉換為陣列
-        // const regex = /(\d+)\.\[(\d*)\](.*)/g;
+        // 將資料轉換為陣列 讀取特定資料的格式變成分數數據
         const regex = /(\d+)\.\[(\d*\.?\d*)\](.*)/g;
-
         const result = [];
         while ((matches = regex.exec(input)) !== null) {
             const id = parseInt(matches[1]);
@@ -736,7 +770,7 @@
             const name = matches[3].trim();
             result.push({ id, score, name });
         }
-        console.log(result);
+        //初始化
         todayPeople = [];
         prepare_PK = [];
         empty_court_arr = [1, 2, 3, 4];
@@ -745,7 +779,6 @@
         wait_to_register_list = []
 
         const today_play_list = []
-        empty_court_arr = [1, 2, 3, 4];
         for (let i = 1; i <= result.length; i++) {
             todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
             today_play_list.push(result[i - 1].name)
@@ -756,11 +789,11 @@
         idle_people_update_to_div()
         save_data()
         //上傳firebase 的today_play_list
-        console.log(today_play_list)
         reset_today_data_to_firebase()
         send_today_play_list_to_firebase(today_play_list)
     }
     function prepare_to_delete() {
+        //即將棄用
         $("#delete").empty()
         $("#prepare_PK_person").empty()
         for (i = 0; i < todayPeople.length; i++) {
@@ -789,11 +822,6 @@
     function handle_simplify_do_change() {
         console.log('將 simplify 設置為：' + $(this).val())
         simplify = $(this).val()
-        // if (simplify == "1") {
-        //     $(".simplify_able").addClass("simplify_able_true")
-        // } else {
-        //     $(".simplify_able").removeClass("simplify_able_true")
-        // }
     }
     function handle_off_court_check_change() {
         console.log('將 off_court_check 設置為：' + $(this).val())
@@ -827,6 +855,7 @@
         }
     }
     function handle_edit_save() {
+        //即將棄用 或需要改寫
         const todayPeople_json = $("#todayPeople_data").val()
         const empty_court_arr_json = $("#empty_court_arr_data").val()
         const prepare_PK_json = $("#prepare_PK_data").val()
@@ -841,46 +870,6 @@
     function handle_edit_off() {
         $("#all_data_area").empty()
     }
-    function handle_set_binding() {
-        const binding_1 = Number($("#binding_partners_1").val())
-        const binding_2 = Number($("#binding_partners_2").val())
-        if (binding_1 == binding_2) {
-            return (alert("需要不同的兩個人才能綁定"))
-        }
-        if (todayPeople[binding_1 - 1].partner_id != 0) {
-            return (alert("需要先解除第一個選擇的人的綁定"))
-        }
-        if (todayPeople[binding_2 - 1].partner_id != 0) {
-            return (alert("需要先解除第二個選擇的人的綁定"))
-        }
-        todayPeople[binding_1 - 1].partner_id = binding_2;
-        todayPeople[binding_2 - 1].partner_id = binding_1;
-        show_message(`${todayPeople[binding_1 - 1].name} 與 ${todayPeople[binding_2 - 1].name} 成功綁定`)
-        idle_people_update_to_div()
-    }
-    function handle_set_unbinding() {
-        const binding_1 = Number($("#binding_partners_1").val())
-        const binding_2 = Number($("#binding_partners_2").val())
-        if (binding_1 == binding_2) {
-            return (alert("需要不同的兩個人才能綁定"))
-        }
-        if (todayPeople[binding_1 - 1].partner_id == 0) {
-            return (alert("第一個人沒有綁定的隊友"))
-        }
-        if (todayPeople[binding_2 - 1].partner_id == 0) {
-            return (alert("第二個人沒有綁定的隊友"))
-        }
-        if (todayPeople[binding_2 - 1].partner_id != binding_1) {
-            return (alert("這兩個人目前不是隊友"))
-        }
-        if (todayPeople[binding_1 - 1].partner_id != binding_2) {
-            return (alert("這兩個人目前不是隊友"))
-        }
-        todayPeople[binding_1 - 1].partner_id = 0;
-        todayPeople[binding_2 - 1].partner_id = 0;
-        show_message(`${todayPeople[binding_1 - 1].name} 與 ${todayPeople[binding_2 - 1].name} 成功解除綁定`)
-        idle_people_update_to_div()
-    }
     function speak(text) {
         // 创建 SpeechSynthesisUtterance 对象
         var msg = new SpeechSynthesisUtterance();
@@ -890,6 +879,7 @@
         window.speechSynthesis.speak(msg);
     }
     function handle_delete_today_data() {
+        //即將棄用 移動到處理輸入邏輯
         const confirmed = confirm('確定刪除今日的資料嗎？(一般只在存好資料後，要開始打之前刪除，刪除後請套用當日球有資料再開始使用)')
         if (confirmed) {
             todayPeople = [];
@@ -1087,26 +1077,30 @@
         console.log($(this))
         const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
         if (choosed_people.length != 1) {
-            return (show_message('正在選擇的人數必須為"1" 操作才有效'))
+            return (show_message('正在選擇的人數必須為"1" 操作才有效', "warning"))
         }
         if (prepare_PK.length != 4) {
-            return (show_message('必須先按選人 操作才有效'))
+            return (show_message('必須先按選人 操作才有效', "warning"))
+        }
+        //檢查 手動派上場的人 是不是不在準備PK區上
+        if (prepare_PK.filter(obj => obj.id == choosed_people[0].id).length != 0) {
+            return show_message("不可以將已經在準備PK的人 在指定到場上", "warning")
+        }
+        if (prepare_PK.filter(obj => obj.id == choosed_people[0].id).length != 0) {
+            return show_message("不可以將已經在準備PK的人 在指定到場上", "warning")
         }
         const which_player = $(this).hasClass("player1") ? 1 : $(this).hasClass("player2") ? 2 : $(this).hasClass("player3") ? 3 : $(this).hasClass("player4") ? 4 : -1
         if (which_player == -1) {
-            return (show_message('which_player 不可預期的錯誤'))
+            return (show_message('which_player 不可預期的錯誤', "error"))
         }
-        prepare_PK[which_player - 1] = choosed_people[0]
-        send_prepare_PK_to_firebase()
+        prepare_PK_refresh(choosed_people[0], which_player - 1)
         choosed_people[0].choosed = 0
         idle_people_update_to_div()
         put_todayPeople_to_court()
-
         show_message("替換成功")
-
-
     }
     function handle_upload_data_to_firebase() {
+        //TODO: 好像沒必要存在...再想想
         //prepare data
         const todayPeople_json = JSON.stringify(todayPeople);
         const empty_court_arr_json = JSON.stringify(empty_court_arr);
@@ -1120,9 +1114,8 @@
         write_today_data_to_firebase(todayPeople_json, game_record_json, bulletin_board_message_json, currentDate);
     }
     function get_now_time() {
-        // 创建Date对象并获取当前时间
+        // 取當前時間到毫秒
         const now = new Date();
-        // 将当前时间格式化为字符串
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
@@ -1132,12 +1125,11 @@
         const miliseconds = String(now.getMilliseconds()).padStart(2, '0');
         // 创建包含当前时间的字符串
         const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${miliseconds}`;
-        // 在控制台输出当前时间
-        console.log(currentTime);
         return (currentTime)
     }
 
     function reset_today_data_to_firebase() {
+        //TODO: reset 之前把舊資料放入一個臨時回收桶
         database.ref(`Chung_Shan_elementary_school/wait_to_register/`).set(
             "reset"
         )
@@ -1155,10 +1147,11 @@
             });
     }
     function send_today_play_list_to_firebase(today_play_list) {
+        //此資料建立 是為了讓client端 取得當日的使用者登入名單
         database.ref(`Chung_Shan_elementary_school/today_play_list/`).set(
             today_play_list
         ).then((result) => {
-            console.log("成功的結果：", result);
+            //成功的時候 會讓result是undefined
             if (result == undefined) {
                 show_message("寫入今日上場人員資料成功")
             }
@@ -1168,9 +1161,9 @@
             });
     }
     function send_prepare_PK_to_firebase() {
-        database.ref(`Chung_Shan_elementary_school/real_time_data/`).update({
+        database.ref(`Chung_Shan_elementary_school/real_time_data/prepare_PK`).set(
             prepare_PK
-        }).then((result) => {
+        ).then((result) => {
             console.log("成功的結果：", result);
             if (result == undefined) {
                 show_message("寫入準備上場人員資料成功")
@@ -1178,7 +1171,7 @@
         })
             .catch((error) => {
                 console.log("發生錯誤：", error);
-                show_message("寫入準備上場人員資料失敗")
+                show_message("寫入準備上場人員資料失敗 可能是資料庫問題", "error")
             });
     }
     function add_listener_to_client_do_from_firebase(database) {
@@ -1191,30 +1184,29 @@
                 if (action_person.length == 1) {
                     if (action_person[0].court != -1) {
                         show_message(`收到用戶端${action_person[0].name}的'報到'操作 操作失敗 
-                        因為並不在休息區 可能是已經上場 或是已經在等待區了`)
+                        因為並不在休息區 可能是已經上場 或是已經在等待區了`, "client_error")
                     } else {
-                        show_message(`收到用戶端${action_person[0].name}的'報到'操作 操作成功`)
+                        show_message(`收到用戶端${action_person[0].name}的'報到'操作 操作成功`, "client_ok")
                         action_person[0].court = 0
                     }
                     idle_people_update_to_div()
                 } else {
-                    console.log(`收到來自用戶端 ${data.creater} 的'報到'操作 但查無此人`)
+                    console.log(`收到來自用戶端 ${data.creater} 的'報到'操作 但查無此人`, "client_error")
                 }
             }
             if (data.action == 'go_to_sleep') {
                 let action_person = todayPeople.filter(obj => obj.name == data.creater)
                 if (action_person.length == 1) {
-                    console.log(`收到來自用戶端 ${action_person[0].name} 的'去休息區'操作`)
                     if (action_person[0].court != 0) {
                         show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作失敗 
-                        因為並不在等待區 可能是已經上場 或是已經在休息區了`)
+                        因為並不在等待區 可能是已經上場 或是已經在休息區了`, "client_error")
                     } else {
-                        show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作成功`)
+                        show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作成功`, "client_ok")
                         action_person[0].court = -1
                     }
                     idle_people_update_to_div()
                 } else {
-                    console.log(`收到來自用戶端 ${data.creater} 的'去休息區'操作 但查無此人`)
+                    console.log(`收到來自用戶端 ${data.creater} 的'去休息區'操作 但查無此人`, "client_error")
                 }
             }
             if (data.action == 'go_to_wait') {
@@ -1222,20 +1214,20 @@
                 if (action_person.length == 1) {
                     if (action_person[0].court != -1) {
                         show_message(`收到用戶端${action_person[0].name}的'去等待區'操作 操作失敗 
-                        因為並不在休息區 可能是已經上場 或是已經在等待區了`)
+                        因為並不在休息區 可能是已經上場 或是已經在等待區了`, "client_error")
                     } else {
-                        show_message(`收到用戶端${action_person[0].name}的'去等待區'操作 操作成功`)
+                        show_message(`收到用戶端${action_person[0].name}的'去等待區'操作 操作成功`, "client_ok")
                         action_person[0].court = 0
                     }
                     idle_people_update_to_div()
                 } else {
-                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`)
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`, "client_error")
                 }
             }
             if (data.action == 'register_score') {
                 let action_person = todayPeople.filter(obj => obj.name == data.creater)
                 if (action_person.length == 1) {
-                    console.log(`收到來自用戶端 ${action_person[0].name} 的'登記分數操作'操作`)
+                    console.log(`收到來自用戶端 ${action_person[0].name} 的'登記分數操作'操作`, "client_ok")
                     // 解析要分析的分數登記 是否符合現在的未登記情形
                     const data_obj = JSON.parse(data.data)
                     console.log(data_obj)
@@ -1249,19 +1241,37 @@
                             //檢查成功 確實有需要登記的場次與資料相符
                             show_message(`收到登記資料並執行：
                             ${data_obj[0]}  和 ${data_obj[1]} 對上 ${data_obj[2]} 和 ${data_obj[3]}
-                            分數為 ${data_obj[4]} 比 ${data_obj[5]}`)
-                            console.log("成功收到正確")
+                            分數為 ${data_obj[4]} 比 ${data_obj[5]}`, "client_ok")
                             record_score(index, data_obj[4], data_obj[5])
                             check_success = true
                         }
                     })
                     if (check_success == false) {
-                        show_message("收到不存在的場次的分數登記")
+                        show_message("收到不存在的場次的分數登記", "client_error")
                     }
                     idle_people_update_to_div()
                 } else {
-                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`)
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`, "client_error")
                 }
+            }
+            if (data.action == "off_court") {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    //檢查要下場的資料是否正確
+                    console.log(data)
+                    const court_number = data.data[0]
+                    const player_name_list = data.data[1]
+                    const server_player_list = todayPeople.filter(person => person.court == court_number).filter(person => player_name_list.includes(person.name))
+                    if (server_player_list.length == 4) {
+                        show_message(`收到來自來自用戶端 ${data.creater} 的下場請求 資料驗證成功 執行下場`)
+                        off_court_new(court_number)
+                    }
+
+
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`, "client_error")
+                }
+
             }
 
         })
@@ -1271,7 +1281,6 @@
     idle_people_update_to_div()
     $("#pickPeople").on("click", pickPeople)
     $("#go_to_pk").on("click", go_to_PK)
-    // $(".gameEnd").on("click", handle_end_game)
     $(".gameEnd").on("click", handle_end_game_new)
     $("#check-info").on("click", handle_check_info)
     $("#refresh-idle").on("click", idle_people_update_to_div)
@@ -1279,7 +1288,6 @@
     $("#prepare_to_delete").on("click", prepare_to_delete)
     $("#min_idle").on("change", set_min_idle)
     $('#set_idle').on("click", set_idle)
-    $('#set_prepare_PK').on("click", set_prepare_PK)
     $("#hide_score").on("change", handle_hide_score_change)
     $("#score_count").on("change", handle_score_count_change)
     $("#simplify_do").on("change", handle_simplify_do_change)
@@ -1287,8 +1295,6 @@
     $("#show_game_record").on('click', handle_show_game_record)
     $("#set_personal_record").on('click', handle_set_personal_record)
     $("#set_personal_record").on('click', handle_set_personal_record)
-    $("#set_binding").on('click', handle_set_binding)
-    $("#set_unbinding").on('click', handle_set_unbinding)
     $("#delete_today_data").on('click', handle_delete_today_data)
     $("#binding").on("click", handle_binging)
     $("#go_to_sleep").on("click", handle_go_to_sleep)
@@ -1301,10 +1307,6 @@
     $(".go_here").click(handle_go_here)
 
     $("#upload_data_to_firebase").click(handle_upload_data_to_firebase)
-
-
-
-
 
     add_listener_to_client_do_from_firebase(database)
 
@@ -1322,7 +1324,7 @@
         })
             .catch((error) => {
                 console.log("發生錯誤：", error);
-                show_message("發生錯誤：write_today_data_to_firebase")
+                show_message("發生錯誤：write_today_data_to_firebase", "error")
             });
     }
     //上傳wait_to_register到firebase 讓client端可以查看登記 
@@ -1369,8 +1371,20 @@
                 show_message("發生錯誤：upload_real_time_data_to_firebase")
             });
     }
-
-
+    function upload_real_time_data_todayPeople_to_firebase() {
+        database.ref(`Chung_Shan_elementary_school/real_time_data/todayPeople`).set(
+            todayPeople
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功(即時資料-今日人員資料)")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("upload_real_time_data_todayPeople_to_firebase", "error")
+            });
+    }
 
 </script>
 

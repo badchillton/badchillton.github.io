@@ -106,7 +106,6 @@
                 <table id="histroy" class="table table-bordered table-responsive w-100"></table>
             </div>
         </div>
-
         <!-- Action  -->
         <div id="pages_action" class="content">
             <div class="user-info">
@@ -122,6 +121,25 @@
                         <button type="button" id="logout-button" class="btn btn-primary rounded-pill">登出</button>
                     </div>
                 </div>
+            </div>
+            <div class="on_the_court_area">
+                <table class="table table-bordered">
+                    <tr>
+                        <td rowspan="2" id="court-number" style="vertical-align: middle">3
+                        </td>
+                        <td class="player1">A1</td>
+                        <td>|</td>
+                        <td class="player4">B1</td>
+                        <td rowspan="2" id="off_court" style="vertical-align: middle">
+                            <button id="off_court_button">下場</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="player2">A2</td>
+                        <td>|</td>
+                        <td class="player3">B2</td>
+                    </tr>
+                </table>
             </div>
             <div class="wait-to-register mt-4">
                 <h3>
@@ -261,6 +279,7 @@
 <script>
     let user_info = { name: "unknown", status: -1 };
     let today_people_from_firebase = []
+    let user_from_today_people
     //開場綁定 header的事件
     $(document).ready(function () {
         start_web()
@@ -293,6 +312,50 @@
     firebase.analytics();
     // 獲取資料庫的引用
     var database = firebase.database();
+
+    /**
+     * 顯示訊息
+     * @param {string} message - 要顯示的訊息
+     * @param {string} [state="success"] - 訊息的狀態，可以是 "success"、"error"、"warning" 或 
+                "client_ok"、  "client_error" 中的任意一個（默認是 "success"）
+     * @returns {void}
+     * success 操作成功
+     * error 出現大錯了！ 正常操作 無論如何都不該出現！ 有出現就要去debug
+     * warning 正常操作下的違規操作   提醒此操作無效即可
+     */
+    function show_message(message, state = "success") {
+        const state_dict_map_backgroundColor = {
+            //綠色系版本：表成功
+            success: "linear-gradient(to right, #00b09b, #96c93d)",
+            //紅色系版本：表危險 錯誤
+            error: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            //黃色系版本：表警告
+            warning: "linear-gradient(to right, #fbb034, #ffdd00)",
+            //藍色系版本：來自client端的操作成功
+            client_ok: "linear-gradient(to right, #00bfff, #0072ff)",
+            //紫色系版本：來自client端的操作失敗
+            client_error: "linear-gradient(to right, #9b50ff, #a849ff)",
+        }
+        if (state_dict_map_backgroundColor[state] == undefined) {
+            return show_message("show_message收到不符合的 state", "error")
+        }
+        if (typeof message !== "string") {
+            return show_message("show_message收到不符合的 message", "error")
+        }
+        Toastify({
+            text: message,
+            duration: 3000, // 設定顯示時間（毫秒）
+            newWindow: true,
+            close: true,
+            gravity: "top", // 設定顯示位置
+            position: "center",
+            backgroundColor: state_dict_map_backgroundColor[state],
+            stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
+        }).showToast();
+    }
+
+
+
     function get_now_time() {
         // 创建Date对象并获取当前时间
         const now = new Date();
@@ -338,6 +401,7 @@
             // 把 court_person 放入場上
             court_person_to_div(court_person)
             put_all_people_to_all_wait_or_sleep(today_people_from_firebase)
+            show_if_on_the_court(today_people_from_firebase, user_info)
         }
         )
     }
@@ -356,10 +420,18 @@
         var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/prepare_PK');
         userRef.on('value', (snapshot) => {
             const data = snapshot.val();
-            today_people_from_firebase = data
             console.log(data)
+            const prepare_PK_from_firebase = data
+            //如果沒準備人員資料 就去清空場地 
+            if (prepare_PK_from_firebase == null) {
+                for (let i = 1; i < 5; i++) {
+                    $(`.wait-court-area .wait-court-1 .player${i}`).html("")
+                }
+                return
+            }
+            // user_from_today_people = today_people_from_firebase.filter(person => person.name = user_info.name).length == 1 ? today_people_from_firebase.filter(person => person.name = user_info.name) : "unknown"
             //把prepare_PK的人選放到場上
-            data.forEach((obj, index) => {
+            prepare_PK_from_firebase.forEach((obj, index) => {
                 $(`.wait-court-area .wait-court-1 .player${index + 1}`).html(obj.name)
             })
         }
@@ -367,6 +439,51 @@
     }
     get_prepare_PK_form_firebase()
     get_today_people_form_firebase()
+
+    function show_if_on_the_court(today_people, user_info) {
+        if (user_info.name == "unknown" || user_info.name == undefined) {
+            return
+        }
+        if (today_people.filter(person => person.name == user_info.name).length != 1) {
+            return (show_message("沒有正確找到登入人員的資料"), "warning")
+        }
+        // 找出使用者是today_people的誰 還有是幾號球場
+        const on_the_court_number = today_people.filter(person => person.name == user_info.name)[0].court
+        // court > 0 表示在場上
+        if (on_the_court_number > 0) {
+            //找出在同一個球場的人 並且顯示出來
+            today_people.filter(person => person.court == on_the_court_number).forEach(person => {
+                $(`.on_the_court_area .player${person.player}`).html(person.name)
+            })
+            $(`.on_the_court_area #court-number`).html(on_the_court_number)
+        } else {
+            $(`.on_the_court_area .player${1}`).html("還沒換你")
+            $(`.on_the_court_area .player${2}`).html("還沒換你")
+            $(`.on_the_court_area .player${3}`).html("還沒換你")
+            $(`.on_the_court_area .player${4}`).html("還沒換你")
+            $(`.on_the_court_area #court-number`).html(0)
+        }
+    }
+    function handle_off_court() {
+        const today_people = today_people_from_firebase
+        console.log("flag")
+        console.log(today_people)
+        const on_the_court_number = today_people.filter(person => person.name == user_info.name)[0].court
+        if (on_the_court_number < 1) {
+            show_message("操作下場的場次有問題！", "error")
+            return
+        }
+        const court_player_name_list = today_people.filter(person => person.court == on_the_court_number).map(person => { return person.name })
+
+        let confirmed = confirm(`確定執行下場操作嗎？ 本場次是${court_player_name_list[0]} & ${court_player_name_list[3]} 對戰 ${court_player_name_list[1]} & ${court_player_name_list[2]}`)
+
+        const data = [on_the_court_number, court_player_name_list]
+        if (confirmed) {
+            send_client_action_to_firebase("off_court", data)
+            show_message("成功送出下場請求")
+        }
+    }
+
 
     // function get_today_people_form_firebase() {
     //     var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople');
@@ -491,6 +608,7 @@
         }
         localStorage.setItem("user", login_char)
         user_info.name = login_char
+        location.reload();
         show_message("您已成功登入 如果還沒報到 記得去按報到喔！")
         $('.content').hide();
         $('#pages_action').show();
@@ -507,18 +625,7 @@
         )
     }
     function getting_start() { }
-    function show_message(message) {
-        Toastify({
-            text: message,
-            duration: 3000, // 設定顯示時間（毫秒）
-            newWindow: true,
-            close: true,
-            gravity: "top", // 設定顯示位置
-            position: "center",
-            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
-            stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
-        }).showToast();
-    }
+
 
     function logout() {
         let confirmed = confirm("確定要登出嗎？")
@@ -594,6 +701,7 @@
     $("#go_to_wait").click(handle_go_to_wait)
     $("#refresh_register").click(handle_refresh_register)
     $("#refresh_history").click(handle_refresh_history)
+    $("#off_court_button").click(handle_off_court)
 
 
 </script>

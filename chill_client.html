@@ -391,9 +391,11 @@
             for (let i = 0; i < 4; i++) {
                 court_person.push([0, 0, 0, 0])
             }
+            console.log("court_person")
             console.log(court_person)
+            console.log(data)
             data.forEach(obj => {
-                if (obj.player != 0 && obj.court != 0) {
+                if (obj.player != 0 && obj.court > 0) {
                     court_person[obj.court - 1][obj.player - 1] = obj.name
                 }
             })
@@ -440,6 +442,21 @@
     get_prepare_PK_form_firebase()
     get_today_people_form_firebase()
 
+
+    function calculateTimeDifference(timeString1, timeString2) {
+        const date1 = new Date(timeString1);
+        const date2 = new Date(timeString2);
+
+        const difference = Math.abs(date2 - date1);
+
+        // 將相差的毫秒數轉換為時間單位，例如小時、分鐘、秒
+        const hours = Math.floor(difference / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        return `${minutes}分${seconds}秒`;
+    }
+
     function show_if_on_the_court(today_people, user_info) {
         if (user_info.name == "unknown" || user_info.name == undefined) {
             return
@@ -484,29 +501,6 @@
         }
     }
 
-
-    // function get_today_people_form_firebase() {
-    //     var userRef = database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople');
-    //     userRef.on('value', (snapshot) => {
-    //         const data = snapshot.val();
-    //         today_people_from_firebase = data
-    //         console.log(data)
-    //         const court_person = []
-    //         for (let i = 0; i < 4; i++) {
-    //             court_person.push([0, 0, 0, 0])
-    //         }
-    //         data.forEach(obj => {
-    //             if (obj.player != 0) {
-    //                 court_person[obj.court - 1][obj.player - 1] = obj.name
-    //             }
-    //         })
-    //         console.log(court_person)
-    //         // 把 court_person 放入場上
-    //         court_person_to_div(court_person)
-    //     }
-    //     )
-    // }
-
     function get_wait_to_register_from_firebase() {
         var userRef = database.ref('Chung_Shan_elementary_school/wait_to_register');
         userRef.once('value').then((snapshot) => {
@@ -515,7 +509,7 @@
             $(".wait-to-register table tbody").empty()
             for (const key in data) {
                 if (data[key].register_name == "待登記") {
-                    $(".wait-to-register table tbody").append(`
+                    $(".wait-to-register table tbody").prepend(`
                         <tr>
                             <td>${data[key].player1}</td>
                             <td>${data[key].player4}</td>
@@ -526,7 +520,21 @@
                             <td><button class="register-button" id="${key}">登記分數</button></td>
                         </tr>
                     `)
+                } else {
+                    $(".wait-to-register table tbody").prepend(`
+                        <tr>
+                            <td>${data[key].player1}</td>
+                            <td>${data[key].player4}</td>
+                            <td>${data[key].score_top}</td>
+                            <td>${data[key].player2}</td>
+                            <td>${data[key].player3}</td>
+                            <td>${data[key].score_bottom}</td>
+                            <td>已經登記分數</td>
+                            <td>${calculateTimeDifference(data[key].create_time, data[key].register_time)}</td>
+                        </tr>
+                    `)
                 }
+
             }
             $(".register-button").click(handle_register)
         }
@@ -679,6 +687,9 @@
                 dataArray.push(data[prop]);
             }
             console.log(dataArray)
+            dataArray.forEach((obj, index) => {
+                dataArray[index].during = calculateTimeDifference(obj.create_time, obj.register_time)
+            })
             $("#histroy").DataTable({
                 data: dataArray,
                 columns: [
@@ -688,7 +699,7 @@
                     { title: "player2", data: "player2" },
                     { title: "player3", data: "player3" },
                     { title: "score_bottom", data: "score_bottom" },
-                    { title: "register_time", data: "register_time" },
+                    { title: "during", data: "during" },
                 ]
             })
 

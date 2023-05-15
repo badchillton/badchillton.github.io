@@ -510,6 +510,7 @@
         }
         const four_people = letsPlay(todayPeople)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
+        console.log(todayPeople)
         prepare_PK_refresh(pickedPeople)
     }
     function go_to_PK() {
@@ -519,41 +520,47 @@
         if (empty_court_arr.length == 0) {
             alert("現在沒有空場 無法進行比賽")
             return
-        } else {
-            const court = empty_court_arr.length > 0 ? empty_court_arr[0] : 0
-            if (prepare_PK.length != 4) {
-                return (alert("請先選人 再去PK"))
-            }
-            prepare_PK.forEach((person, index) => {
-                person.court = court;
-                person.player = index + 1;
-                person.game_count += 1;
-            });
-            show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], court)
-            const now = new Date();
-            const timezoneOffsetInMs = now.getTimezoneOffset() * 60 * 1000;
-            const currentTimeInMs = now.getTime() - timezoneOffsetInMs;
-            const currentTime = new Date(currentTimeInMs);
-            const hours = currentTime.getHours().toString().padStart(2, '0');
-            const minutes = currentTime.getMinutes().toString().padStart(2, '0');
-            const seconds = currentTime.getSeconds().toString().padStart(2, '0');
-            const currentTime_hms = `${hours}:${minutes}:${seconds}`
-            const PK_court = empty_court_arr.shift()
-            bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, PK_court, currentTime_hms])
-            refresh_bulletin_board_message()
-            const speak_text = String(`大會報告：《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${PK_court}球場比賽。`)
-            speak(speak_text);
-            todayPeople.forEach(person => {
-                if (person.court == 0 || person.court == -1) {
-                    person.idleRounds += 1;
-                } else {
-                    person.idleRounds = 0;
-                }
-            })
-            prepare_PK_refresh([]);
-            idle_people_update_to_div()
         }
+        if (prepare_PK.length != 4) {
+            return (alert("請先選人 再去PK"))
+        }
+        const court = empty_court_arr.shift()
+        console.log("court")
+        console.log(court)
+        //!!! prepare_PK 不一定會跟today_people的物件完全綁定！！！
+        //故只修改prepare_PK可能造成錯誤
+        prepare_PK.forEach((person, index) => {
+            person.court = court;
+            person.player = index + 1;
+            person.game_count += 1;
+            todayPeople[person.id - 1].court = court
+            todayPeople[person.id - 1].player = index + 1;
+            todayPeople[person.id - 1].game_count += 1;
+        });
+        show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], court)
+        const now = new Date();
+        const timezoneOffsetInMs = now.getTimezoneOffset() * 60 * 1000;
+        const currentTimeInMs = now.getTime() - timezoneOffsetInMs;
+        const currentTime = new Date(currentTimeInMs);
+        const hours = currentTime.getHours().toString().padStart(2, '0');
+        const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+        const seconds = currentTime.getSeconds().toString().padStart(2, '0');
+        const currentTime_hms = `${hours}:${minutes}:${seconds}`
+        bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, court, currentTime_hms])
+        refresh_bulletin_board_message()
+        const speak_text = String(`大會報告：《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
+        speak(speak_text);
+        todayPeople.forEach(person => {
+            if (person.court == 0 || person.court == -1) {
+                person.idleRounds += 1;
+            } else {
+                person.idleRounds = 0;
+            }
+        })
+        prepare_PK_refresh([]);
+        idle_people_update_to_div()
     }
+
 
     // 操控 準備上場人員的函數 只要會動到prepare_PK 都應該透過這個函數操作
     function prepare_PK_refresh(pickedPeople, index = -1) {
@@ -607,6 +614,7 @@
         })
         $(".selectable").click(handle_personal_card_click)
         upload_real_time_data_todayPeople_to_firebase()
+        save_data()
     }
     function idle_personal_card(person) {
         return (`
@@ -703,6 +711,8 @@
         const bulletin_board_message_json = JSON.stringify(bulletin_board_message);
         const wait_to_register_list_json = JSON.stringify(wait_to_register_list);
         const binding_team_list_json = JSON.stringify(binding_team_list)
+        console.log("save")
+        console.log(todayPeople)
         // 將 JSON 字串存入本地存儲中
         localStorage.setItem('todayPeople', todayPeople_json);
         localStorage.setItem('empty_court_arr', empty_court_arr_json);
@@ -1263,8 +1273,10 @@
                     const player_name_list = data.data[1]
                     const server_player_list = todayPeople.filter(person => person.court == court_number).filter(person => player_name_list.includes(person.name))
                     if (server_player_list.length == 4) {
-                        show_message(`收到來自來自用戶端 ${data.creater} 的下場請求 資料驗證成功 執行下場`)
+                        show_message(`收到來自來自用戶端 ${data.creater} 的下場請求 資料驗證成功 執行下場`, "client_ok")
                         off_court_new(court_number)
+                    } else {
+                        show_message(`收到來自來自用戶端 ${data.creater} 的下場請求 資料驗證失敗`, "client_error")
                     }
 
 

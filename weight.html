@@ -556,8 +556,10 @@
         const currentTime_hms = `${hours}:${minutes}:${seconds}`
         bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, court, currentTime_hms])
         refresh_bulletin_board_message()
-        const speak_text = String(`大會報告：《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
-        speak(speak_text);
+        const speak_text1 = String(`大會報告`)
+        speak(speak_text1,times=1, rate=0.8);
+        const speak_text2= String(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
+        speak(speak_text2,times=3, rate=0.7);
         todayPeople.forEach(person => {
             if (person.court == 0 || person.court == -1) {
                 person.idleRounds += 1;
@@ -795,6 +797,7 @@
         game_record = [];
         bulletin_board_message = []
         wait_to_register_list = []
+        binding_team_list=[]
 
         const today_play_list = []
         for (let i = 1; i <= result.length; i++) {
@@ -888,13 +891,16 @@
     function handle_edit_off() {
         $("#all_data_area").empty()
     }
-    function speak(text) {
+    function speak(text, times=1, rate=1) {
         // 创建 SpeechSynthesisUtterance 对象
         var msg = new SpeechSynthesisUtterance();
+        //文本速度
+        msg.rate=rate;
         // 设置要朗读的文本
-        msg.text = text;
+        msg.text = text.repeat(times);
         // 播放语音
         window.speechSynthesis.speak(msg);
+        
     }
     function handle_delete_today_data() {
         //即將棄用 移動到處理輸入邏輯

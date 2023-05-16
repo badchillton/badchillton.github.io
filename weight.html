@@ -1555,7 +1555,8 @@
     }
     function count_difference(a) {
         // console.log(a)
-        return Math.abs(a[0].score + a[3].score - a[1].score - a[2].score)
+        const temp = Math.abs(a[0].score + a[3].score - a[1].score - a[2].score)
+        return temp>200? temp*1.5:temp;
     }
     function idleRounds_count(a, p = 10) {
         const point = Math.pow(p, a[0].idleRounds) + Math.pow(p, a[1].idleRounds) + Math.pow(p, a[2].idleRounds) + Math.pow(p, a[3].idleRounds)

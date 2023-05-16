@@ -472,7 +472,7 @@
     }
     //產生文字檔類
     function personal_card(person) {
-        if(person==undefined){
+        if (person == undefined) {
             show_message("personal card的參數有誤 傳入UNDEFINED", "error")
             return
         }
@@ -516,7 +516,7 @@
             return
         }
         // const four_people = letsPlay(todayPeople)
-        const four_people = pick_weight_count(todayPeople,binding_team_list)
+        const four_people = pick_weight_count(todayPeople, binding_team_list)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         console.log(todayPeople)
         prepare_PK_refresh(pickedPeople)
@@ -1513,16 +1513,16 @@
 
 </script>
 <script>
-    function pick_weight_count(today_people,binding_list) {
+    function pick_weight_count(today_people, binding_list) {
         // IDLE ROUND WEIGHT 是次方關係  等了4場 會扣5*5*5*5分 (越低分越優先上)
-        const idle_round_weight=5
+        const idle_round_weight = 5
         //count_d_weight 是雙方的分差 舉例 一邊是150+200 另一邊是50+500 分差為200 會在*權重加上去(越高分越不容易上場)
-        const count_d_weight=10
+        const count_d_weight = 10
         //count_player_in_one_team_weight 是隊內的分差 一般希望越小越好 但是兩隊差距小更重要 所以權重應低於 雙方的分差 
-        const count_player_in_one_team_weight=1
+        const count_player_in_one_team_weight = 1
         // binding_l_p 是給不符合綁定規則的人巨大的分數 讓不合規則的組合幾乎不會上場
         const match = []
-        const data= today_people.filter(person=>person.court==0)
+        const data = today_people.filter(person => person.court == 0)
         const all_people_number = data.length
         for (let player1 = 0; player1 < all_people_number; player1++) {
             for (let player2 = player1 + 1; player2 < all_people_number; player2++) {
@@ -1538,10 +1538,10 @@
                             continue;
                         }
                         const count_d = count_difference([data[player1], data[player2], data[player3], data[player4]]) * count_d_weight
-                        const count_p14 = Math.abs(data[player1].score - data[player4].score)*count_player_in_one_team_weight
-                        const count_p23 = Math.abs(data[player2].score - data[player3].score)*count_player_in_one_team_weight
+                        const count_p14 = Math.abs(data[player1].score - data[player4].score) * count_player_in_one_team_weight
+                        const count_p23 = Math.abs(data[player2].score - data[player3].score) * count_player_in_one_team_weight
                         const idleRounds_C = idleRounds_count([data[player1], data[player2], data[player3], data[player4]], idle_round_weight)
-                        const binding_l_p = binding_list_point([data[player1].id, data[player2].id, data[player3].id, data[player4].id],binding_list)
+                        const binding_l_p = binding_list_point([data[player1].id, data[player2].id, data[player3].id, data[player4].id], binding_list)
                         match.push([data[player1], data[player2], data[player3], data[player4], count_d + count_p14 + count_p23 - idleRounds_C + binding_l_p, count_d, count_p14, count_p23, idleRounds_C, binding_l_p])
                     }
                 }
@@ -1551,16 +1551,17 @@
         const match_sort = match.sort((a, b) => { return a[4] - b[4] })
         console.log(new Date())
         console.log(match_sort.slice(0, 10))
-        return([match_sort[0][0].id,match_sort[0][1].id,match_sort[0][2].id,match_sort[0][3].id])
+        return ([match_sort[0][0].id, match_sort[0][1].id, match_sort[0][2].id, match_sort[0][3].id])
     }
     function count_difference(a) {
         // console.log(a)
         return Math.abs(a[0].score + a[3].score - a[1].score - a[2].score)
     }
     function idleRounds_count(a, p = 10) {
-        return Math.pow(p, a[0].idleRounds) + Math.pow(p, a[1].idleRounds) + Math.pow(p, a[2].idleRounds) + Math.pow(p, a[3].idleRounds)
+        const point = Math.pow(p, a[0].idleRounds) + Math.pow(p, a[1].idleRounds) + Math.pow(p, a[2].idleRounds) + Math.pow(p, a[3].idleRounds)
+        return point > 50000 ? 50000 : point
     }
-    function binding_list_point(a,binding_list) {
+    function binding_list_point(a, binding_list) {
         let num = 0
         a.forEach(element => {
             binding_list.forEach(binding => {
@@ -1569,11 +1570,11 @@
                         if (!a.includes(be)) {
                             num = 999999
                         }
-                        if(binding.length==2){
+                        if (binding.length == 2) {
                             var index1 = a.indexOf(binding[0]);
                             var index2 = a.indexOf(binding[1]);
-                            if(index1+index2!=3){
-                                num=999999
+                            if (index1 + index2 != 3) {
+                                num = 999999
                             }
                         }
                     })

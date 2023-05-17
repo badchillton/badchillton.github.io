@@ -453,7 +453,7 @@
     }
 
     function handle_refresh_history() {
-        var userRef = database.ref('Chung_Shan_elementary_school/wait_to_register');
+        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0516/wait_to_register');
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data)

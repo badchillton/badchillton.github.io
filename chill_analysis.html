@@ -85,7 +85,7 @@
         <div id="statistics" class="content">
             <div class="row">
                 <div class="col-12">
-                    <h2>5月9號勝負一覽表</h2>
+                    <h2>5月16號勝負一覽表</h2>
                     <table id="example" class="display table-bordered table" style="width:100%">
                         <thead>
                             <tr>
@@ -102,6 +102,9 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="mt-4 w-100">
+                <table id="histroy" class="table table-bordered table-responsive w-100"></table>
             </div>
         </div><!-- 分頁 統計圖表2 -->
         <div id="statistics2" class="content" style="display:none;">
@@ -223,13 +226,6 @@
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data);
-            // const data3 = JSON.parse(data.date_0503.today_people)
-            // console.log(data);
-            // data.forEach(obj => database.ref(`Chung_Shan_elementary_school/people_data/${obj.name}`).set({
-            //     name: obj.name,
-            //     score: obj.score
-            // }))
-
         })
     }
     // 讀取資料
@@ -279,7 +275,7 @@
     function readData2() {
         var readRef = database.ref('Chung_Shan_elementary_school');
         readRef.once("value").then((snapshot) => {
-            const data = snapshot.val().analysis_use_data.date_0509.wait_to_register
+            const data = snapshot.val().analysis_use_data.date_0516.wait_to_register
             console.log(data)
             const arr = []
             for (let key in data) {
@@ -287,7 +283,7 @@
             }
             console.log(arr)
             let data2 = arr;
-            let data3 = snapshot.val().analysis_use_data.date_0509.today_people
+            let data3 = snapshot.val().analysis_use_data.date_0516.today_people
             let today_people = {}
             data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
             console.log(today_people)
@@ -454,5 +450,49 @@
             backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
             stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
         }).showToast();
+    }
+
+    function handle_refresh_history() {
+        var userRef = database.ref('Chung_Shan_elementary_school/wait_to_register');
+        userRef.once('value').then((snapshot) => {
+            const data = snapshot.val();
+            console.log(data)
+            const dataArray = [];
+            for (let prop in data) {
+                dataArray.push(data[prop]);
+            }
+            console.log(dataArray)
+            dataArray.forEach((obj, index) => {
+                dataArray[index].during = calculateTimeDifference(obj.create_time, obj.register_time)
+            })
+            $("#histroy").DataTable({
+                data: dataArray,
+                columns: [
+                    { title: "player1", data: "player1" },
+                    { title: "player4", data: "player4" },
+                    { title: "score_top", data: "score_top" },
+                    { title: "player2", data: "player2" },
+                    { title: "player3", data: "player3" },
+                    { title: "score_bottom", data: "score_bottom" },
+                    { title: "during", data: "during" },
+                ]
+            })
+
+        })
+    }
+    handle_refresh_history()
+
+    function calculateTimeDifference(timeString1, timeString2) {
+        const date1 = new Date(timeString1);
+        const date2 = new Date(timeString2);
+
+        const difference = Math.abs(date2 - date1);
+
+        // 將相差的毫秒數轉換為時間單位，例如小時、分鐘、秒
+        const hours = Math.floor(difference / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        return `${minutes}分${seconds}秒`;
     }
 </script>

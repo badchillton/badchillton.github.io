@@ -37,6 +37,7 @@
 
         .team-color-0 {
             background-color: #ffd7e9;
+            /* border: 3px solid #ffd7e9; */
         }
 
         .team-color-1 {
@@ -80,7 +81,8 @@
         }
 
         .team-color-11 {
-            background-color: #eaa69d;
+            /* background-color: #eaa69d; */
+            border: 10px solid #eaa69d;
         }
 
         .selected {
@@ -302,6 +304,7 @@
                             <option value="1">下場需要確認</option>
                             <option value="0">下場不需要確認</option>
                         </select>
+                        <button id="clear_global_config">清除設定</button>
                     </fieldset>
                     <fieldset class="simplify_able">
                         <legend>個人戰績查詢</legend>
@@ -381,6 +384,9 @@
     let hide_score = '0';
     let score_count = '1';
     let off_court_check = '1';
+    let global_config = {
+        albert_fisher: 1
+    }
     //產生4個主要比賽場地
     for (let i = 1; i < 5; i++) {
         $(".court-container").append(court_generate(i))
@@ -467,7 +473,7 @@
         $(`.court-${court} .top`).empty()
         $(`.court-${court} .bottom`).empty()
         if (court == 5) {
-            $(".team-color-board").removeClass('team-color-3')
+            $(".team-color-board").removeClass('team-color-11')
         }
     }
     //產生文字檔類
@@ -557,9 +563,9 @@
         bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, court, currentTime_hms])
         refresh_bulletin_board_message()
         const speak_text1 = String(`大會報告`)
-        speak(speak_text1,times=1, rate=0.8);
-        const speak_text2= String(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
-        speak(speak_text2,times=3, rate=0.7);
+        speak(speak_text1, times = 1, rate = 0.8);
+        const speak_text2 = String(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
+        speak(speak_text2, times = 3, rate = 0.7);
         todayPeople.forEach(person => {
             if (person.court == 0 || person.court == -1) {
                 person.idleRounds += 1;
@@ -594,11 +600,31 @@
 
     }
 
+    //修改court 下場休息 自動解除綁定
+    function court_change(person, binding_list, change_number = -1) {
+        // person 一個人物物件 
+        // binding_list 永遠應該傳入 binding_team_list
+        // change_number 把這個人的court 改成多少 一般去休息才使用 所以是-1
+        const temp_id = person.id
+        let binding_list_index = -1
+        //檢查是否在綁定的列表中
+        binding_list.forEach((binding, index) => {
+            if (binding.includes(temp_id)) {
+                binding_list_index = index
+            }
+        })
+        if (binding_list_index != -1) {
+            binding_list.splice(binding_list_index, 1)
+        }
+        person.court = change_number
+
+    }
     //展示資料類型
     function refresh_bulletin_board_message() {
         $("#bulletin_board_message").empty()
         bulletin_board_message.forEach(obj => $("#bulletin_board_message").prepend((`《${obj[0]}》 和 《${obj[3]}》 對戰 《${obj[1]}》 和 《${obj[2]}》，請至第${obj[4]}球場比賽。<br>`)))
     }
+
 
     function idle_people_update_to_div() {
         const idle_people = todayPeople.filter(obj => obj.court === 0 || obj.court === -1).sort((a, b) => b.idleRounds - a.idleRounds)
@@ -797,7 +823,7 @@
         game_record = [];
         bulletin_board_message = []
         wait_to_register_list = []
-        binding_team_list=[]
+        binding_team_list = []
 
         const today_play_list = []
         for (let i = 1; i <= result.length; i++) {
@@ -891,16 +917,16 @@
     function handle_edit_off() {
         $("#all_data_area").empty()
     }
-    function speak(text, times=1, rate=1) {
+    function speak(text, times = 1, rate = 1) {
         // 创建 SpeechSynthesisUtterance 对象
         var msg = new SpeechSynthesisUtterance();
         //文本速度
-        msg.rate=rate;
+        msg.rate = rate;
         // 设置要朗读的文本
         msg.text = text.repeat(times);
         // 播放语音
         window.speechSynthesis.speak(msg);
-        
+
     }
     function handle_delete_today_data() {
         //即將棄用 移動到處理輸入邏輯
@@ -916,7 +942,7 @@
             load_data()
         }
     }
-    function handle_binging() {
+    function handle_binding() {
         const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
         if (choosed_people.length > 4) {
             return (alert(`當前綁定功能 只能接受最多四人綁定`))
@@ -932,6 +958,12 @@
                 return (alert(`請先移除${choosed_people[x].name}的綁定 再重新進行綁定`))
             }
         }
+        if (global_config.albert_fisher == 1) {
+            if (choosed_people.filter(obj => obj.name == "燕羽").length == 1 && choosed_people.filter(obj => obj.name == "阿承").length == 1) {
+                return (show_message("發生不可預期的錯誤", "error"))
+            }
+        }
+
         const temp_binding = [];
         choosed_people.forEach(obj => {
             temp_binding.push(obj.id)
@@ -946,7 +978,8 @@
             return (show_message("沒有選人 操作無效"))
         }
         choosed_people.forEach(obj => {
-            obj.court = -1;
+            // obj.court = -1;
+            court_change(obj, binding_team_list, -1)
             obj.choosed = 0;
         })
         idle_people_update_to_div()
@@ -1081,6 +1114,10 @@
         $("#player-2-td").html(todayPeople[wait_to_register_list[now_which_game][1] - 1].name)
         $("#player-3-td").html(todayPeople[wait_to_register_list[now_which_game][2] - 1].name)
         $("#player-4-td").html(todayPeople[wait_to_register_list[now_which_game][3] - 1].name)
+    }
+
+    function handle_clear_global_config() {
+        global_config.albert_fisher = 0;
     }
 
     function handle_delete_record_score() {
@@ -1226,7 +1263,8 @@
                         因為並不在等待區 可能是已經上場 或是已經在休息區了`, "client_error")
                     } else {
                         show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作成功`, "client_ok")
-                        action_person[0].court = -1
+                        // action_person[0].court = -1
+                        court_change(action_person[0], binding_team_list, -1)
                     }
                     idle_people_update_to_div()
                 } else {
@@ -1322,7 +1360,7 @@
     $("#set_personal_record").on('click', handle_set_personal_record)
     $("#set_personal_record").on('click', handle_set_personal_record)
     $("#delete_today_data").on('click', handle_delete_today_data)
-    $("#binding").on("click", handle_binging)
+    $("#binding").on("click", handle_binding)
     $("#go_to_sleep").on("click", handle_go_to_sleep)
     $("#go_to_wait").on("click", handle_go_to_wait)
     $("#cancel_binding").on("click", handle_cancel_binding)
@@ -1333,6 +1371,8 @@
     $(".go_here").click(handle_go_here)
 
     $("#upload_data_to_firebase").click(handle_upload_data_to_firebase)
+
+    $("#clear_global_config").click(handle_clear_global_config)
 
     add_listener_to_client_do_from_firebase(database)
 
@@ -1559,16 +1599,28 @@
         console.log(match_sort.slice(0, 10))
         return ([match_sort[0][0].id, match_sort[0][1].id, match_sort[0][2].id, match_sort[0][3].id])
     }
+    function count_teammates_difference(teammates_list) {
+        //計算組內差距 傳入的參數 應該為一個list 裡面有todaypeople裡的人兩個
+        //當超過200 會將這個參數放大15倍 
+        const temp = Math.abs(teammates_list[0].score + teammates_list[1].score)
+        return temp > 200 ? temp * 15 : temp;
+    }
     function count_difference(a) {
-        // console.log(a)
+        //計算ｐｋ的兩個隊伍的分數合計差距  傳入的參數 應該為一個list 裡面有todaypeople裡的人4個 
+        // 這四個人當中 1＆4 同一隊 2＆3 同一隊
+        //當超過200 會將這個參數放大1.5倍
         const temp = Math.abs(a[0].score + a[3].score - a[1].score - a[2].score)
-        return temp>200? temp*1.5:temp;
+        return temp > 200 ? temp * 1.5 : temp;
     }
     function idleRounds_count(a, p = 10) {
+        // 計算當前的等待場數的分數換算 以等比數列的方式成長 
+        // 有最大值50000 (用扣的 所以當達到最大值時 會很容易上場)
         const point = Math.pow(p, a[0].idleRounds) + Math.pow(p, a[1].idleRounds) + Math.pow(p, a[2].idleRounds) + Math.pow(p, a[3].idleRounds)
         return point > 50000 ? 50000 : point
     }
     function binding_list_point(a, binding_list) {
+        // 計算 是否為綁定組合的分數 
+        // 如果不符合綁定的規則 會有100萬分 讓這個組合基本上一定不會被選到
         let num = 0
         a.forEach(element => {
             binding_list.forEach(binding => {

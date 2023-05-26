@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料中心</title>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add the Firebase Analytics SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+    <!-- Add the Firebase Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- 引入 jQuery 和 Bootstrap 的 JS 檔案 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <button id="check_name_list">check_name_list</button>
+    <textarea name="" id="name_list" cols="30" rows="10"></textarea>
+    <textarea name="" id="output_name_list" cols="30" rows="10"></textarea>
+    <button id="backup_today_data">將今日資料備份</button>
+    <button id="update_data_to_newest_score_data">將資料更新到newest_score_data</button>
+</body>
+
+</html>
+
+<script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCLXKg7Ru5p5dtgyRs28-qg8LQaG69yME",
+        databaseURL: "https://friendly-sensor-137111-default-rtdb.firebaseio.com",
+        projectId: "friendly-sensor-137111",
+        storageBucket: "friendly-sensor-137111.appspot.com",
+        appId: "1:824581584416:web:fdd5462dd85230d8caae45",
+        measurementId: "G-2HYJ96RDLV"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    // 獲取資料庫的引用
+    var database = firebase.database();
+    $("#check_name_list").click(check_name_list)
+    $("#backup_today_data").click(backup_today_data)
+    $("#update_data_to_newest_score_data").click(update_data_to_newest_score_data)
+    function update_data_to_newest_score_data() {
+        database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0523/today_people').once("value").then((snapshot) => {
+            const data_in_firebase = snapshot.val()
+            console.log(data_in_firebase)
+            data_in_firebase.forEach(e => {
+                database.ref(`Chung_Shan_elementary_school/newest_score_data/${e.name}`).set(e.score)
+            })
+        })
+    }
+    function check_name_list() {
+        let data = $("#name_list").val()
+        data = data.replace(/\d/g, "").replace(/[^\S\n]+/g, "");
+        // 刪除所有空格
+        let withoutSpaces = data.replaceAll(".", "");
+
+        // withoutSpaces=withoutSpaces.replaceAll(",","").replaceAll("")
+        // 以換行符號切割成陣列
+        let arr = withoutSpaces.split("\n");
+        let empty_arr = []
+        let my_str = ""
+        database.ref('Chung_Shan_elementary_school/newest_score_data').once("value").then((snapshot) => {
+            const data_in_firebase = snapshot.val()
+            console.log(data_in_firebase)
+            arr.forEach((element, index) => {
+                empty_arr.push([element, data_in_firebase[element]])
+                my_str += `${index + 1}.[${data_in_firebase[element] ? data_in_firebase[element] / 100 : -1}]${element}\n`
+            });
+            console.log(empty_arr)
+            $("#output_name_list").val(my_str)
+        })
+
+
+    }
+    function backup_today_data() {
+        //會將資料庫目前的real_time_data > today_people 進行備份 
+        //會將資料庫目前的wait_to_register 進行備份 
+        //登錄者為 data_center
+        const now_time = get_now_time()
+        database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople').once("value").then((snapshot) => {
+            const data_in_firebase = snapshot.val()
+            database.ref(`Chung_Shan_elementary_school/backup_today_data/${now_time}/today_people`).set(data_in_firebase)
+        })
+        database.ref('Chung_Shan_elementary_school/wait_to_register').once("value").then((snapshot) => {
+            const data_in_firebase = snapshot.val()
+            database.ref(`Chung_Shan_elementary_school/backup_today_data/${now_time}/wait_to_register`).set(data_in_firebase)
+        })
+        database.ref(`Chung_Shan_elementary_school/backup_today_data/${now_time}/creater`).set("data_center")
+        alert("完成存檔")
+    }
+
+    function get_now_time() {
+        // 创建Date对象并获取当前时间
+        const now = new Date();
+        // 将当前时间格式化为字符串
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const miliseconds = String(now.getMilliseconds()).padStart(2, '0');
+        // 创建包含当前时间的字符串
+        const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${miliseconds}`;
+        // 在控制台输出当前时间
+        console.log(currentTime);
+        return (currentTime)
+    }
+
+
+
+    // database.ref(`Chung_Shan_elementary_school/backup_today_data/2023-05-24 11:40:10:149`).once('value').then(snapshot => {
+    //     const data = snapshot.val()
+    //     console.log(data.today_people)
+    //     database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0523/today_people`).set(data.today_people)
+    // })
+    // database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0523/today_people`).set(data.today_people)
+
+
+    /*
+    吉米
+    麒升
+    芸榕
+    玟均
+    積晟
+    阿文
+    阿榮
+    源泰
+    漢平
+    健智
+    彥博
+    室長
+    燕羽
+    阿寶
+    梯虧
+    龍郁
+    祐祐
+    恩恩
+    提莉
+    耿立
+    室長
+    娜娜
+    祥祥
+    阿承
+    旻旻
+    卡卡
+    晟瑋
+    岳祥
+    室長
+    康晴
+    浩浩
+    慈慈
+    羿汝
+    宗育
+    */
+</script>

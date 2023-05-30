@@ -245,6 +245,7 @@
                     <button id="open_modal_of_record_score" class="btn btn-primary ml-2">登入分數</button>
                     <span class="wait_to_register_text" id="wait_to_register_text">待登記：</span>
                     <button class="go_to_pk btn-primary btn" id="upload_data_to_firebase">上傳雲端</button>
+                    <button class="go_to_pk btn-primary btn" id="backup_data_to_firebase">上傳備份資料到雲端</button>
                 </div>
                 <div class="col">
                     <table class="table table-bordered court-5 court">
@@ -268,26 +269,8 @@
                         <button class="button" id="prepare_to_delete">準備設定人員 </button>
                         <button class="button" id="delete_today_data">刪除本地端當日資料 </button>
                     </div>
-                    <fieldset class="simplify_able">
-                        <legend>idleRounds設定區</legend>
-                        <select name="idle_round_set" id="idle_round_set">
-                            <option value="50">超級回歸</option>
-                            <option value="0">回歸</option>
-                            <option value="-999">暫離</option>
-                        </select>
-                        <select name="idle_round_person" id="delete">
-                        </select>
-                        <button id="set_idle">確認執行</button>
-                    </fieldset>
                     <fieldset>
                         <legend>環境變數設定區</legend>
-                        <select name="min_idle" id="min_idle">
-                            <option value="0">最小等待場數:0</option>
-                            <option value="1">最小等待場數:1</option>
-                            <option value="2">最小等待場數:2</option>
-                            <option value="3">最小等待場數:3</option>
-                            <option value="4">最小等待場數:4</option>
-                        </select>
                         <select id="hide_score">
                             <option value="0">顯示分數</option>
                             <option value="1">隱藏分數</option>
@@ -324,6 +307,7 @@
                     <button id="go_to_wait" class="btn btn-primary ml-2">去備戰區</button>
                     <button id="cancel_binding" class="btn btn-primary ml-2">解除綁定</button>
                     <button id="cancel_choosed" class="btn btn-primary ml-2">清除選取</button>
+                    <button id="one_click_to_wait" class="btn btn-primary ml-2">一鍵備戰</button>
                 </div>
                 <h1> 休息區</h1>
                 <div class="row person-sleep"></div>
@@ -380,7 +364,6 @@
     //wait to register list 改變邏輯 變成 永久紀錄每一場 
     //這些變數 每次進來會重置成這樣
     let simplify = '1';
-    let min_idle = 0;
     let hide_score = '0';
     let score_count = '1';
     let off_court_check = '1';
@@ -432,8 +415,8 @@
             duration: 3000, // 設定顯示時間（毫秒）
             newWindow: true,
             close: true,
-            gravity: "top", // 設定顯示位置
-            position: "center",
+            gravity: "bottom", // 設定顯示位置
+            position: "right",
             backgroundColor: state_dict_map_backgroundColor[state],
             stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
         }).showToast();
@@ -521,8 +504,8 @@
             show_message("在備戰區的人數不足8人 演算法失靈", "error")
             return
         }
-        const four_people = letsPlay(todayPeople, binding_team_list)
-        // const four_people = pick_weight_count(todayPeople, binding_team_list)
+        // const four_people = letsPlay(todayPeople, binding_team_list)
+        const four_people = pick_weight_count(todayPeople, binding_team_list)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         console.log(todayPeople)
         prepare_PK_refresh(pickedPeople)
@@ -625,7 +608,10 @@
         bulletin_board_message.forEach(obj => $("#bulletin_board_message").prepend((`《${obj[0]}》 和 《${obj[3]}》 對戰 《${obj[1]}》 和 《${obj[2]}》，請至第${obj[4]}球場比賽。<br>`)))
     }
 
-
+    function handle_one_click_to_wait() {
+        todayPeople.filter(obj => obj.court == -1).forEach(obj => obj.court = 0)
+        idle_people_update_to_div()
+    }
     function idle_people_update_to_div() {
         const idle_people = todayPeople.filter(obj => obj.court === 0 || obj.court === -1).sort((a, b) => b.idleRounds - a.idleRounds)
         $(".person-wait").empty()
@@ -785,18 +771,6 @@
             show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
         }
         //TODO:應該要上傳資料到firebase
-    }
-    function set_min_idle(e) {
-        //TODO: 應該可以刪掉了！
-        console.log('將 min_idle 設置為：' + $(this).val())
-        min_idle = $(this).val()
-    }
-    function set_idle() {
-        //TODO: 應該可以刪掉了
-        console.log($("#delete").val())
-        console.log($("#idle_round_set").val())
-        console.log(todayPeople)
-        todayPeople[Number($("#delete").val()) - 1].idleRounds = Number($("#idle_round_set").val())
     }
     function processInput() {
         let confirmed = confirm("確定輸入嗎？ 此操作將導致今天的資料重置！")
@@ -1131,6 +1105,16 @@
         }
     }
 
+    function handle_backup_data_to_firebase() {
+        //會把資料備份到firebase 
+        //備份目標地址 backup_today_data
+        // origin : server端
+        // 備份資料 ：today_people, game_record 
+        // 資料要完整 請把所有未登記的分數填完 
+        database.ref(`Chung_Shan_elementary_school/backup_today_data/${get_now_time()}`).set({ todayPeople, game_record })
+        show_message("完成備份")
+    }
+
     function refresh_wait_to_register_text() {
         $("#wait_to_register_text").html(`待登記: ${wait_to_register_list.length}`)
     }
@@ -1350,8 +1334,6 @@
     $("#refresh-idle").on("click", idle_people_update_to_div)
     $("#save-data").on("click", save_data)
     $("#prepare_to_delete").on("click", prepare_to_delete)
-    $("#min_idle").on("change", set_min_idle)
-    $('#set_idle').on("click", set_idle)
     $("#hide_score").on("change", handle_hide_score_change)
     $("#score_count").on("change", handle_score_count_change)
     $("#simplify_do").on("change", handle_simplify_do_change)
@@ -1369,12 +1351,16 @@
     $("#open_modal_of_record_score").on("click", handle_open_modal_of_record_score)
     $("#delete_record_score").on("click", handle_delete_record_score)
     $(".go_here").click(handle_go_here)
+    $("#one_click_to_wait").click(handle_one_click_to_wait)
 
     $("#upload_data_to_firebase").click(handle_upload_data_to_firebase)
 
     $("#clear_global_config").click(handle_clear_global_config)
 
     add_listener_to_client_do_from_firebase(database)
+
+    $("#backup_data_to_firebase").click(handle_backup_data_to_firebase)
+
 
     //通常整天結束的時候 使用這個功能 這個上傳的資料會永久保存 (按日期算) 
     function write_today_data_to_firebase(today_people_data, game_record_data, bulletin_board_message_data, today_date) {
@@ -1455,7 +1441,6 @@
 </script>
 
 <script>
-
     //計算選人上場邏輯
     function isOverlap(choice1, choice2) {
         const set1 = new Set(choice1["號碼清單"]);
@@ -1715,6 +1700,7 @@
         }
     }
 
+ 
 </script>
 <script>
     function pick_weight_count(today_people, binding_list) {

@@ -504,8 +504,8 @@
             show_message("在備戰區的人數不足8人 演算法失靈", "error")
             return
         }
-        // const four_people = letsPlay(todayPeople)
-        const four_people = pick_weight_count(todayPeople, binding_team_list)
+        const four_people = letsPlay(todayPeople, binding_team_list)
+        // const four_people = pick_weight_count(todayPeople, binding_team_list)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         console.log(todayPeople)
         prepare_PK_refresh(pickedPeople)
@@ -1465,82 +1465,195 @@
 
         return temp;
     }
-    function letsPlay(people_ori) {
-        const people = people_ori.filter(person => person['court'] == 0 && person['idleRounds'] >= 0);
-        let people_ready_fight = people.sort((a, b) => b['score'] - a['score'])
-        console.log('let people_ready_fight', people_ready_fight)
-        console.log('people_ori', people_ori)
-        // step1 取得備戰名單
-        // let people_ready_fight = people.filter(person => person['court'] == 0 && person['idleRounds']>=0); //idleRounds>=0
-        console.log('people_ready_fight', people_ready_fight)
-        let matches = [];
-        // step2 列舉組合
-        for (let i = 0; i < people_ready_fight.length - 3; i++) {
-            matches.push({
-                "1號": people_ready_fight[i]['score'],
-                "2號": people_ready_fight[i + 1]['score'],
-                "3號": people_ready_fight[i + 2]['score'],
-                "4號": people_ready_fight[i + 3]['score'],
-                "戰力": `${(people_ready_fight[i]['score'] + people_ready_fight[i + 3]['score']).toString().padStart(4)} vs ${(people_ready_fight[i + 1]['score'] + people_ready_fight[i + 2]['score']).toString().padStart(4)}`,
-                "總分": people_ready_fight.slice(i, i + 4).reduce((sum, person) => sum + person['score'], 0),
-                "隊伍差": Math.abs((people_ready_fight[i]['score'] + people_ready_fight[i + 3]['score']) - (people_ready_fight[i + 1]['score'] + people_ready_fight[i + 2]['score'])),
-                "標準差": +(math.std(people_ready_fight.slice(i, i + 4).map(person => person['score'])).toFixed(1)),
-                "組內差": people_ready_fight[i]['score'] - people_ready_fight[i + 3]['score'],
-                "Rank頭": i,
-                "Rank尾": i + 3
-            });
+    function letsPlay(people, partner) {
+        console.log("綁定清單", partner)
+        const flatten_partner = partner.flat();
+
+        // step1: Get the list of people ready to fight
+
+        const people_ready_fight = people.filter(person => person.court === 0);
+        const ids_people_ready_fight = people_ready_fight.map(person => person.id)
+        const people_ready_fight_single = people_ready_fight.filter(person => !flatten_partner.includes(person.id));
+        const ids_people_ready_fight_single = people_ready_fight_single.map(person => person.id)
+
+        const matches = [];
+        console.log(' people', people);
+        console.log(' people_ready_fight', people_ready_fight);
+        console.log(' ids_people_ready_fight', ids_people_ready_fight);
+
+        const sorted_people_ready_fight_single = people_ready_fight_single.sort((person1, person2) => person1.score - person2.score);
+        const ids_sorted_people_ready_fight_single = sorted_people_ready_fight_single.map(person => person.id)
+        console.log(' people_ready_fight_single', people_ready_fight_single);
+        console.log(' ids_people_ready_fight_single', ids_people_ready_fight_single);
+        // step2: Enumerate acceptable matches
+        for (let i = 0; i < sorted_people_ready_fight_single.length - 3; i++) {
+            const ids = sorted_people_ready_fight_single.slice(i, i + 4).map(person => person.id);
+            console.log('ids1533', ids);
+            matches.push(fourIdsFormAMatch(sorted_people_ready_fight_single, ids, [], match_type = '全部單人'));
         }
-        console.log('matches', matches)
-        // step3 排序組合
-        let sorted_matches = matches.sort((match1, match2) => match1['標準差'] - match2['標準差']);
-        console.log('sorted_matches', sorted_matches)
-        // step4 組合的組合
-        let solutions = [];
-        for (let i = 0; i < sorted_matches.length - 1; i++) {
-            for (let j = i + 1; j < sorted_matches.length; j++) {
-                if (!isOverlap(sorted_matches[i], sorted_matches[j])) {
+        console.log('basic_matches[0]', matches[0]);
+        console.log('basic_matches[1]', matches[1]);
+        console.log('basic_matches', matches);
+        console.log('basic_matches[0]', matches[0]);
+        console.log('basic_matches[1]', matches[1]);
+        let all_two_binding = []
+        for (const binding of partner) {
+            const length_binding = binding.length;
+            if (!ids_people_ready_fight.includes(binding[0])) {
+                continue;
+            } else if (length_binding === 2) {
+                all_two_binding.push(binding)
+                const matches_for_2 = [];
+                let match_temp = [...binding];
+
+                for (let i = 0; i < people_ready_fight.length; i++) {
+                    for (let j = 0; j < people_ready_fight.length; j++) {
+                        const person1 = people_ready_fight[i];
+                        const person2 = people_ready_fight[j];
+
+                        // console.log('per1', person1);
+                        // console.log('per2', person2);
+                        if (
+                            i >= j ||
+                            match_temp.includes(person1.id) ||
+                            match_temp.includes(person2.id) ||
+                            flatten_partner.includes(person1.id) ||
+                            flatten_partner.includes(person2.id)
+                        ) {
+                            // console.log('AA');
+                            continue;
+                        } else {
+                            // console.log('BB');
+                            match_temp.push(person1.id);
+                            match_temp.push(person2.id);
+                            // console.log('match_temp', match_temp);
+                            // console.log('binding',binding);
+                            const a_match_dict = fourIdsFormAMatch(people_ready_fight, match_temp, binding, match_type = '雙人綁定');
+                            matches_for_2.push(a_match_dict);
+                            match_temp = [...binding];
+                        }
+                    }
+                }
+
+                if (matches_for_2.length === 0) {
+                    console.log('沒有配到！！！');
+                }
+
+                const sorted_matches_for_2 = matches_for_2.sort((match1, match2) => match1.標準差 - match2.標準差);
+                matches.push(sorted_matches_for_2[0]);
+            } else if (length_binding === 3) {
+                const matches_for_3 = [];
+                let match_temp = [...binding];
+
+                for (let i = 0; i < people_ready_fight.length; i++) {
+                    const person1 = people_ready_fight[i];
+
+                    if (match_temp.includes(person1.id) || flatten_partner.includes(person1.id)) {
+                        continue;
+                    } else {
+                        match_temp.push(person1.id);
+                    }
+
+                    const a_match_dict = fourIdsFormAMatch(people_ready_fight, match_temp, [], match_type = '三人綁定');
+                    matches_for_3.push(a_match_dict);
+                    match_temp = [...binding];
+                }
+
+                const sorted_matches_for_3 = matches_for_3.sort((match1, match2) => match1.標準差 - match2.標準差);
+                const min_team_diff = Math.min(...sorted_matches_for_3.map(match => match.隊伍差));
+                const min_team_diff_match = sorted_matches_for_3.filter(match => match.隊伍差 === min_team_diff);
+                const min_sd = Math.min(...min_team_diff_match.map(match => match.標準差));
+
+                for (const match of min_team_diff_match) {
+                    if (match.隊伍差 === min_team_diff && match.標準差 === min_sd) {
+                        if (!matches.includes(match)) {
+                            matches.push(match);
+                        }
+                        break;
+                    }
+                }
+            } else if (length_binding === 4) {
+                const match_temp = [...binding];
+                const a_match_dict = fourIdsFormAMatch(people_ready_fight, match_temp, [], match_type = '四人綁定');
+                matches.push(a_match_dict);
+            }
+        }
+
+        console.log('all_two', all_two_binding);
+        for (const binding_1 of all_two_binding) {
+            for (const binding_2 of all_two_binding) {
+                if (binding_1 != binding_2) {
+                    let binding_temp = []
+                    binding_temp.push(...binding_1)
+                    binding_temp.push(...binding_2)
+                    console.log('找到雙組', binding_temp)
+                    matches.push(fourIdsFormAMatch(people_ready_fight, binding_temp, binding_1, match_type = '兩組對戰'));
+
+
+                }
+            }
+        }
+        // step3: Sort matches
+        const sorted_matches = matches.sort((match1, match2) => match2.評分 - match1.評分);
+
+        // step4: Combinations of matches
+        const solutions = [];
+
+        for (let i = 0; i < sorted_matches.length; i++) {
+            const choice_1 = sorted_matches[i];
+
+            for (let j = 0; j < sorted_matches.length; j++) {
+                const choice_2 = sorted_matches[j];
+
+                if (j <= i) {
+                    continue;
+                }
+
+                if (!isOverlap(choice_1, choice_2)) {
                     solutions.push({
-                        "Choice_1": i,
-                        "Choice_2": j,
-                        "SD_1": sorted_matches[i]['標準差'],
-                        "SD_2": sorted_matches[j]['標準差'],
-                        "SD_ALL": +(sorted_matches[i]['標準差'] + sorted_matches[j]['標準差']).toFixed(1),
-                        "等待數值_1": waiting_count(sorted_matches[i], people_ready_fight),
-                        "等待數值_2": waiting_count(sorted_matches[j], people_ready_fight),
-                        "等待數值_合": waiting_count(sorted_matches[i], people_ready_fight) + waiting_count(sorted_matches[j], people_ready_fight)
+                        評分S: choice_1.評分 + choice_2.評分,
+                        評分1: choice_1.評分,
+                        評分2: choice_2.評分,
+                        Choice_1: i,
+                        Choice_2: j,
+                        SD_1: choice_1.標準差,
+                        SD_2: choice_2.標準差,
+                        SD_ALL: choice_1.標準差 + choice_2.標準差,
+                        等待值1: choice_1.等待值,
+                        等待值2: choice_2.等待值,
+                        等待值S: choice_1.等待值 + choice_2.等待值,
+                        等待場次1: people_ready_fight
+                            .filter(person => choice_1.號碼清單.includes(person.id))
+                            .map(person => person.idleRounds),
+                        等待場次2: people_ready_fight
+                            .filter(person => choice_2.號碼清單.includes(person.id))
+                            .map(person => person.idleRounds),
                     });
                 }
             }
         }
-        console.log('solutions', solutions)
-        // step5 組合依 總ＳＤ排序
-        const sorted_solutions = solutions.sort((a, b) => a.SD_ALL - b.SD_ALL);
-        console.log('sorted_solutions', sorted_solutions)
-        // step6 找出等待值最大之中，ＳＤ最小的選擇，再選擇其中較小的ＳＤ的隊戰
-        const waiting_max = Math.max(...solutions.map(sol => sol.等待數值_合));
-        console.log("waiting_max", waiting_max)
-        let next_game_players;
-        for (const sol of sorted_solutions) {
-            if (sol.等待數值_合 === waiting_max) {
-                console.log("choice!!")
-                if (sol.SD_1 * 10 - sol.等待數值_1 <= sol.SD_2 * 10 - sol.等待數值_2) {
-                    console.log("choice_1")
-                    next_game_players = sol.Choice_1;
+        console.log('sorted_matches', sorted_matches);
+        if (solutions.length < 1) {
+            console.log('sorted_matches[0]', sorted_matches[0]);
+            return sorted_matches[0].號碼清單;
+        } else {
+            // step5: Sort solutions by '評分S'
+            const sorted_solutions = solutions.sort((sol1, sol2) => sol2.評分S - sol1.評分S);
+            console.log('solutions', solutions);
+            console.log('solutions[0]', solutions[0]);
+            console.log('solutions[1]', solutions[1]);
+            // step6: Find the choice with the highest '評分S' and '評分'
+            const the_choice = Math.max(solutions[0].評分1, solutions[0].評分2);
 
-                } else {
-                    console.log("choice_2")
-                    next_game_players = sol.Choice_2;
-                }
-                break;
+            console.log('sorted_solutions', sorted_solutions);
+            if (solutions[0].評分1 > solutions[0].評分2) {
+                console.log('sorted_matches[solutions[0].Choice_1]', sorted_matches[solutions[0].Choice_1]);
+                return sorted_matches[solutions[0].Choice_1].號碼清單;
+            } else {
+                console.log('sorted_matches[solutions[0].Choice_2]', sorted_matches[solutions[0].Choice_2]);
+                return sorted_matches[solutions[0].Choice_2].號碼清單;
             }
         }
-        const result = [];
-
-        for (let i = sorted_matches[next_game_players]["Rank頭"]; i <= sorted_matches[next_game_players]["Rank尾"]; i++) {
-            result.push(people_ready_fight[i]['id']);
-        }
-        console.log(result)
-        return result
     }
 
 </script>

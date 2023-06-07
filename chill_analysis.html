@@ -85,7 +85,7 @@
         <div id="statistics" class="content">
             <div class="row">
                 <div class="col-12">
-                    <h2>5月30號勝負一覽表</h2>
+                    <h2>6月6號勝負一覽表</h2>
                     <table id="example" class="display table-bordered table" style="width:100%">
                         <thead>
                             <tr>
@@ -275,7 +275,7 @@
     function readData2() {
         var readRef = database.ref('Chung_Shan_elementary_school');
         readRef.once("value").then((snapshot) => {
-            const data = snapshot.val().analysis_use_data.date_0530.wait_to_register
+            const data = snapshot.val().analysis_use_data.date_0606.wait_to_register
             console.log(data)
             const arr = []
             for (let key in data) {
@@ -283,7 +283,7 @@
             }
             console.log(arr)
             let data2 = arr;
-            let data3 = snapshot.val().analysis_use_data.date_0530.today_people
+            let data3 = snapshot.val().analysis_use_data.date_0606.today_people
             let today_people = {}
             data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
             console.log(today_people)
@@ -453,7 +453,7 @@
     }
 
     function handle_refresh_history() {
-        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0530/wait_to_register');
+        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0606/wait_to_register');
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data)

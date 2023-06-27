@@ -48,7 +48,7 @@
     $("#backup_today_data").click(backup_today_data)
     $("#update_data_to_newest_score_data").click(update_data_to_newest_score_data)
     function update_data_to_newest_score_data() {
-        database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0523/today_people').once("value").then((snapshot) => {
+        database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people').once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
             console.log(data_in_firebase)
             data_in_firebase.forEach(e => {
@@ -61,6 +61,9 @@
         data = data.replace(/\d/g, "").replace(/[^\S\n]+/g, "");
         // 刪除所有空格
         let withoutSpaces = data.replaceAll(".", "");
+        withoutSpaces = withoutSpaces.replaceAll(",", "");
+        withoutSpaces = withoutSpaces.replaceAll("(季打)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(正取)", "");
 
         // withoutSpaces=withoutSpaces.replaceAll(",","").replaceAll("")
         // 以換行符號切割成陣列
@@ -115,14 +118,19 @@
         return (currentTime)
     }
 
-
-
-    // database.ref(`Chung_Shan_elementary_school/backup_today_data/2023-05-24 11:40:10:149`).once('value').then(snapshot => {
+    // const date_string = '2023-06-21 10:36:27:221'
+    // database.ref(`Chung_Shan_elementary_school/backup_today_data/${date_string}`).once('value').then(snapshot => {
     //     const data = snapshot.val()
     //     console.log(data.today_people)
-    //     database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0523/today_people`).set(data.today_people)
+    //     database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people`).set(data.today_people)
     // })
-    // database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0523/today_people`).set(data.today_people)
+    // // database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people`).set(data.today_people)
+    // database.ref(`Chung_Shan_elementary_school/backup_today_data/${date_string}`).once('value').then(snapshot => {
+    //     const data = snapshot.val()
+    //     console.log(data.wait_to_register)
+    //     database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/wait_to_register`).set(data.wait_to_register)
+    // })
+    // // database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people`).set(data.today_people)
 
 
     /*

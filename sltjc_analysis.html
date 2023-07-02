@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分析網</title>
+    <!-- Add your project's config here -->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+
+    <!-- Add the Firebase Analytics SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+
+    <!-- Add the Firebase Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- 引入 jQuery 和 Bootstrap 的 JS 檔案 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- 引入 Datatable 和 Bootstrap 的 JS 檔案 -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css"
+        integrity="sha512-PT0RvABaDhDQugEbpNMwgYBCnGCiTZMh9yOzUsJHDgl/dMhD9yjHAwoumnUk3JydV3QTcIkNDuN40CJxik5+WQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"
+        integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- 引入 Toastify 的 CSS & JS文件  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css"
+        integrity="sha512-UiKdzM5DL+I+2YFxK+7TDedVyVm7HMp/bN85NeWMJNYortoll+Nd6PU9ZDrZiaOsdarOyk9egQm6LOJZi36L2g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"
+        integrity="sha512-79j1YQOJuI8mLseq9icSQKT6bLlLtWknKwj1OpJZMdPt2pFBry3vQTt+NZuJw7NSd1pHhZlu0s12Ngqfa371EA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+</head>
+
+<body>
+    <!-- header組件 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">羽你在一起 分析網</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <!-- <li class="nav-item active">
+                        <a class="nav-link" href="#" data-content="home">首頁</a>
+                    </li> -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-content="statistics">戰績統計資料</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-content="statistics2">全員分數表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-content="analysis">分數分析</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-content="contact">聯繫我們</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- 主要內容區 -->
+    <div class="container mt-4">
+        <!-- 分頁 統計圖表 -->
+        <div id="statistics" class="content">
+            <div class="row">
+                <div class="col-12">
+                    <h2>7月1號勝負一覽表</h2>
+                    <table id="example" class="display table-bordered table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>名字</th>
+                                <th>勝場</th>
+                                <th>敗場</th>
+                                <th>總場數</th>
+                                <th>勝率</th>
+                                <th>當前分數</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="mt-4 w-100">
+                <table id="histroy" class="table table-bordered table-responsive w-100"></table>
+            </div>
+        </div><!-- 分頁 統計圖表2 -->
+        <div id="statistics2" class="content" style="display:none;">
+            <div class="row">
+                <div class="col-12">
+                    <h2>全員分數表</h2>
+                    <table id="example2" class="display table-bordered table" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>名字</th>
+                                <th>當前分數</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- 分頁 首頁 -->
+        <div id="home" class="content" style="display:none;">
+            施工中...
+        </div>
+        <!-- 分頁 聯絡我們 -->
+        <div id="contact" class="content" style="display:none;">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <h1 class="text-center mb-4">意見回饋</h1>
+                    <form id="feedback-form">
+                        <div class="form-group">
+                            <label for="name">姓名</label>
+                            <input type="text" class="form-control" id="name" placeholder="請輸入您的姓名或綽號(如果想匿名 則留空)">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">電子郵件</label>
+                            <input type="email" class="form-control" id="email"
+                                placeholder="請輸入您的電子郵件(如果不願意留下聯絡資訊 則留空)">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">意見與建議</label>
+                            <textarea class="form-control" id="message" rows="5" placeholder="請輸入您的意見與建議"></textarea>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">提交</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- 分頁 分析圖表 -->
+        <div id="analysis" class="content" style="display:none;">
+            <div class="row">
+                <div class="col-12">
+                    <div id="analysis_chart" style="height: 80vh"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="display:none;">
+            <div class="col">
+                <!-- <button id="upload_newest">上傳雲端newest</button> -->
+            </div>
+        </div>
+    </div>
+</body>
+
+
+<script>
+    var analysis_echart = echarts.init(document.getElementById('analysis_chart'), null, {
+        renderer: 'canvas',
+        useDirtyRect: false
+    });
+
+    let echart_data = []
+
+    //開場綁定 
+    $(document).ready(function () {
+        $('.nav-link').click(function (event) {
+            event.preventDefault();
+            var content = $(this).data('content');
+            $('.content').hide();
+            $('#' + content).show();
+            if (content == "analysis") {
+                console.log("render analysis")
+                render_echart(echart_data)
+                console.log(echart_data)
+                analysis_echart.resize();
+            }
+        });
+    });
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCLXKg7Ru5p5dtgyRs28-qg8LQaG69yME",
+        databaseURL: "https://friendly-sensor-137111-default-rtdb.firebaseio.com",
+        projectId: "friendly-sensor-137111",
+        storageBucket: "friendly-sensor-137111.appspot.com",
+        appId: "1:824581584416:web:fdd5462dd85230d8caae45",
+        measurementId: "G-2HYJ96RDLV"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    // 獲取資料庫的引用
+    var database = firebase.database();
+
+    // 寫入資料
+    function writeData(user_name, history_score) {
+        let today = new Date();
+        let month = String(today.getMonth() + 1).padStart(2, '0');
+        let date = String(today.getDate()).padStart(2, '0');
+        let currentDate = month + date;
+        database.ref(`users/${user_name}/history_score/${currentDate}`).set({
+            currentDate: name,
+        });
+    }
+    // 寫入資料
+    function writeData_all_users_json() {
+        var userRef = database.ref('sltjc/temp_data/');
+        userRef.once('value').then((snapshot) => {
+            const data = snapshot.val();
+            console.log(data);
+        })
+    }
+    // 讀取資料
+    function readData() {
+        var userRef = database.ref('sltjc/Tuesday/date_0503');
+        userRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            console.log(data);
+            const data1 = data.bulletin_board_message
+            // 使用正規表達式從字串中提取所需的數據
+            let regex = /\《(.+?)\》.*?\《(.+?)\》.*?\《(.+?)\》.*?\[(.+?)\]/g;
+            let matches;
+            let results = parseInput(data1)
+            const data2 = JSON.parse(data.game_record)
+            const data3 = JSON.parse(data.today_people)
+            console.log(data2);
+            let today_people = {}
+            data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
+            data2.forEach(obj => {
+                //top team win
+                let top_team_win = obj[4] > obj[5] ? true : false
+                today_people[obj[0]].win += top_team_win ? 1 : 0;
+                today_people[obj[3]].win += top_team_win ? 1 : 0;
+                today_people[obj[1]].lose += top_team_win ? 1 : 0;
+                today_people[obj[2]].lose += top_team_win ? 1 : 0;
+                today_people[obj[0]].lose += top_team_win ? 0 : 1;
+                today_people[obj[3]].lose += top_team_win ? 0 : 1;
+                today_people[obj[1]].win += top_team_win ? 0 : 1;
+                today_people[obj[2]].win += top_team_win ? 0 : 1;
+            })
+            console.log(today_people)
+            const data_table = []
+            Object.keys(today_people).forEach(key => {
+                data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
+            })
+            $('#example').DataTable({
+                data: data_table,
+                rowId: 'row',
+                rowCallback: function (row, data, index) {
+                    $('td:eq(0)', row).html(index + 1);
+                }
+            });
+        });
+    }
+
+
+    function readData2() {
+        var readRef = database.ref('sltjc');
+        readRef.once("value").then((snapshot) => {
+            const data = snapshot.val().analysis_use_data.date_0701.wait_to_register
+            console.log(data)
+            const arr = []
+            for (let key in data) {
+                arr.push([data[key].player1, data[key].player2, data[key].player3, data[key].player4, data[key].score_top, data[key].score_bottom, data[key].create_time])
+            }
+            console.log(arr)
+            let data2 = arr;
+            let data3 = snapshot.val().analysis_use_data.date_0701.today_people
+            let today_people = {}
+            data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
+            console.log(today_people)
+            console.log(data2)
+            data2.forEach(obj => {
+                //top team win
+                console.log(obj)
+                let top_team_win = obj[4] > obj[5] ? true : false
+                today_people[obj[0]].win += top_team_win ? 1 : 0;
+                today_people[obj[3]].win += top_team_win ? 1 : 0;
+                today_people[obj[1]].lose += top_team_win ? 1 : 0;
+                today_people[obj[2]].lose += top_team_win ? 1 : 0;
+                today_people[obj[0]].lose += top_team_win ? 0 : 1;
+                today_people[obj[3]].lose += top_team_win ? 0 : 1;
+                today_people[obj[1]].win += top_team_win ? 0 : 1;
+                today_people[obj[2]].win += top_team_win ? 0 : 1;
+            })
+            console.log(today_people)
+            let data_table = []
+            Object.keys(today_people).forEach(key => {
+                data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
+            })
+            $('#example').DataTable({
+                data: data_table,
+                rowId: 'row',
+                rowCallback: function (row, data, index) {
+                    $('td:eq(0)', row).html(index + 1);
+                }
+            });
+
+
+            const data22 = snapshot.val().newest_score_data
+            console.log(data22)
+            let data_table2 = []
+            Object.keys(data22).forEach(key => {
+                data_table2.push(["", key, data22[key]])
+            })
+            $('#example2').DataTable({
+                data: data_table2,
+                rowId: 'row',
+                rowCallback: function (row, data, index) {
+                    $('td:eq(0)', row).html(index + 1);
+                }
+            });
+
+
+        })
+
+
+    };
+
+    database.ref('sltjc/people_data').once("value").then((snapshot) => {
+        const data = snapshot.val()
+
+        console.log(data)
+        echart_data = []
+        Object.keys(data).forEach(key => {
+            echart_data.push([key, data[key].score])
+        })
+        console.log(echart_data)
+        render_echart(echart_data)
+    })
+
+
+
+
+
+
+    function parseInput(str) {
+        const regex = /《(.*?)》 和 《(.*?)》 VS 《(.*?)》 和 《(.*?)》，請至第\d球場比賽。 \[ (.*?) \]/g;
+        const matches = [];
+        let match;
+        while ((match = regex.exec(str)) !== null) {
+            matches.push([match[1], match[2], match[3], match[4], match[5]]);
+        }
+        return matches;
+    }
+
+    readData2()
+</script>
+
+</html>
+
+<script type="text/javascript">
+    function render_echart(echart_data) {
+        var app = {};
+        var option;
+        option = {
+            dataset: [
+                {
+                    dimensions: ['name', 'score'],
+                    source: echart_data
+                },
+                {
+                    transform: {
+                        type: 'sort',
+                        config: { dimension: 'score', order: 'desc' }
+                    }
+                }
+            ],
+            xAxis: {
+                type: 'category',
+                axisLabel: { interval: 0, rotate: 30 }
+            },
+            yAxis: {},
+            series: {
+                type: 'bar',
+                encode: { x: 'name', y: 'score' },
+                datasetIndex: 1,
+                label: {
+                    show: true,
+                    position: 'top' // 可以設置 label 的位置，如 top、inside、right 等等
+                }
+            }
+        };
+        if (option && typeof option === 'object') {
+            analysis_echart.setOption(option);
+        }
+        window.addEventListener('resize', analysis_echart.resize);
+    }
+
+
+    $("#upload_newest").click(writeData_all_users_json)
+
+    function get_now_time() {
+        // 创建Date对象并获取当前时间
+        const now = new Date();
+        // 将当前时间格式化为字符串
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const miliseconds = String(now.getMilliseconds()).padStart(2, '0');
+        // 创建包含当前时间的字符串
+        const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${miliseconds}`;
+        // 在控制台输出当前时间
+        console.log(currentTime);
+        return (currentTime)
+    }
+    $(function () {
+        // 监听表单提交事件
+        $("#feedback-form").submit(function (event) {
+            // 阻止表单默认提交行为
+            event.preventDefault();
+            // 获取表单数据
+            var name = $("#name").val();
+            var email = $("#email").val();
+            var message = $("#message").val();
+            database.ref(`feedback/${get_now_time()}`).set({ name, email, message, time: get_now_time() })
+            show_message("成功送出")
+        });
+    });
+
+    function show_message(message) {
+        Toastify({
+            text: message,
+            duration: 3000, // 設定顯示時間（毫秒）
+            newWindow: true,
+            close: true,
+            gravity: "top", // 設定顯示位置
+            position: "center",
+            backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+            stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
+        }).showToast();
+    }
+
+    function handle_refresh_history() {
+        var userRef = database.ref('sltjc/analysis_use_data/date_0701/wait_to_register');
+        userRef.once('value').then((snapshot) => {
+            const data = snapshot.val();
+            console.log(data)
+            const dataArray = [];
+            for (let prop in data) {
+                dataArray.push(data[prop]);
+            }
+            console.log(dataArray)
+            dataArray.forEach((obj, index) => {
+                dataArray[index].during = calculateTimeDifference(obj.create_time, obj.register_time)
+            })
+            $("#histroy").DataTable({
+                data: dataArray,
+                columns: [
+                    { title: "player1", data: "player1" },
+                    { title: "player4", data: "player4" },
+                    { title: "score_top", data: "score_top" },
+                    { title: "player2", data: "player2" },
+                    { title: "player3", data: "player3" },
+                    { title: "score_bottom", data: "score_bottom" },
+                    { title: "during", data: "during" },
+                ]
+            })
+
+        })
+    }
+    handle_refresh_history()
+
+    function calculateTimeDifference(timeString1, timeString2) {
+        const date1 = new Date(timeString1);
+        const date2 = new Date(timeString2);
+
+        const difference = Math.abs(date2 - date1);
+
+        // 將相差的毫秒數轉換為時間單位，例如小時、分鐘、秒
+        const hours = Math.floor(difference / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+        return `${minutes}分${seconds}秒`;
+    }
+</script>

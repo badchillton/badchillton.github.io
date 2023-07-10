@@ -1,5 +1,5 @@
 // var redirect_uri = "https://makeratplay.github.io/SpotifyWebAPI/"; // change this your value
-// var redirect_uri = "http://127.0.0.1:5501/weight.html";
+// var redirect_uri = "http://127.0.0.1:5501/weight4.html";
 var redirect_uri = "https://badchillton.github.io/weight4";
  
 
@@ -327,6 +327,9 @@ function handleCurrentlyPlayingResponse(){
             currentPlaylist = currentPlaylist.substring( currentPlaylist.lastIndexOf(":") + 1,  currentPlaylist.length );
             document.getElementById('playlists').value=currentPlaylist;
         }
+        
+        console.log("playing or not",data.is_playing)
+        localStorage.setItem("isPlaying", data.is_playing)
     }
     else if ( this.status == 204 ){
 

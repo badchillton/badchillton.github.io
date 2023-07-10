@@ -491,6 +491,7 @@
     let fullVolTime=new Date();
     let nowTime;
     let waiting_secs=23*1000
+    let playingMusic
 
     //產生4個主要比賽場地
     for (let i = 1; i < 5; i++) {
@@ -667,12 +668,15 @@
         const currentTime_hms = `${hours}:${minutes}:${seconds}`
         bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, court, currentTime_hms])
         refresh_bulletin_board_message()
-        lowVol()
+        if (localStorage.getItem("isPlaying")=="true"){
+            // lowVol()
+            pause()
+            localStorage.setItem("isPlaying", "false")
+        }
         const speak_text1 = String(`大會報告`)
         speak(speak_text1, times = 1, rate = 0.8);
         const speak_text2 = String(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
-        speak(speak_text2, times = 3, rate = 0.7);
-        
+        speak(speak_text2, times = 3, rate = 0.7);       
         nowTime=new Date()
         if(nowTime>fullVolTime){
             waiting_secs=23*1000
@@ -683,7 +687,14 @@
         }
         setTimeout(() => {
             if((new Date()-fullVolTime)>0){
-                fullVol()
+                // fullVol()
+                currentlyPlaying()
+                setTimeout(() => {
+                    if(localStorage.getItem("isPlaying")=="false"){
+                    play()
+                }
+                }, 1000);
+                
             }
         }, waiting_secs);
         

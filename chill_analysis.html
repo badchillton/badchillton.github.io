@@ -85,7 +85,15 @@
         <div id="statistics" class="content">
             <div class="row">
                 <div class="col-12">
-                    <h2>7月3號勝負一覽表</h2>
+                    <h2> <span id="date_span">
+                            0711
+                        </span> 勝負一覽表
+                        <span id="date_choose_span">
+                            <select name="" id="date_choose_select">
+                                <option value="-1">請選擇</option>
+                            </select>
+                        </span>
+                    </h2>
                     <table id="example" class="display table-bordered table" style="width:100%">
                         <thead>
                             <tr>
@@ -165,7 +173,6 @@
         </div>
         <div class="row" style="display:none;">
             <div class="col">
-                <!-- <button id="upload_newest">上傳雲端newest</button> -->
             </div>
         </div>
     </div>
@@ -209,81 +216,76 @@
     firebase.analytics();
     // 獲取資料庫的引用
     var database = firebase.database();
-
-    // 寫入資料
-    function writeData(user_name, history_score) {
-        let today = new Date();
-        let month = String(today.getMonth() + 1).padStart(2, '0');
-        let date = String(today.getDate()).padStart(2, '0');
-        let currentDate = month + date;
-        database.ref(`users/${user_name}/history_score/${currentDate}`).set({
-            currentDate: name,
-        });
+    let all_analysis_data;
+    function get_newest_in_all_analysis_data(all_analysis_data) {
+        let arr = (Object.keys(all_analysis_data))
+        return (arr[arr.length - 1]);
     }
-    // 寫入資料
-    function writeData_all_users_json() {
-        var userRef = database.ref('Chung_Shan_elementary_school/temp_data/');
-        userRef.once('value').then((snapshot) => {
-            const data = snapshot.val();
-            console.log(data);
+    function set_date_choose_select() {
+        let arr = (Object.keys(all_analysis_data))
+        $("#date_choose_select").empty()
+        arr.forEach((e) => { $("#date_choose_select").append(`<option value="${e}">${e}</option>`) })
+    }
+    function set_table_data_by_select_change(value) {
+        const set_string = value
+        const data = all_analysis_data[set_string].wait_to_register
+        const arr = []
+        for (let key in data) {
+            arr.push([data[key].player1, data[key].player2, data[key].player3, data[key].player4, data[key].score_top, data[key].score_bottom, data[key].create_time])
+        }
+        let data2 = arr;
+        let data3 = all_analysis_data[set_string].today_people
+        let today_people = {}
+        data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
+        console.log(today_people)
+        console.log(data2)
+        data2.forEach(obj => {
+            //top team win
+            console.log(obj)
+            let top_team_win = obj[4] > obj[5] ? true : false
+            today_people[obj[0]].win += top_team_win ? 1 : 0;
+            today_people[obj[3]].win += top_team_win ? 1 : 0;
+            today_people[obj[1]].lose += top_team_win ? 1 : 0;
+            today_people[obj[2]].lose += top_team_win ? 1 : 0;
+            today_people[obj[0]].lose += top_team_win ? 0 : 1;
+            today_people[obj[3]].lose += top_team_win ? 0 : 1;
+            today_people[obj[1]].win += top_team_win ? 0 : 1;
+            today_people[obj[2]].win += top_team_win ? 0 : 1;
         })
-    }
-    // 讀取資料
-    function readData() {
-        var userRef = database.ref('Chung_Shan_elementary_school/Tuesday/date_0503');
-        userRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            console.log(data);
-            const data1 = data.bulletin_board_message
-            // 使用正規表達式從字串中提取所需的數據
-            let regex = /\《(.+?)\》.*?\《(.+?)\》.*?\《(.+?)\》.*?\[(.+?)\]/g;
-            let matches;
-            let results = parseInput(data1)
-            const data2 = JSON.parse(data.game_record)
-            const data3 = JSON.parse(data.today_people)
-            console.log(data2);
-            let today_people = {}
-            data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
-            data2.forEach(obj => {
-                //top team win
-                let top_team_win = obj[4] > obj[5] ? true : false
-                today_people[obj[0]].win += top_team_win ? 1 : 0;
-                today_people[obj[3]].win += top_team_win ? 1 : 0;
-                today_people[obj[1]].lose += top_team_win ? 1 : 0;
-                today_people[obj[2]].lose += top_team_win ? 1 : 0;
-                today_people[obj[0]].lose += top_team_win ? 0 : 1;
-                today_people[obj[3]].lose += top_team_win ? 0 : 1;
-                today_people[obj[1]].win += top_team_win ? 0 : 1;
-                today_people[obj[2]].win += top_team_win ? 0 : 1;
-            })
-            console.log(today_people)
-            const data_table = []
-            Object.keys(today_people).forEach(key => {
-                data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
-            })
-            $('#example').DataTable({
-                data: data_table,
-                rowId: 'row',
-                rowCallback: function (row, data, index) {
-                    $('td:eq(0)', row).html(index + 1);
-                }
-            });
+        console.log(today_people)
+        let data_table = []
+        Object.keys(today_people).forEach(key => {
+            data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
+        })
+        $('#example').DataTable({
+            destroy: true,
+            data: data_table,
+            rowId: 'row',
+            rowCallback: function (row, data, index) {
+                $('td:eq(0)', row).html(index + 1);
+            }
         });
+
     }
-
-
+    $('#date_choose_select').change((e) => {
+        console.log(e.target.value)
+        set_table_data_by_select_change(e.target.value)
+    })
     function readData2() {
         var readRef = database.ref('Chung_Shan_elementary_school');
         readRef.once("value").then((snapshot) => {
-            const data = snapshot.val().analysis_use_data.date_0703.wait_to_register
-            console.log(data)
+            // const data = snapshot.val().analysis_use_data.date_0711.wait_to_register
+
+            all_analysis_data = snapshot.val().analysis_use_data
+            const newest_string = get_newest_in_all_analysis_data(all_analysis_data)
+            set_date_choose_select();
+            const data = all_analysis_data[newest_string].wait_to_register
             const arr = []
             for (let key in data) {
                 arr.push([data[key].player1, data[key].player2, data[key].player3, data[key].player4, data[key].score_top, data[key].score_bottom, data[key].create_time])
             }
-            console.log(arr)
             let data2 = arr;
-            let data3 = snapshot.val().analysis_use_data.date_0703.today_people
+            let data3 = all_analysis_data[newest_string].today_people
             let today_people = {}
             data3.forEach(obj => { today_people[obj.name] = { win: 0, lose: 0, score: obj.score } })
             console.log(today_people)
@@ -307,12 +309,14 @@
                 data_table.push(["", key, today_people[key].win, today_people[key].lose, today_people[key].win + today_people[key].lose, parseInt(today_people[key].win * 100 / (today_people[key].lose + today_people[key].win)), today_people[key].score])
             })
             $('#example').DataTable({
+                destroy: true,
                 data: data_table,
                 rowId: 'row',
                 rowCallback: function (row, data, index) {
                     $('td:eq(0)', row).html(index + 1);
                 }
             });
+
 
 
             const data22 = snapshot.val().newest_score_data
@@ -406,7 +410,6 @@
     }
 
 
-    $("#upload_newest").click(writeData_all_users_json)
 
     function get_now_time() {
         // 创建Date对象并获取当前时间
@@ -453,7 +456,7 @@
     }
 
     function handle_refresh_history() {
-        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0703/wait_to_register');
+        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0711/wait_to_register');
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data)

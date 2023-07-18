@@ -20,11 +20,21 @@
 </head>
 
 <body>
+    <select name="" id="club-select">
+        <option value="1">和雲羽chill社</option>
+        <option value="2">SLTJC 與你在一起</option>
+    </select>
     <button id="check_name_list">check_name_list</button>
     <textarea name="" id="name_list" cols="30" rows="10"></textarea>
     <textarea name="" id="output_name_list" cols="30" rows="10"></textarea>
     <button id="backup_today_data">將今日資料備份</button>
     <button id="update_data_to_newest_score_data">將資料更新到newest_score_data</button>
+    <button id="convert_generate">轉換區讀取</button>
+    <div class="convert_area">
+        <select name="" id="backup_data_select"></select>
+        日期：<input type="text" id="date">
+        <button id="convert_analysis_button">轉換資料</button>
+    </div>
 </body>
 
 </html>
@@ -44,15 +54,60 @@
     firebase.analytics();
     // 獲取資料庫的引用
     var database = firebase.database();
+    //使用的資料庫
+
+    let club = "Chung_Shan_elementary_school";
+    // let club = get_now_club();
+    $("#club-select").change(get_now_club)
+    $("#convert_generate").click(handle_convert_generate)
+    $("#convert_analysis_button").click(handle_convert_analysis)
+    function handle_convert_analysis() {
+        const data_id = $("#backup_data_select").val()
+        const date = $("#date").val()
+        database.ref(`${club}/backup_today_data/${data_id}`).once('value').then(snapshot => {
+            const data = snapshot.val()
+            console.log(data.today_people)
+            database.ref(`${club}/analysis_use_data/date_${date}/today_people`).set(data.today_people)
+        })
+        database.ref(`${club}/backup_today_data/${data_id}`).once('value').then(snapshot => {
+            const data = snapshot.val()
+            console.log(data.wait_to_register)
+            database.ref(`${club}/analysis_use_data/date_${date}/wait_to_register`).set(data.wait_to_register)
+        })
+    }
+    function get_now_club() {
+        console.log($("#club-select").val())
+        if ($("#club-select").val() == 1) {
+            club = "Chung_Shan_elementary_school"
+            return
+        }
+        if ($("#club-select").val() == 2) {
+            club = "sltjc"
+            return
+        }
+    }
+    function handle_convert_generate() {
+        console.log(club)
+        database.ref(`${club}/backup_today_data`).once("value").then((snapshot) => {
+            const data_in_firebase = snapshot.val()
+            console.log(data_in_firebase)
+            $("#backup_data_select").empty()
+            for (key in data_in_firebase) {
+                $("#backup_data_select").append(`<option value='${key}'>${key} </option>`)
+            }
+        })
+    }
+
+
     $("#check_name_list").click(check_name_list)
     $("#backup_today_data").click(backup_today_data)
     $("#update_data_to_newest_score_data").click(update_data_to_newest_score_data)
     function update_data_to_newest_score_data() {
-        database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people').once("value").then((snapshot) => {
+        database.ref(`${club}/analysis_use_data/date_0717/today_people`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
             console.log(data_in_firebase)
             data_in_firebase.forEach(e => {
-                database.ref(`Chung_Shan_elementary_school/newest_score_data/${e.name}`).set(e.score)
+                database.ref(`${club}/newest_score_data/${e.name}`).set(e.score)
             })
         })
     }
@@ -70,7 +125,7 @@
         let arr = withoutSpaces.split("\n");
         let empty_arr = []
         let my_str = ""
-        database.ref('Chung_Shan_elementary_school/newest_score_data').once("value").then((snapshot) => {
+        database.ref(`${club}/newest_score_data`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
             console.log(data_in_firebase)
             arr.forEach((element, index) => {
@@ -88,15 +143,15 @@
         //會將資料庫目前的wait_to_register 進行備份 
         //登錄者為 data_center
         const now_time = get_now_time()
-        database.ref('Chung_Shan_elementary_school/real_time_data/todayPeople').once("value").then((snapshot) => {
+        database.ref(`${club}/real_time_data/todayPeople`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
-            database.ref(`Chung_Shan_elementary_school/backup_today_data/${now_time}/today_people`).set(data_in_firebase)
+            database.ref(`${club}/backup_today_data/${now_time}/today_people`).set(data_in_firebase)
         })
-        database.ref('Chung_Shan_elementary_school/wait_to_register').once("value").then((snapshot) => {
+        database.ref(`${club}/wait_to_register`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
-            database.ref(`Chung_Shan_elementary_school/backup_today_data/${now_time}/wait_to_register`).set(data_in_firebase)
+            database.ref(`${club}/backup_today_data/${now_time}/wait_to_register`).set(data_in_firebase)
         })
-        database.ref(`Chung_Shan_elementary_school/backup_today_data/${now_time}/creater`).set("data_center")
+        database.ref(`${club}/backup_today_data/${now_time}/creater`).set("data_center")
         alert("完成存檔")
     }
 
@@ -118,19 +173,20 @@
         return (currentTime)
     }
 
-    // const date_string = '2023-06-21 10:36:27:221'
-    // database.ref(`Chung_Shan_elementary_school/backup_today_data/${date_string}`).once('value').then(snapshot => {
+    // const date_string = '2023-06-30 13:52:51:804'
+    // database.ref(`${club}/backup_today_data/${date_string}`).once('value').then(snapshot => {
     //     const data = snapshot.val()
     //     console.log(data.today_people)
-    //     database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people`).set(data.today_people)
+    //     database.ref(`${club}/analysis_use_data/date_0627/today_people`).set(data.today_people)
     // })
-    // // database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people`).set(data.today_people)
-    // database.ref(`Chung_Shan_elementary_school/backup_today_data/${date_string}`).once('value').then(snapshot => {
+    // database.ref(`${club}/backup_today_data/${date_string}`).once('value').then(snapshot => {
     //     const data = snapshot.val()
     //     console.log(data.wait_to_register)
-    //     database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/wait_to_register`).set(data.wait_to_register)
+    //     database.ref(`${club}/analysis_use_data/date_0627/wait_to_register`).set(data.wait_to_register)
     // })
-    // // database.ref(`Chung_Shan_elementary_school/analysis_use_data/date_0620/today_people`).set(data.today_people)
+
+    // // database.ref(`${club}/analysis_use_data/date_0627/today_people`).set(data.today_people)
+    // // database.ref(`${club}/analysis_use_data/date_0627/today_people`).set(data.today_people)
 
 
     /*

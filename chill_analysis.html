@@ -266,6 +266,21 @@
             }
         });
 
+        const data22 = snapshot.val().newest_score_data
+        console.log(data22)
+        let data_table2 = []
+        Object.keys(data22).forEach(key => {
+            data_table2.push(["", key, data22[key]])
+        })
+        $('#example2').DataTable({
+            destroy: true,
+            data: data_table2,
+            rowId: 'row',
+            rowCallback: function (row, data, index) {
+                $('td:eq(0)', row).html(index + 1);
+            }
+        });
+
     }
     $('#date_choose_select').change((e) => {
         console.log(e.target.value)
@@ -456,7 +471,7 @@
     }
 
     function handle_refresh_history() {
-        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0711/wait_to_register');
+        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0717/wait_to_register');
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data)

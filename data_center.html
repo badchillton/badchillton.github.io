@@ -103,7 +103,7 @@
     $("#backup_today_data").click(backup_today_data)
     $("#update_data_to_newest_score_data").click(update_data_to_newest_score_data)
     function update_data_to_newest_score_data() {
-        database.ref(`${club}/analysis_use_data/date_0717/today_people`).once("value").then((snapshot) => {
+        database.ref(`${club}/analysis_use_data/date_0718/today_people`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
             console.log(data_in_firebase)
             data_in_firebase.forEach(e => {
@@ -130,7 +130,7 @@
             console.log(data_in_firebase)
             arr.forEach((element, index) => {
                 empty_arr.push([element, data_in_firebase[element]])
-                my_str += `${index + 1}.[${data_in_firebase[element] ? data_in_firebase[element] / 100 : -1}]${element}\n`
+                my_str += `${index + 1}.[${data_in_firebase[element] ? data_in_firebase[element] / 100 : "?"}]${element}\n`
             });
             console.log(empty_arr)
             $("#output_name_list").val(my_str)

@@ -86,7 +86,7 @@
             <div class="row">
                 <div class="col-12">
                     <h2> <span id="date_span">
-                            0711
+                            0725
                         </span> 勝負一覽表
                         <span id="date_choose_span">
                             <select name="" id="date_choose_select">
@@ -471,7 +471,7 @@
     }
 
     function handle_refresh_history() {
-        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0717/wait_to_register');
+        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0725/wait_to_register');
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data)

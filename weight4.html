@@ -231,6 +231,22 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="adjust_score_Modal">
+        <div class="modal-dialog">
+            <div class="modal-content modal_content_style">
+                <!-- 模態框的內容 -->
+                <div class="select_div">
+                    選擇的人：<select name="" id="adjust_score_select"></select>
+                </div>
+                <div class="">
+                    指定分數：<input id="adjust_target_point_input" type="number">
+                </div>
+                <div class="">
+                    <button id="adjust_point_confirm_button">執行調整分數</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">羽Chill社 主控台</a>
@@ -311,6 +327,7 @@
                     <button id="cancel_binding" class="btn btn-primary ml-2">解除綁定</button>
                     <button id="cancel_choosed" class="btn btn-primary ml-2">清除選取</button>
                     <button id="one_click_to_wait" class="btn btn-primary ml-2">一鍵備戰</button>
+                    <button id="adjust_point" class="btn btn-primary ml-2">積分調整</button>
                 </div>
                 <h1> 休息區</h1>
                 <div class="row person-sleep"></div>
@@ -336,32 +353,34 @@
 
         <div id="tokenSection" class="row">
             <div class="col">
-                <p class="welcomeText">This is a javascript app that shows how to use the Spotify API to control the playback 
+                <p class="welcomeText">This is a javascript app that shows how to use the Spotify API to control the
+                    playback
                     of music (playlist or albums) on any of your devices connected to your spotify account.</p>
-                <p class="welcomeText">To use this app you need a Spotify client ID and client secret. You get these by 
-                    creating an app in the Spotify developers dashboard here 
-                    <a href="https://developer.spotify.com/dashboard/applications" target="_blank">https://developer.spotify.com/dashboard/applications</a> 
-                     and add https://makeratplay.github.io/SpotifyWebAPI/ in the "Redirect URIs" settings field.
-                </p>                    
-                <p  class="welcomeText"> 
-                    This app demostrates how the use the following APIs: 
-                    <ul>
-                        <li>https://accounts.spotify.com/authorize </li>
-                        <li>https://accounts.spotify.com/api/token </li>
-                    
-                        <li>https://api.spotify.com/v1/me/playlists </li>
-                        <li>https://api.spotify.com/v1/me/player/devices </li>
-                        <li>https://api.spotify.com/v1/me/player/play </li>
-                        <li>https://api.spotify.com/v1/me/player/pause </li>
-                        <li>https://api.spotify.com/v1/me/player/next </li>
-                        <li>https://api.spotify.com/v1/me/player/previous </li>
-                        <li>https://api.spotify.com/v1/me/player </li>
-                        <li>https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks </li>
-                        <li>https://api.spotify.com/v1/me/player/currently-playing </li>
-                        <li>https://api.spotify.com/v1/me/player/shuffle </li>
-                    </ul>
-                </p>                    
-                
+                <p class="welcomeText">To use this app you need a Spotify client ID and client secret. You get these by
+                    creating an app in the Spotify developers dashboard here
+                    <a href="https://developer.spotify.com/dashboard/applications"
+                        target="_blank">https://developer.spotify.com/dashboard/applications</a>
+                    and add https://makeratplay.github.io/SpotifyWebAPI/ in the "Redirect URIs" settings field.
+                </p>
+                <p class="welcomeText">
+                    This app demostrates how the use the following APIs:
+                <ul>
+                    <li>https://accounts.spotify.com/authorize </li>
+                    <li>https://accounts.spotify.com/api/token </li>
+
+                    <li>https://api.spotify.com/v1/me/playlists </li>
+                    <li>https://api.spotify.com/v1/me/player/devices </li>
+                    <li>https://api.spotify.com/v1/me/player/play </li>
+                    <li>https://api.spotify.com/v1/me/player/pause </li>
+                    <li>https://api.spotify.com/v1/me/player/next </li>
+                    <li>https://api.spotify.com/v1/me/player/previous </li>
+                    <li>https://api.spotify.com/v1/me/player </li>
+                    <li>https://api.spotify.com/v1/playlists/{{PlaylistId}}/tracks </li>
+                    <li>https://api.spotify.com/v1/me/player/currently-playing </li>
+                    <li>https://api.spotify.com/v1/me/player/shuffle </li>
+                </ul>
+                </p>
+
             </div>
             <div class="col">
                 <div class="mb-3">
@@ -372,12 +391,16 @@
                     <label for="clientSecret" class="form-label">Client Secret</label>
                     <input type="text" class="form-control" id="clientSecret" placeholder="">
                 </div>
-                <input class="btn btn-primary btn-lg" type="button" onclick="requestAuthorization()" value="Request Authorization"><br/>
+                <input class="btn btn-primary btn-lg" type="button" onclick="requestAuthorization()"
+                    value="Request Authorization"><br />
             </div>
 
             <div class="col">
-                <p class="welcomeText" style="margin-top: 40px;"> I used this project to learn the Spotify API in order to create this project:</p>
-                <iframe width="560" height="315" src="https://www.youtube.com/embed/H2HJ-LY7-lQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <p class="welcomeText" style="margin-top: 40px;"> I used this project to learn the Spotify API in order
+                    to create this project:</p>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/H2HJ-LY7-lQ" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
             </div>
         </div>
 
@@ -388,7 +411,8 @@
                     <label for="devices" class="form-label">Devices</label>
                     <select id="devices" class="form-control">
                     </select>
-                    <input class="btn btn-primary btn-sm mt-3" type="button" onclick="refreshDevices()" value="Refresh Devices">
+                    <input class="btn btn-primary btn-sm mt-3" type="button" onclick="refreshDevices()"
+                        value="Refresh Devices">
                     <input type="button" class="btn btn-dark btn-sm  mt-3" onclick="transfer()" value="Transfer">
                 </div>
 
@@ -396,7 +420,8 @@
                     <label for="playlists" class="form-label">Playlists</label>
                     <select id="playlists" class="form-control">
                     </select>
-                    <input class="btn btn-primary btn-sm mt-3" type="button" onclick="refreshPlaylists()" value="Refresh Playlists">
+                    <input class="btn btn-primary btn-sm mt-3" type="button" onclick="refreshPlaylists()"
+                        value="Refresh Playlists">
 
                 </div>
 
@@ -404,7 +429,8 @@
                     <label for="tracks" class="form-label">Tracks</label>
                     <select id="tracks" class="form-control">
                     </select>
-                    <input class="btn btn-primary btn-sm mt-3" type="button" onclick="fetchTracks()" value="Fetch Tracks">
+                    <input class="btn btn-primary btn-sm mt-3" type="button" onclick="fetchTracks()"
+                        value="Fetch Tracks">
                 </div>
 
                 <div class="mb-3">
@@ -428,7 +454,8 @@
                 <div class="row  mt-3">
                     <div class="col">
                         <h1> Currently Playing</h1>
-                        <input type="button" class="btn btn-primary btn-sm mt-3" onclick="currentlyPlaying()" value="Refresh Currently Playing">
+                        <input type="button" class="btn btn-primary btn-sm mt-3" onclick="currentlyPlaying()"
+                            value="Refresh Currently Playing">
                         <div>
                             <img id="albumImage" src="">
                             <div id="trackTitle"></div>
@@ -488,9 +515,9 @@
     let global_config = {
         albert_fisher: 1
     }
-    let fullVolTime=new Date();
+    let fullVolTime = new Date();
     let nowTime;
-    let waiting_secs=23*1000
+    let waiting_secs = 23 * 1000
     let playingMusic
 
     //產生4個主要比賽場地
@@ -668,7 +695,7 @@
         const currentTime_hms = `${hours}:${minutes}:${seconds}`
         bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, court, currentTime_hms])
         refresh_bulletin_board_message()
-        if (localStorage.getItem("isPlaying")=="true"){
+        if (localStorage.getItem("isPlaying") == "true") {
             // lowVol()
             pause()
             localStorage.setItem("isPlaying", "false")
@@ -676,28 +703,28 @@
         const speak_text1 = String(`大會報告`)
         speak(speak_text1, times = 1, rate = 0.8);
         const speak_text2 = String(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
-        speak(speak_text2, times = 3, rate = 0.7);       
-        nowTime=new Date()
-        if(nowTime>fullVolTime){
-            waiting_secs=23*1000
-            fullVolTime.setTime(nowTime.getTime()+23*1000)
-        }else{
-            waiting_secs=23*1000+(fullVolTime.getTime()-nowTime.getTime())
-            fullVolTime.setTime(fullVolTime.getTime()+23*1000)
+        speak(speak_text2, times = 3, rate = 0.7);
+        nowTime = new Date()
+        if (nowTime > fullVolTime) {
+            waiting_secs = 23 * 1000
+            fullVolTime.setTime(nowTime.getTime() + 23 * 1000)
+        } else {
+            waiting_secs = 23 * 1000 + (fullVolTime.getTime() - nowTime.getTime())
+            fullVolTime.setTime(fullVolTime.getTime() + 23 * 1000)
         }
         setTimeout(() => {
-            if((new Date()-fullVolTime)>0){
+            if ((new Date() - fullVolTime) > 0) {
                 // fullVol()
                 currentlyPlaying()
                 setTimeout(() => {
-                    if(localStorage.getItem("isPlaying")=="false"){
-                    play()
-                }
+                    if (localStorage.getItem("isPlaying") == "false") {
+                        play()
+                    }
                 }, 1000);
-                
+
             }
         }, waiting_secs);
-        
+
         todayPeople.forEach(person => {
             if (person.court == 0 || person.court == -1) {
                 person.idleRounds += 1;
@@ -1156,6 +1183,8 @@
         $('#myModal').modal('hide');
     }
     function record_score(now_which_game_p, top_team_score_p, bottom_team_score_p) {
+        const top_score_line = 1000
+        const bottom_score_line = 100
         const record_database = database
         const now_which_game = parseInt(now_which_game_p)
         const top_team_score = parseInt(top_team_score_p)
@@ -1176,16 +1205,11 @@
         const score_diff_scale = score_count == '1' ? 10 : score_count == 2 ? 20 : 10
         //計算分數：
         const score_diff = top_team_score - bottom_team_score
-        todayPeople[wait_to_register_list[now_which_game][0] - 1].score += (score_diff * score_diff_scale)
-        todayPeople[wait_to_register_list[now_which_game][1] - 1].score += (score_diff * score_diff_scale * -1)
-        todayPeople[wait_to_register_list[now_which_game][2] - 1].score += (score_diff * score_diff_scale * -1)
-        todayPeople[wait_to_register_list[now_which_game][3] - 1].score += (score_diff * score_diff_scale)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
 
-        //設置最低分是100
-        todayPeople[wait_to_register_list[now_which_game][0] - 1].score = todayPeople[wait_to_register_list[now_which_game][0] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][0] - 1].score
-        todayPeople[wait_to_register_list[now_which_game][1] - 1].score = todayPeople[wait_to_register_list[now_which_game][1] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][1] - 1].score
-        todayPeople[wait_to_register_list[now_which_game][2] - 1].score = todayPeople[wait_to_register_list[now_which_game][2] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][2] - 1].score
-        todayPeople[wait_to_register_list[now_which_game][3] - 1].score = todayPeople[wait_to_register_list[now_which_game][3] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][3] - 1].score
         //將雲端登記列表更新
         record_database.ref(`Chung_Shan_elementary_school/wait_to_register/`).once('value').then(snapshot => {
             console.log(snapshot.val())
@@ -1513,6 +1537,52 @@
 
         })
     }
+
+    function handle_adjust_point_open_modal() {
+        // 調整分數按鈕 會打開modal 
+        $('#adjust_score_select').empty()
+        todayPeople.forEach(e => {
+            $('#adjust_score_select').append(`<option value=${e.id}>${e.name} </option >`)
+        })
+        if (todayPeople.filter(e => e.choosed == 1).length == 1) {
+            const choosed_person = todayPeople.filter(e => e.choosed == 1)[0]
+            $('#adjust_score_select').val(choosed_person.id)
+        }
+        $('#adjust_score_Modal').modal('show');
+    }
+
+    function handle_adjust_point_confirm() {
+        const person_id = parseInt($('#adjust_score_select').val())
+        const target_point = parseInt($("#adjust_target_point_input").val())
+        let confirmed = confirm(`確定將${todayPeople[person_id - 1].name}的分數調整為${target_point}分嗎？`)
+        if (confirmed) {
+            todayPeople[person_id - 1].score = target_point
+        }
+        $('#adjust_score_Modal').modal('hide');
+        idle_people_update_to_div()
+    }
+    function count_score_function(person, score, top_score_line, bottom_score_line) {
+        // 分數計算規則：
+        // 高於高分線的分數 增加會以20%的比例增加(降低情況會正常降低)
+        // 低於低分線的分數 會自動回歸低分線的數值
+        if (score > 0) {
+            if (person.score > top_score_line) {
+                person.score = person.score + score / 5
+                return
+            }
+            if (person.score + score > top_score_line) {
+                person.score = parseInt(top_score_line + (person.score + score - top_score_line) / 5)
+                return
+            }
+        }
+        person.score = person.score + score
+        if (person.score < bottom_score_line) {
+            person.score = bottom_score_line
+        }
+        return
+    }
+
+
 
     refresh_wait_to_register_text()
     idle_people_update_to_div()

@@ -228,6 +228,22 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="adjust_score_Modal">
+        <div class="modal-dialog">
+            <div class="modal-content modal_content_style">
+                <!-- 模態框的內容 -->
+                <div class="select_div">
+                    選擇的人：<select name="" id="adjust_score_select"></select>
+                </div>
+                <div class="">
+                    指定分數：<input id="adjust_target_point_input" type="number">
+                </div>
+                <div class="">
+                    <button id="adjust_point_confirm_button">執行調整分數</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">羽Chill社 主控台</a>
@@ -308,6 +324,7 @@
                     <button id="cancel_binding" class="btn btn-primary ml-2">解除綁定</button>
                     <button id="cancel_choosed" class="btn btn-primary ml-2">清除選取</button>
                     <button id="one_click_to_wait" class="btn btn-primary ml-2">一鍵備戰</button>
+                    <button id="adjust_point" class="btn btn-primary ml-2">積分調整</button>
                 </div>
                 <h1> 休息區</h1>
                 <div class="row person-sleep"></div>
@@ -1007,6 +1024,8 @@
         $('#myModal').modal('hide');
     }
     function record_score(now_which_game_p, top_team_score_p, bottom_team_score_p) {
+        const top_score_line = 1000
+        const bottom_score_line = 100
         const record_database = database
         const now_which_game = parseInt(now_which_game_p)
         const top_team_score = parseInt(top_team_score_p)
@@ -1027,16 +1046,12 @@
         const score_diff_scale = score_count == '1' ? 10 : score_count == 2 ? 20 : 10
         //計算分數：
         const score_diff = top_team_score - bottom_team_score
-        todayPeople[wait_to_register_list[now_which_game][0] - 1].score += (score_diff * score_diff_scale)
-        todayPeople[wait_to_register_list[now_which_game][1] - 1].score += (score_diff * score_diff_scale * -1)
-        todayPeople[wait_to_register_list[now_which_game][2] - 1].score += (score_diff * score_diff_scale * -1)
-        todayPeople[wait_to_register_list[now_which_game][3] - 1].score += (score_diff * score_diff_scale)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
 
-        //設置最低分是100
-        todayPeople[wait_to_register_list[now_which_game][0] - 1].score = todayPeople[wait_to_register_list[now_which_game][0] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][0] - 1].score
-        todayPeople[wait_to_register_list[now_which_game][1] - 1].score = todayPeople[wait_to_register_list[now_which_game][1] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][1] - 1].score
-        todayPeople[wait_to_register_list[now_which_game][2] - 1].score = todayPeople[wait_to_register_list[now_which_game][2] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][2] - 1].score
-        todayPeople[wait_to_register_list[now_which_game][3] - 1].score = todayPeople[wait_to_register_list[now_which_game][3] - 1].score < 100 ? 100 : todayPeople[wait_to_register_list[now_which_game][3] - 1].score
+
         //將雲端登記列表更新
         record_database.ref(`Chung_Shan_elementary_school/wait_to_register/`).once('value').then(snapshot => {
             console.log(snapshot.val())
@@ -1365,6 +1380,50 @@
         })
     }
 
+    function handle_adjust_point_open_modal() {
+        // 調整分數按鈕 會打開modal 
+        $('#adjust_score_select').empty()
+        todayPeople.forEach(e => {
+            $('#adjust_score_select').append(`<option value=${e.id}>${e.name} </option >`)
+        })
+        if (todayPeople.filter(e => e.choosed == 1).length == 1) {
+            const choosed_person = todayPeople.filter(e => e.choosed == 1)[0]
+            $('#adjust_score_select').val(choosed_person.id)
+        }
+        $('#adjust_score_Modal').modal('show');
+    }
+
+    function handle_adjust_point_confirm() {
+        const person_id = parseInt($('#adjust_score_select').val())
+        const target_point = parseInt($("#adjust_target_point_input").val())
+        let confirmed = confirm(`確定將${todayPeople[person_id - 1].name}的分數調整為${target_point}分嗎？`)
+        if (confirmed) {
+            todayPeople[person_id - 1].score = target_point
+        }
+        $('#adjust_score_Modal').modal('hide');
+        idle_people_update_to_div()
+    }
+    function count_score_function(person, score, top_score_line, bottom_score_line) {
+        // 分數計算規則：
+        // 高於高分線的分數 增加會以20%的比例增加(降低情況會正常降低)
+        // 低於低分線的分數 會自動回歸低分線的數值
+        if (score > 0) {
+            if (person.score > top_score_line) {
+                person.score = person.score + score / 5
+                return
+            }
+            if (person.score + score > top_score_line) {
+                person.score = parseInt(top_score_line + (person.score + score - top_score_line) / 5)
+                return
+            }
+        }
+        person.score = person.score + score
+        if (person.score < bottom_score_line) {
+            person.score = bottom_score_line
+        }
+        return
+    }
+
     refresh_wait_to_register_text()
     idle_people_update_to_div()
     $("#pickPeople").on("click", pickPeople)
@@ -1392,6 +1451,9 @@
     $("#delete_record_score").on("click", handle_delete_record_score)
     $(".go_here").click(handle_go_here)
     $("#one_click_to_wait").click(handle_one_click_to_wait)
+    $("#adjust_point").click(handle_adjust_point_open_modal)
+    $("#adjust_point_confirm_button").click(handle_adjust_point_confirm)
+
 
     $("#upload_data_to_firebase").click(handle_upload_data_to_firebase)
 

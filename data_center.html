@@ -103,7 +103,8 @@
     $("#backup_today_data").click(backup_today_data)
     $("#update_data_to_newest_score_data").click(update_data_to_newest_score_data)
     function update_data_to_newest_score_data() {
-        database.ref(`${club}/analysis_use_data/date_0731/today_people`).once("value").then((snapshot) => {
+        const date = $("#date").val()
+        database.ref(`${club}/analysis_use_data/date_${date}/today_people`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
             console.log(data_in_firebase)
             data_in_firebase.forEach(e => {

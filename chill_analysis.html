@@ -184,7 +184,7 @@
         renderer: 'canvas',
         useDirtyRect: false
     });
-
+    let the_date = 'date_0725'
     let echart_data = []
 
     //開場綁定 
@@ -216,7 +216,7 @@
     firebase.analytics();
     // 獲取資料庫的引用
     var database = firebase.database();
-    let all_analysis_data;
+    let all_analysis_data, the_shot;
     function get_newest_in_all_analysis_data(all_analysis_data) {
         let arr = (Object.keys(all_analysis_data))
         return (arr[arr.length - 1]);
@@ -266,7 +266,7 @@
             }
         });
 
-        const data22 = snapshot.val().newest_score_data
+        const data22 = the_shot.newest_score_data
         console.log(data22)
         let data_table2 = []
         Object.keys(data22).forEach(key => {
@@ -281,16 +281,20 @@
             }
         });
 
+        handle_refresh_history()
+
     }
     $('#date_choose_select').change((e) => {
         console.log(e.target.value)
+        the_date = e.target.value
+        $("#date_span").html(e.target.value)
         set_table_data_by_select_change(e.target.value)
     })
     function readData2() {
         var readRef = database.ref('Chung_Shan_elementary_school');
         readRef.once("value").then((snapshot) => {
             // const data = snapshot.val().analysis_use_data.date_0711.wait_to_register
-
+            the_shot = snapshot.val()
             all_analysis_data = snapshot.val().analysis_use_data
             const newest_string = get_newest_in_all_analysis_data(all_analysis_data)
             set_date_choose_select();
@@ -334,7 +338,7 @@
 
 
 
-            const data22 = snapshot.val().newest_score_data
+            const data22 = the_shot.newest_score_data
             console.log(data22)
             let data_table2 = []
             Object.keys(data22).forEach(key => {
@@ -471,7 +475,9 @@
     }
 
     function handle_refresh_history() {
-        var userRef = database.ref('Chung_Shan_elementary_school/analysis_use_data/date_0725/wait_to_register');
+        console.log("refresh history")
+        console.log(the_date)
+        var userRef = database.ref(`Chung_Shan_elementary_school/analysis_use_data/${the_date}/wait_to_register`);
         userRef.once('value').then((snapshot) => {
             const data = snapshot.val();
             console.log(data)
@@ -484,6 +490,7 @@
                 dataArray[index].during = calculateTimeDifference(obj.create_time, obj.register_time)
             })
             $("#histroy").DataTable({
+                destroy: true,
                 data: dataArray,
                 columns: [
                     { title: "player1", data: "player1" },

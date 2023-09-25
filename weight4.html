@@ -247,6 +247,19 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="add_player_Modal">
+        <div class="modal-dialog">
+            <div class="modal-content modal_content_style">
+                <!-- 模態框的內容 -->
+                <div class="">
+                    指定人名：<input id="add_player_name_input">
+                </div>
+                <div class="">
+                    <button id="add_player_confirm_button">執行增加人員</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="#">羽Chill社 主控台</a>
@@ -328,6 +341,7 @@
                     <button id="cancel_choosed" class="btn btn-primary ml-2">清除選取</button>
                     <button id="one_click_to_wait" class="btn btn-primary ml-2">一鍵備戰</button>
                     <button id="adjust_point" class="btn btn-primary ml-2">積分調整</button>
+                    <button id="add_player" class="btn btn-primary ml-2">新增選手</button>
                 </div>
                 <h1> 休息區</h1>
                 <div class="row person-sleep"></div>
@@ -1537,7 +1551,33 @@
 
         })
     }
-
+    function handle_add_player_open_modal() {
+        // 新增選手按鈕 會打開modal 
+        // 檢查有無重複名字者 若有則報錯
+        $('#add_player_Modal').modal('show');
+        return
+    }
+    function handle_add_player_confirm() {
+        const add_player_name=$('#add_player_name_input').val()
+        if(add_player_name.length!=2){
+            alert('錯誤 名字必須兩個字!')
+            return
+        }
+        if(todayPeople.filter(e=>e.name==add_player_name).length!=0){
+            alert('錯誤 名字重複了!')
+            return
+        }
+        const new_player={ id: todayPeople.length+1, name: add_player_name, score: 400, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 }
+        todayPeople.push(new_player);
+        idle_people_update_to_div();
+        const today_play_list = []
+        for (let i = 1; i <= todayPeople.length; i++) {
+            today_play_list.push(todayPeople[i - 1].name)
+        }
+        send_today_play_list_to_firebase(today_play_list)
+        alert("新增成功");
+        return
+    }
     function handle_adjust_point_open_modal() {
         // 調整分數按鈕 會打開modal 
         $('#adjust_score_select').empty()
@@ -1611,6 +1651,10 @@
     $("#delete_record_score").on("click", handle_delete_record_score)
     $(".go_here").click(handle_go_here)
     $("#one_click_to_wait").click(handle_one_click_to_wait)
+    $("#add_player").click(handle_add_player_open_modal)
+    $("#add_player_confirm_button").click(handle_add_player_confirm)
+    $("#adjust_point").click(handle_adjust_point_open_modal)
+    $("#adjust_point_confirm_button").click(handle_adjust_point_confirm)
 
     $("#upload_data_to_firebase").click(handle_upload_data_to_firebase)
 

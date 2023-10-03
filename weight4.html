@@ -1135,6 +1135,7 @@
             obj.choosed = 0;
         })
         binding_team_list.push(temp_binding)
+        pickPeople()
         idle_people_update_to_div()
     }
     function handle_go_to_sleep() {
@@ -1195,6 +1196,8 @@
         }
         record_score(now_which_game, top_team_score, bottom_team_score)
         $('#myModal').modal('hide');
+        idle_people_update_to_div();
+        put_todayPeople_to_court();
     }
     function record_score(now_which_game_p, top_team_score_p, bottom_team_score_p) {
         const top_score_line = 1000
@@ -1558,16 +1561,16 @@
         return
     }
     function handle_add_player_confirm() {
-        const add_player_name=$('#add_player_name_input').val()
-        if(add_player_name.length!=2){
+        const add_player_name = $('#add_player_name_input').val()
+        if (add_player_name.length != 2) {
             alert('錯誤 名字必須兩個字!')
             return
         }
-        if(todayPeople.filter(e=>e.name==add_player_name).length!=0){
+        if (todayPeople.filter(e => e.name == add_player_name).length != 0) {
             alert('錯誤 名字重複了!')
             return
         }
-        const new_player={ id: todayPeople.length+1, name: add_player_name, score: 400, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 }
+        const new_player = { id: todayPeople.length + 1, name: add_player_name, score: 400, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 }
         todayPeople.push(new_player);
         idle_people_update_to_div();
         const today_play_list = []

@@ -112,16 +112,37 @@
             })
         })
     }
+    function del_no_need(str){
+        let withoutSpaces=str;
+        withoutSpaces = withoutSpaces.replaceAll("(季打)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(正取)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(備上)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(備取)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(季)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(正)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(備)", "");
+        withoutSpaces = withoutSpaces.replaceAll("(備)", "");
+        return withoutSpaces;
+    }
+    function simple_str(str){
+        let withoutSpaces=str;
+        withoutSpaces = withoutSpaces.replaceAll("(季打)", "(季)");
+        withoutSpaces = withoutSpaces.replaceAll("(正取)", "(正)");
+        withoutSpaces = withoutSpaces.replaceAll("(備上)", "(備)");
+        withoutSpaces = withoutSpaces.replaceAll("(備取)", "(備)");
+        return withoutSpaces;
+    }
     function check_name_list() {
         let data = $("#name_list").val()
         data = data.replace(/\d/g, "").replace(/[^\S\n]+/g, "");
         // 刪除所有空格
-        let withoutSpaces = data.replaceAll(".", "");
-        withoutSpaces = withoutSpaces.replaceAll(",", "");
-        withoutSpaces = withoutSpaces.replaceAll("(季打)", "");
-        withoutSpaces = withoutSpaces.replaceAll("(正取)", "");
-        withoutSpaces = withoutSpaces.replaceAll("(備上)", "");
-
+        let withoutSpaces = data.replaceAll("?", "").replaceAll(".", "").replaceAll("[]","");
+        withoutSpaces = withoutSpaces.replaceAll(",", "").replaceAll(/\n+/g, '\n').replace(/\n+$/, '');
+        // withoutSpaces = withoutSpaces.replaceAll("(季打)", "");
+        // withoutSpaces = withoutSpaces.replaceAll("(正取)", "");
+        // withoutSpaces = withoutSpaces.replaceAll("(備上)", "");
+        // withoutSpaces = withoutSpaces.replaceAll("(備取)", "");
+        
         // withoutSpaces=withoutSpaces.replaceAll(",","").replaceAll("")
         // 以換行符號切割成陣列
         let arr = withoutSpaces.split("\n");
@@ -132,7 +153,7 @@
             console.log(data_in_firebase)
             arr.forEach((element, index) => {
                 empty_arr.push([element, data_in_firebase[element]])
-                my_str += `${index + 1}.[${data_in_firebase[element] ? data_in_firebase[element] / 100 : "?"}]${element}\n`
+                my_str += `${index + 1}.[${data_in_firebase[del_no_need(element)] ? data_in_firebase[del_no_need(element)] / 100 : "?"}]${simple_str(element)}\n`
             });
             console.log(empty_arr)
             $("#output_name_list").val(my_str)

@@ -811,7 +811,7 @@
         }
         // 獲取輸入框中的內容
         const input = document.getElementById('input').value;
-        const converted_input = input.replace(/\*/g, '');
+        const converted_input = input.replace(/\*/g, '').replaceAll('?', '4').replace(/\([^)]*\)/g, '');
         // 處理輸入
         console.log(converted_input);
         // 將資料轉換為陣列 讀取特定資料的格式變成分數數據

@@ -206,8 +206,8 @@
         
         database.ref(`${club}/newest_score_data`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
-            console.log("網路資料",data_in_firebase)
-            console.log("手輸資料",key_in_data)
+            // console.log("網路資料",data_in_firebase)
+            // console.log("手輸資料",key_in_data)
             arr.forEach((element, index) => {
                 empty_arr.push([element, data_in_firebase[element]])
                 my_str += `${index + 1}.[${key_in_data[del_no_need(element)] ? key_in_data[del_no_need(element)]/100:data_in_firebase[del_no_need(element)] ? data_in_firebase[del_no_need(element)] / 100 : "?"}]${simple_str(element)}\n`
@@ -215,6 +215,10 @@
             });
             console.log(empty_arr)
             my_str=data_result.prefixContent ? data_result.prefixContent+'\n'+my_str:my_str
+            // console.log('arr.lenngth',arr.length
+            if (arr.length<=32){
+                my_str+="所有備取都補上囉"
+            }
             $("#output_name_list").val(my_str)
         })
 

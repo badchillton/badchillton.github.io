@@ -132,12 +132,67 @@
         withoutSpaces = withoutSpaces.replaceAll("(備取)", "(備)");
         return withoutSpaces;
     }
+    function keyInData(inputString) {
+        let result = {};
+        let inputArray = inputString.split('\n');  // 將輸入字串分割為陣列
+
+        for (let item of inputArray) {
+        // 使用正則表達式從字串中提取名稱和分數
+        let match = item.match(/\[([\d.]+)\](.+)\((季|正|備)\)/);
+        
+        if (match) {
+            let score = parseInt(parseFloat(match[1]) * 100);  // 轉換分數為整數
+            let name = match[2].trim();
+            result[name] = score;
+        }
+    }
+        return result;
+    }
+    // function extractEntries(inputString) {
+    //     let regex = /^(.*?\((季|正|備|季打|正取|備取)\)).*/gm;
+
+    //     let matches = [];
+    //     let match;
+    //     while ((match = regex.exec(inputString)) !== null) {
+    //         matches.push(match[1]);
+    //     }
+
+    //     return matches.join('\n');
+    // }
+
+    function extractEntries(inputString) {
+        let regex = /^(.*?\((季|正|備|季打|正取|備取)\)).*/gm;
+
+        let matches = [];
+        let match;
+        let firstMatchIndex = null;
+
+        while ((match = regex.exec(inputString)) !== null) {
+            matches.push(match[1]);
+            if (firstMatchIndex === null) {
+                firstMatchIndex = match.index;
+            }
+        }
+
+        let prefixContent = firstMatchIndex !== null ? inputString.substring(0, firstMatchIndex) : "";
+
+        return {
+            prefixContent: prefixContent.trim(),
+            matchedEntries: matches.join('\n')
+        };
+    }
+
+
+
     function check_name_list() {
         let data = $("#name_list").val()
+        data_result = extractEntries(data)
+        data=data_result.matchedEntries
+        let key_in_data = keyInData(data)
         data = data.replace(/\d/g, "").replace(/[^\S\n]+/g, "");
-        // 刪除所有空格
+        // 刪除所有數字、刪除所有空格
         let withoutSpaces = data.replaceAll("?", "").replaceAll(".", "").replaceAll("[]","");
-        withoutSpaces = withoutSpaces.replaceAll(",", "").replaceAll(/\n+/g, '\n').replace(/\n+$/, '');
+        withoutSpaces = withoutSpaces.replaceAll(",", "").replaceAll(/\n+/g, '\n').replace(/\n+$/, '').replace(/^\n/, '');
         // withoutSpaces = withoutSpaces.replaceAll("(季打)", "");
         // withoutSpaces = withoutSpaces.replaceAll("(正取)", "");
         // withoutSpaces = withoutSpaces.replaceAll("(備上)", "");
@@ -148,14 +203,18 @@
         let arr = withoutSpaces.split("\n");
         let empty_arr = []
         let my_str = ""
+        
         database.ref(`${club}/newest_score_data`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
-            console.log(data_in_firebase)
+            console.log("網路資料",data_in_firebase)
+            console.log("手輸資料",key_in_data)
             arr.forEach((element, index) => {
                 empty_arr.push([element, data_in_firebase[element]])
-                my_str += `${index + 1}.[${data_in_firebase[del_no_need(element)] ? data_in_firebase[del_no_need(element)] / 100 : "?"}]${simple_str(element)}\n`
+                my_str += `${index + 1}.[${key_in_data[del_no_need(element)] ? key_in_data[del_no_need(element)]/100:data_in_firebase[del_no_need(element)] ? data_in_firebase[del_no_need(element)] / 100 : "?"}]${simple_str(element)}\n`
+                if (index==31){my_str += '----------------\n'}
             });
             console.log(empty_arr)
+            my_str=data_result.prefixContent ? data_result.prefixContent+'\n'+my_str:my_str
             $("#output_name_list").val(my_str)
         })
 

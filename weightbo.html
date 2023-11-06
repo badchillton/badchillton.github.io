@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>和雲羽chill社 </title>
+    <!-- 引入 Bootstrap 的 CSS 檔案 -->
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/9.5.1/math.min.js"></script>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <!-- Add the Firebase Analytics SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+    <!-- Add the Firebase Realtime Database SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- 引入 jQuery 和 Bootstrap 的 JS 檔案 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- 引入 Toastify 的 CSS & JS文件  -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css"
+        integrity="sha512-UiKdzM5DL+I+2YFxK+7TDedVyVm7HMp/bN85NeWMJNYortoll+Nd6PU9ZDrZiaOsdarOyk9egQm6LOJZi36L2g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"
+        integrity="sha512-79j1YQOJuI8mLseq9icSQKT6bLlLtWknKwj1OpJZMdPt2pFBry3vQTt+NZuJw7NSd1pHhZlu0s12Ngqfa371EA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        .team-color-board {
+            border: 3px solid rgb(115, 104, 104);
+            box-shadow: 0 0 0 3px black;
+        }
+
+        .team-color-0 {
+            background-color: #ffd7e9;
+            /* border: 3px solid #ffd7e9; */
+        }
+
+        .team-color-1 {
+            background-color: #d7f2ff;
+        }
+
+        .team-color-2 {
+            background-color: #fff7c7;
+        }
+
+        .team-color-3 {
+            background-color: #c7ffd7;
+        }
+
+        .team-color-4 {
+            background-color: #e7d7ff;
+        }
+
+        .team-color-5 {
+            background-color: #ffe7d7;
+        }
+
+        .team-color-6 {
+            background-color: #f0e3e3;
+        }
+
+        .team-color-7 {
+            background-color: #d7ffeb;
+        }
+
+        .team-color-8 {
+            background-color: #ffd7dc;
+        }
+
+        .team-color-9 {
+            background-color: #d7f7ff;
+        }
+
+        .team-color-10 {
+            background-color: #fff2d7;
+        }
+
+        .team-color-11 {
+            /* background-color: #eaa69d; */
+            border: 10px solid #eaa69d;
+        }
+
+        .selected {
+            background-color: #007bff;
+            color: #fff;
+            border: 2px solid #010b17;
+        }
+
+        .choosed {
+            background-color: yellowgreen;
+        }
+
+        .even {
+            background-color: rgb(122, 176, 223);
+        }
+
+        .odd {
+            background-color: antiquewhite;
+        }
+
+        .court {
+            background-color: rgb(236, 236, 244);
+            border: 2px solid white;
+        }
+
+        .row>div {
+            padding: 5px;
+        }
+
+        .court td {
+            /* margin-top: 10px; */
+            height: 120px;
+        }
+
+        .court .net {
+            background-color: aliceblue;
+            height: 5px;
+        }
+
+        .main-container {
+            background-color: gray;
+        }
+
+        .gameStart {
+            background-color: greenyellow;
+            width: 45%;
+        }
+
+        .gameEnd {
+            background-color: red;
+            width: 100%;
+            color: aliceblue;
+        }
+
+        .person-span {
+            margin: 3px;
+            border: 1px solid black;
+            /* background-color: white; */
+        }
+
+        .court-5 {
+            /* background-color: white; */
+            background-color: burlywood;
+
+        }
+
+        .court-1 {
+            /* background-color: lightcoral; */
+            background-color: MediumSeaGreen;
+
+        }
+
+        .court-2 {
+            background-color: lightgreen;
+        }
+
+        .court-3 {
+            background-color: MediumSeaGreen;
+            /* background-color: lightblue; */
+        }
+
+        .court-4 {
+            /* background-color: lightyellow; */
+            background-color: lightgreen;
+
+        }
+
+        .analysis td {
+            height: auto;
+        }
+
+        .personal_table {
+            background-color: aliceblue;
+            margin: 2px;
+            border-radius: 3px;
+        }
+
+        .json {
+            width: 100%;
+        }
+
+        .simplify_able_true {
+            visibility: hidden;
+        }
+
+        .choosed {
+            background-color: rgb(216, 235, 133);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- 模態框的內容 -->
+                <div class="record_score_area">
+                    <select name="ss" id="which_game">
+                        <option value="1">1,2 VS 3,4</option>
+                        <option value="1">1,2 VS 3,4</option>
+                        <option value="1">1,2 VS 3,4</option>
+
+                    </select>
+                    <table class="table">
+                        <tr>
+                            <td id="player-1-td">1號</td>
+                            <td id="player-4-td">4號</td>
+                            <td><input id="top_team_score" type="number"></td>
+                        </tr>
+                        <tr>
+                            <td id="player-2-td">2號</td>
+                            <td id="player-3-td">3號</td>
+                            <td><input id="bottom_team_score" type="number"></td>
+                        </tr>
+                        <tr>
+                            <td><button id="delete_record_score" class="btn btn-primary">刪除特定場次紀錄</button></td>
+                            <td></td>
+                            <td><button id="record_score" class="btn btn-primary">登記分數</button></td>
+                        </tr>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="adjust_score_Modal">
+        <div class="modal-dialog">
+            <div class="modal-content modal_content_style">
+                <!-- 模態框的內容 -->
+                <div class="select_div">
+                    選擇的人：<select name="" id="adjust_score_select"></select>
+                </div>
+                <div class="">
+                    指定分數：<input id="adjust_target_point_input" type="number">
+                </div>
+                <div class="">
+                    <button id="adjust_point_confirm_button">執行調整分數</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="add_player_Modal">
+        <div class="modal-dialog">
+            <div class="modal-content modal_content_style">
+                <!-- 模態框的內容 -->
+                <div class="">
+                    指定人名：<input id="add_player_name_input">
+                </div>
+                <div class="">
+                    <button id="add_player_confirm_button">執行增加人員</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">羽Chill社 主控台</a>
+        </div>
+    </nav>
+    <div class="container-fluid main-container">
+        <div class="row court-container">
+        </div>
+
+        <div class="row">
+            <div class="col-4">
+                <div>
+                    <button class="btn-primary btn" id="pickPeople"> 選人上場</button>
+                    <button class="go_to_pk btn-primary btn" id="go_to_pk">去？球場比賽</button>
+                    <button id="open_modal_of_record_score" class="btn btn-primary ml-2">登入分數</button>
+                    <span class="wait_to_register_text" id="wait_to_register_text">待登記：</span>
+                    <button class="go_to_pk btn-primary btn" id="upload_data_to_firebase">上傳雲端</button>
+                    <button class="go_to_pk btn-primary btn" id="backup_data_to_firebase">上傳備份資料到雲端</button>
+                </div>
+                <div class="col">
+                    <table class="table table-bordered court-5 court">
+                        <tr>
+                            <td class="player1 go_here"></td>
+                            <td class="player4 go_here"></td>
+                        </tr>
+                        <tr>
+                            <td class='net top'> </td>
+                            <td class='net bottom'> </td>
+                        </tr>
+                        <tr>
+                            <td class="player2 go_here"></td>
+                            <td class="player3 go_here"></td>
+                        </tr>
+                    </table>
+                    <div>
+                        <button class="button" id="check-info">檢視資料</button>
+                        <button class="button" id="refresh-idle">刷新閒置人員資料</button>
+                        <button class="button" id="save-data">存資料</button>
+                        <button class="button" id="prepare_to_delete">準備設定人員 </button>
+                        <button class="button" id="delete_today_data">刪除本地端當日資料 </button>
+                    </div>
+                    <fieldset>
+                        <legend>環境變數設定區</legend>
+                        <select id="hide_score">
+                            <option value="0">顯示分數</option>
+                            <option value="1">隱藏分數</option>
+                        </select>
+                        <select id="score_count">
+                            <option value="1">分差*10分</option>
+                            <option value="2">分差*20分</option>
+                        </select>
+                        <select id="simplify_do">
+                            <option value="1">簡化操作流程</option>
+                            <option value="0">不簡化操作流程</option>
+                        </select>
+                        <select id="off_court_check">
+                            <option value="1">下場需要確認</option>
+                            <option value="0">下場不需要確認</option>
+                        </select>
+                        <button id="clear_global_config">清除設定</button>
+                    </fieldset>
+                    <fieldset class="simplify_able">
+                        <legend>個人戰績查詢</legend>
+                        <select name="personal_record" id="personal_record">
+                        </select>
+                        <button id="set_personal_record">確認執行</button>
+                        <button class="button" id="show_game_record">顯示所有比賽紀錄 </button>
+                    </fieldset>
+                </div>
+            </div>
+            <div class="col-8">
+                <div class="row person-wait card-container"></div>
+                <h2> 操作按鈕區</h2>
+                <div class="row button-group">
+                    <button id="binding" class="btn btn-primary ml-2">綁定</button>
+                    <button id="go_to_sleep" class="btn btn-primary ml-2">去休息區</button>
+                    <button id="go_to_wait" class="btn btn-primary ml-2">去備戰區</button>
+                    <button id="cancel_binding" class="btn btn-primary ml-2">解除綁定</button>
+                    <button id="cancel_choosed" class="btn btn-primary ml-2">清除選取</button>
+                    <button id="one_click_to_wait" class="btn btn-primary ml-2">一鍵備戰</button>
+                    <button id="adjust_point" class="btn btn-primary ml-2">積分調整</button>
+                    <button id="add_player" class="btn btn-primary ml-2">新增選手</button>
+
+                </div>
+                <h1> 休息區</h1>
+                <div class="row person-sleep"></div>
+                <!-- 多行文本輸入框 -->
+                <textarea id="input" rows="5"></textarea>
+                <!-- 按鈕 -->
+                <button onclick="processInput()">處理輸入</button>
+                <div id="all_data_area"></div>
+                <div id="bulletin_board">
+                    <h1>📰公布欄📰</h1>
+                    <div id="bulletin_board_message"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table id="game_record" class="table-bordered"></table>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
+
+<script>
+    //TODO: 刷新人會導致 上場顏色遺失 
+    //TODO: 重整頁面 會導致 prepare pk 資料不同 應每次變動都存檔
+    //firebase 相關設定 
+    const firebaseConfig = {
+        apiKey: "AIzaSyCCLXKg7Ru5p5dtgyRs28-qg8LQaG69yME",
+        // authDomain: "friendly-sensor-137111.firebaseapp.com",
+        databaseURL: "https://friendly-sensor-137111-default-rtdb.firebaseio.com",
+        projectId: "friendly-sensor-137111",
+        storageBucket: "friendly-sensor-137111.appspot.com",
+        // messagingSenderId: "824581584416",
+        appId: "1:824581584416:web:fdd5462dd85230d8caae45",
+        measurementId: "G-2HYJ96RDLV"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+    // 獲取資料庫的引用
+    const database = firebase.database();
+    //這些變數會寫入local storage
+    let todayPeople = [];
+    let prepare_PK = [];
+    let empty_court_arr = [1, 2, 3, 4];
+    let game_record = [];
+    let bulletin_board_message = []
+    let binding_team_list = []
+    let wait_to_register_list = []
+    //wait to register list 改變邏輯 變成 永久紀錄每一場 
+    //這些變數 每次進來會重置成這樣
+    let simplify = '1';
+    let hide_score = '0';
+    let score_count = '1';
+    let off_court_check = '1';
+    let global_config = {
+        albert_fisher: 1
+    }
+    //產生4個主要比賽場地
+    for (let i = 1; i < 5; i++) {
+        $(".court-container").append(court_generate(i))
+    }
+    //從local storage 載入資料 若沒有資料則產生假資料
+    if (!load_data()) {
+        for (let i = 1; i <= 28; i++) {
+            todayPeople.push({ id: i, name: `Object ${i}`, score: 500 - i, court: 0, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
+        }
+    }
+
+    /**
+     * 顯示訊息
+     * @param {string} message - 要顯示的訊息
+     * @param {string} [state="success"] - 訊息的狀態，可以是 "success"、"error"、"warning" 或 
+                "client_ok"、  "client_error" 中的任意一個（默認是 "success"）
+     * @returns {void}
+     * success 操作成功
+     * error 出現大錯了！ 正常操作 無論如何都不該出現！ 有出現就要去debug
+     * warning 正常操作下的違規操作   提醒此操作無效即可
+     */
+    function show_message(message, state = "success") {
+        const state_dict_map_backgroundColor = {
+            //綠色系版本：表成功
+            success: "linear-gradient(to right, #00b09b, #96c93d)",
+            //紅色系版本：表危險 錯誤
+            error: "linear-gradient(to right, #ff416c, #ff4b2b)",
+            //黃色系版本：表警告
+            warning: "linear-gradient(to right, #fbb034, #ffdd00)",
+            //藍色系版本：來自client端的操作成功
+            client_ok: "linear-gradient(to right, #00bfff, #0072ff)",
+            //紫色系版本：來自client端的操作失敗
+            client_error: "linear-gradient(to right, #9b50ff, #a849ff)",
+        }
+        if (state_dict_map_backgroundColor[state] == undefined) {
+            return show_message("show_message收到不符合的 state", "error")
+        }
+        if (typeof message !== "string") {
+            return show_message("show_message收到不符合的 message", "error")
+        }
+        Toastify({
+            text: message,
+            duration: 3000, // 設定顯示時間（毫秒）
+            newWindow: true,
+            close: true,
+            gravity: "bottom", // 設定顯示位置
+            position: "right",
+            backgroundColor: state_dict_map_backgroundColor[state],
+            stopOnFocus: true // 在焦點處於提示訊息上時停止顯示
+        }).showToast();
+    }
+    //court 相關的function
+    function show_player_data_to_court(topTeamPlayers, bottomTeamPlayers, court) {
+        //topTeamPlayers, bottomTeamPlayers 都是array 放了兩個選手的資料
+        //court 是 int 表示第幾場次
+        if (topTeamPlayers.length != 2 || bottomTeamPlayers.length != 2) {
+            return (show_message("顯示選手資料到場地 發生錯誤(選手列表)"), "error")
+        }
+        if (court < 0 || court > 5) {
+            return (show_message("顯示選手資料到場地 發生錯誤(場地)"), "error")
+        }
+        console.log(topTeamPlayers)
+        console.log(bottomTeamPlayers)
+        $(`.court-${court} .player1`).html(personal_card(topTeamPlayers[0]))
+        $(`.court-${court} .player2`).html(personal_card(bottomTeamPlayers[0]))
+        $(`.court-${court} .player3`).html(personal_card(bottomTeamPlayers[1]))
+        $(`.court-${court} .player4`).html(personal_card(topTeamPlayers[1]))
+        $(`.court-${court} .top`).html(`↑：${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
+        $(`.court-${court} .bottom`).html(`↓：${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
+        if (court == 5) {
+            const id_list = [topTeamPlayers[0].id, topTeamPlayers[1].id, bottomTeamPlayers[0].id, bottomTeamPlayers[1].id,]
+            $(".team-color-board").removeClass('team-color-11')
+            id_list.forEach(obj => $(`#${obj}`).addClass('team-color-11'))
+        }
+    }
+    function empty_data_to_court(court) {
+        if (court < 1 || court > 5) {
+            show_message("清空場地發生問題", "error")
+        }
+        $(`.court-${court} .player1`).empty()
+        $(`.court-${court} .player2`).empty()
+        $(`.court-${court} .player3`).empty()
+        $(`.court-${court} .player4`).empty()
+        $(`.court-${court} .top`).empty()
+        $(`.court-${court} .bottom`).empty()
+        if (court == 5) {
+            $(".team-color-board").removeClass('team-color-11')
+        }
+    }
+    //產生文字檔類
+    function personal_card(person) {
+        if (person == undefined) {
+            show_message("personal card的參數有誤 傳入UNDEFINED", "error")
+            return
+        }
+        if (person.name == undefined || person.score == undefined) {
+            show_message("personal card的參數有誤", "error")
+            return
+        }
+        return (`${person.name}<br>⚔️：${hide_score == 1 ? '???' : person.score}`)
+    }
+    function court_generate(court_number) {
+        if (court_number < 1 || court_number > 5) {
+            show_message("生成場地資訊發生問題", "error")
+        }
+        return (`<div class="col-sm">
+                <table class="table table-bordered court-${court_number} court">
+                    <tr>
+                        <td class="player1 td-court-${court_number} td-click"></td>
+                        <td class="player4 td-court-${court_number} td-click"></td>
+                    </tr>
+                    <tr>
+                        <td class='net top'> </td>
+                        <td class='net bottom'> </td>
+                    </tr>
+                    <tr>
+                        <td class="player2 td-court-${court_number} td-click"></td>
+                        <td class="player3 td-court-${court_number} td-click"></td>
+                    </tr>
+                </table>
+                <button class="gameEnd" id="court${court_number}end">場地${court_number} 比賽結束</button>
+            </div>`)
+    }
+
+    //重要影響資料的函數-動作 
+    function pickPeople() {
+        //觸發時機：當按下選人按鈕 或是 自動簡化模式時 按下下場按鈕時會自動選人
+        //主要影響 prepare_PK
+        const people = todayPeople.filter(person => person['court'] == 0 && person['idleRounds'] >= 0);
+        if (people.length < 8) {
+            show_message("在備戰區的人數不足8人 演算法失靈", "error")
+            return
+        }
+        const four_people = letsPlay(todayPeople, binding_team_list)
+        // const four_people = pick_weight_count(todayPeople, binding_team_list)
+        const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
+        console.log(todayPeople)
+        prepare_PK_refresh(pickedPeople)
+    }
+    function go_to_PK() {
+        // 觸發時機 按下去球場比賽 或自動簡化模式時 按下下場按鈕時會自動上場
+        // 主要影響 todayPeople 的court & player, prepare_PK , empty_court_arr
+        // 把資料改上去 並顯示人員在對的位置
+        if (empty_court_arr.length == 0) {
+            alert("現在沒有空場 無法進行比賽")
+            return
+        }
+        if (prepare_PK.length != 4) {
+            return (alert("請先選人 再去PK"))
+        }
+        const court = empty_court_arr.shift()
+        console.log("court")
+        console.log(court)
+        //!!! prepare_PK 不一定會跟today_people的物件完全綁定！！！
+        //故只修改prepare_PK可能造成錯誤
+        prepare_PK.forEach((person, index) => {
+            person.court = court;
+            person.player = index + 1;
+            person.game_count += 1;
+            todayPeople[person.id - 1].court = court
+            todayPeople[person.id - 1].player = index + 1;
+            todayPeople[person.id - 1].game_count += 1;
+        });
+        show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], court)
+        const now = new Date();
+        const timezoneOffsetInMs = now.getTimezoneOffset() * 60 * 1000;
+        const currentTimeInMs = now.getTime() - timezoneOffsetInMs;
+        const currentTime = new Date(currentTimeInMs);
+        const hours = currentTime.getHours().toString().padStart(2, '0');
+        const minutes = currentTime.getMinutes().toString().padStart(2, '0');
+        const seconds = currentTime.getSeconds().toString().padStart(2, '0');
+        const currentTime_hms = `${hours}:${minutes}:${seconds}`
+        bulletin_board_message.push([prepare_PK[0].name, prepare_PK[1].name, prepare_PK[2].name, prepare_PK[3].name, court, currentTime_hms])
+        refresh_bulletin_board_message()
+        const speak_text1 = String(`大會報告`)
+        speak(speak_text1, times = 1, rate = 0.8);
+        const speak_text2 = String(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
+        speak(speak_text2, times = 3, rate = 0.7);
+        todayPeople.forEach(person => {
+            if (person.court == 0 || person.court == -1) {
+                person.idleRounds += 1;
+            } else {
+                person.idleRounds = 0;
+            }
+        })
+        prepare_PK_refresh([]);
+        idle_people_update_to_div()
+    }
+
+
+    // 操控 準備上場人員的函數 只要會動到prepare_PK 都應該透過這個函數操作
+    function prepare_PK_refresh(pickedPeople, index = -1) {
+        //只使用一個參數的時候 就是整個替換prepare_PK
+        //使用兩個參數的時候 index表示要替換哪一個prepare_PK的人 從0-3 表示player1-4
+        //這個函數 也同時控制賽場的顯示還有存地端和雲端
+        if (index == -1) {
+            prepare_PK = pickedPeople
+        }
+        if (index < 4 && index > -1) {
+            prepare_PK[index] = pickedPeople
+        }
+        save_data()
+        if (pickedPeople.length == 0) {
+            empty_data_to_court(5);
+        }
+        if (pickedPeople.length == 4) {
+            show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
+        }
+        send_prepare_PK_to_firebase()
+
+    }
+
+    //修改court 下場休息 自動解除綁定
+    function court_change(person, binding_list, change_number = -1) {
+        // person 一個人物物件 
+        // binding_list 永遠應該傳入 binding_team_list
+        // change_number 把這個人的court 改成多少 一般去休息才使用 所以是-1
+        const temp_id = person.id
+        let binding_list_index = -1
+        //檢查是否在綁定的列表中
+        binding_list.forEach((binding, index) => {
+            if (binding.includes(temp_id)) {
+                binding_list_index = index
+            }
+        })
+        if (binding_list_index != -1) {
+            binding_list.splice(binding_list_index, 1)
+        }
+        person.court = change_number
+
+    }
+    //展示資料類型
+    function refresh_bulletin_board_message() {
+        $("#bulletin_board_message").empty()
+        bulletin_board_message.forEach(obj => $("#bulletin_board_message").prepend((`《${obj[0]}》 和 《${obj[3]}》 對戰 《${obj[1]}》 和 《${obj[2]}》，請至第${obj[4]}球場比賽。<br>`)))
+    }
+
+    function handle_one_click_to_wait() {
+        todayPeople.filter(obj => obj.court == -1).forEach(obj => obj.court = 0)
+        idle_people_update_to_div()
+    }
+    function idle_people_update_to_div() {
+        const idle_people = todayPeople.filter(obj => obj.court === 0 || obj.court === -1).sort((a, b) => b.idleRounds - a.idleRounds)
+        $(".person-wait").empty()
+        $(".person-sleep").empty()
+        idle_people.forEach(obj => {
+
+        })
+        for (x in idle_people) {
+            if (idle_people[x].court == -1) {
+                $(".person-sleep").append(idle_personal_card(idle_people[x]))
+            }
+            if (idle_people[x].court == 0) {
+                $(".person-wait").append(idle_personal_card(idle_people[x]))
+            }
+            idle_people[x].choosed = 0;
+        }
+        console.log(binding_team_list)
+        binding_team_list.forEach((obj, index) => {
+            obj.forEach((in_obj, in_index) => {
+                $(`#${in_obj}`).addClass(`team-color-${index}`)
+            })
+        })
+        $(".selectable").click(handle_personal_card_click)
+        upload_real_time_data_todayPeople_to_firebase()
+        save_data()
+    }
+    function idle_personal_card(person) {
+        return (`
+        <div class='col-md-2'>
+        <div class="card selectable team-color-board" id='${person.id}'>
+                        <div class="card-body">
+                            <h5 class="card-title">${person.name}</h5>
+                            <p class="card-text">${hide_score == 1 ? '???' : person.score}／${person.idleRounds}</p>
+                        </div>
+                    </div>
+                    </div>`)
+    }
+    function handle_personal_card_click(e) {
+        const click_id = parseInt(e.currentTarget.id)
+        console.log(`#${e.currentTarget.id}`)
+        if (todayPeople[click_id - 1].choosed == 1) {
+            $(`#${e.currentTarget.id}`).removeClass("selected")
+            todayPeople[click_id - 1].choosed = 0;
+        } else {
+            todayPeople[click_id - 1].choosed = 1;
+            $(`#${e.currentTarget.id}`).addClass("selected")
+        }
+
+
+    }
+    function handle_end_game_new(e) {
+        const str = e.target.id;
+        const sixthChar = str.charAt(5); // 取得第六個字 (從 0 開始算)
+        const court_number = parseInt(sixthChar, 10); // 將第六個字轉換成數字 (10 代表使用十進制)
+        console.log(empty_court_arr)
+        console.log(court_number)
+        if (empty_court_arr.includes(court_number)) {
+            return (alert(`第${court_number}場還是空的 無法結束比賽`))
+        }
+        if (off_court_check == '1') {
+            var confirmed = confirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`);
+            if (confirmed) {
+                off_court_new(court_number)
+            }
+        } else {
+            off_court_new(court_number)
+        }
+    }
+    function off_court_new(court_number) {
+        const result = todayPeople.filter(obj => obj.court === court_number);
+        const temp_id_list = [1, 2, 3, 4]
+        let temp_name_list = []
+        result.forEach(obj => {
+            temp_id_list[Number(obj.player) - 1] = obj.id
+            obj.court = 0;
+        })
+        wait_to_register_list.push(temp_id_list)
+        temp_id_list.forEach(obj => temp_name_list.push(todayPeople[obj - 1].name))
+        upload_wait_to_register_to_firebase(temp_name_list)
+        empty_data_to_court(court_number)
+        empty_court_arr.push(Number(court_number))
+        console.log("empty_court_arr 增加" + court_number)
+        idle_people_update_to_div()
+        save_data()
+        if (simplify == '1') {
+            go_to_PK()
+            pickPeople()
+        }
+        //可能要送資料
+        refresh_wait_to_register_text();
+    }
+    function handle_check_info() {
+        console.log(todayPeople)
+        console.log(empty_court_arr)
+        console.log(prepare_PK)
+        console.log(game_record)
+        const todayPeople_json = JSON.stringify(todayPeople);
+        const empty_court_arr_json = JSON.stringify(empty_court_arr);
+        const prepare_PK_json = JSON.stringify(prepare_PK);
+        const game_record_json = JSON.stringify(game_record);
+        const bulletin_board_message_json = JSON.stringify(bulletin_board_message);
+        $("#all_data_area").append(`<textarea id = "todayPeople_data" class="json" > ${todayPeople_json}</textarea > `)
+        $("#all_data_area").append(`<textarea id = "empty_court_arr_data" class="json" > ${empty_court_arr_json}</textarea > `)
+        $("#all_data_area").append(`<textarea id = "prepare_PK_data" class="json" > ${prepare_PK_json}</textarea > `)
+        $("#all_data_area").append(`<textarea id = "game_record_data" class="json" > ${game_record_json}</textarea > `)
+        $("#all_data_area").append(`<textarea id = "game_record_data" class="json" > ${bulletin_board_message_json}</textarea > `)
+        $("#all_data_area").append(`非必要不要使用這個功能 格式錯就會GG喔`)
+        $("#all_data_area").append(`<button id = "edit_save" > 儲存修改的資料 </button > `)
+        $("#all_data_area").append(`<button id = "edit_off" > 退出編輯模式 </button > `)
+        $("#edit_save").on("click", handle_edit_save)
+        $("#edit_off").on("click", handle_edit_off)
+    }
+    function save_data() {
+        // 將物件陣列轉換為 JSON 字串
+        const todayPeople_json = JSON.stringify(todayPeople);
+        const empty_court_arr_json = JSON.stringify(empty_court_arr);
+        const prepare_PK_json = JSON.stringify(prepare_PK);
+        const game_record_json = JSON.stringify(game_record);
+        const bulletin_board_message_json = JSON.stringify(bulletin_board_message);
+        const wait_to_register_list_json = JSON.stringify(wait_to_register_list);
+        const binding_team_list_json = JSON.stringify(binding_team_list)
+        console.log("save")
+        console.log(todayPeople)
+        // 將 JSON 字串存入本地存儲中
+        localStorage.setItem('todayPeople', todayPeople_json);
+        localStorage.setItem('empty_court_arr', empty_court_arr_json);
+        localStorage.setItem('prepare_PK', prepare_PK_json);
+        localStorage.setItem('game_record', game_record_json);
+        localStorage.setItem('bulletin_board_message', bulletin_board_message_json);
+        localStorage.setItem('wait_to_register_list', wait_to_register_list_json);
+        localStorage.setItem('binding_team_list', binding_team_list_json);
+    }
+    function load_data() {
+        if (localStorage.getItem('todayPeople') == undefined || localStorage.getItem('empty_court_arr') == undefined || localStorage.getItem('prepare_PK') == undefined) {
+            return false
+        }
+        // 從本地存儲中取出 JSON 字串 並且轉換 放入 正在用的資料
+        todayPeople = JSON.parse(localStorage.getItem('todayPeople'));
+        empty_court_arr = JSON.parse(localStorage.getItem('empty_court_arr'));
+        prepare_PK = JSON.parse(localStorage.getItem('prepare_PK'));
+        game_record = JSON.parse(localStorage.getItem('game_record'));
+        wait_to_register_list = JSON.parse(localStorage.getItem('wait_to_register_list')) ? JSON.parse(localStorage.getItem('wait_to_register_list')) : [];
+        bulletin_board_message = JSON.parse(localStorage.getItem('bulletin_board_message')) ? JSON.parse(localStorage.getItem('bulletin_board_message')) : [];
+        binding_team_list = JSON.parse(localStorage.getItem('binding_team_list')) ? JSON.parse(localStorage.getItem('binding_team_list')) : [];
+        put_todayPeople_to_court()
+        return true
+    }
+    function put_todayPeople_to_court() {
+        for (let court = 1; court < 6; court++) {
+            const temp_arr = todayPeople.filter(obj => obj.court == court)
+            if (temp_arr.length != 0) {
+                temp_arr.sort((a, b) => a.player - b.player);
+                show_player_data_to_court([temp_arr[0], temp_arr[3]], [temp_arr[1], temp_arr[2]], court)
+            }
+        }
+        if (prepare_PK.length == 4) {
+            show_player_data_to_court([prepare_PK[0], prepare_PK[3]], [prepare_PK[1], prepare_PK[2]], 5)
+        }
+        //TODO:應該要上傳資料到firebase
+    }
+    function processInput() {
+        let confirmed = confirm("確定輸入嗎？ 此操作將導致今天的資料重置！")
+        if (confirmed == false) {
+            return
+        }
+        // 獲取輸入框中的內容
+        const input = document.getElementById('input').value;
+        const converted_input = input.replace(/\*/g, '').replaceAll('?', '4').replace(/\([^)]*\)/g, '');
+        // 處理輸入
+        console.log(converted_input);
+        // 將資料轉換為陣列 讀取特定資料的格式變成分數數據
+        const regex = /(\d+)\.\[(\d*\.?\d*)\](.*)/g;
+        const result = [];
+        while ((matches = regex.exec(converted_input)) !== null) {
+            const id = parseInt(matches[1]);
+            const score = matches[2] !== '' ? parseInt(parseFloat(matches[2]) * 100) : 0;
+            const name = matches[3].trim();
+            result.push({ id, score, name });
+        }
+        //初始化
+        todayPeople = [];
+        prepare_PK = [];
+        empty_court_arr = [1, 2, 3, 4];
+        game_record = [];
+        bulletin_board_message = []
+        wait_to_register_list = []
+        binding_team_list = []
+
+        const today_play_list = []
+        for (let i = 1; i <= result.length; i++) {
+            todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
+            today_play_list.push(result[i - 1].name)
+        }
+        for (let i = 1; i < 6; i++) {
+            empty_data_to_court(i)
+        }
+        idle_people_update_to_div()
+        save_data()
+        //上傳firebase 的today_play_list
+        reset_today_data_to_firebase()
+        //TODO: 放人到雲端 要塞到家人功能
+        send_today_play_list_to_firebase(today_play_list)
+    }
+    function prepare_to_delete() {
+        //即將棄用
+        $("#delete").empty()
+        $("#prepare_PK_person").empty()
+        for (i = 0; i < todayPeople.length; i++) {
+            $("#delete").append(`<option value = '${todayPeople[i].id}' > ${todayPeople[i].name}</option > `)
+        }
+        for (i = 0; i < todayPeople.length; i++) {
+            $("#prepare_PK_person").append(`<option value = '${todayPeople[i].id}' > ${todayPeople[i].name}</option > `)
+        }
+        for (i = 0; i < todayPeople.length; i++) {
+            $("#personal_record").append(`<option value = '${todayPeople[i].id}' > ${todayPeople[i].name}</option > `)
+            $("#binding_partners_2").append(`<option value = '${todayPeople[i].id}' > ${todayPeople[i].name}</option > `)
+            $("#binding_partners_1").append(`<option value = '${todayPeople[i].id}' > ${todayPeople[i].name}</option > `)
+        }
+
+    }
+    function handle_hide_score_change() {
+        console.log('將 hide_score 設置為：' + $(this).val())
+        hide_score = $(this).val()
+        put_todayPeople_to_court()
+        idle_people_update_to_div()
+    }
+    function handle_score_count_change() {
+        console.log('將 score_count 設置為：' + $(this).val())
+        score_count = $(this).val()
+    }
+    function handle_simplify_do_change() {
+        console.log('將 simplify 設置為：' + $(this).val())
+        simplify = $(this).val()
+    }
+    function handle_off_court_check_change() {
+        console.log('將 off_court_check 設置為：' + $(this).val())
+        off_court_check = $(this).val()
+    }
+    function handle_show_game_record() {
+        $("#game_record").empty()
+        for (x in game_record) {
+            let y = game_record.length - x - 1
+            let even_or_odd = y % 2 == 0 ? 'even' : "odd"
+            $("#game_record").append(`
+            <tr class='${even_or_odd}'><td>${game_record[y][0]}、${game_record[y][3]}</td><td>${game_record[y][1]}、${game_record[y][2]}</td></tr>
+            <tr class='${even_or_odd}'><td>${game_record[y][4]}</td><td>${game_record[y][5]}</td></tr>
+            `)
+        }
+    }
+    function handle_set_personal_record() {
+        console.log($("#personal_record").val())
+        const the_name = todayPeople[Number($("#personal_record").val()) - 1].name
+        $("#game_record").empty()
+        for (x in game_record) {
+            let y = game_record.length - x - 1
+            if (game_record[y].includes(the_name))
+                $("#game_record").append(`
+        <tr >
+                        <td>${game_record[y][0]}、${game_record[y][3]}</td>
+                        <td>${game_record[y][1]}、${game_record[y][2]}</td>
+                    </tr >
+        <tr><td>${game_record[y][4]}</td><td>${game_record[y][5]}</td></tr>
+    `)
+        }
+    }
+    function handle_edit_save() {
+        //即將棄用 或需要改寫
+        const todayPeople_json = $("#todayPeople_data").val()
+        const empty_court_arr_json = $("#empty_court_arr_data").val()
+        const prepare_PK_json = $("#prepare_PK_data").val()
+        const game_record_json = $("#game_record_data").val()
+        // 將 JSON 字串存入本地存儲中
+        localStorage.setItem('todayPeople', todayPeople_json);
+        localStorage.setItem('empty_court_arr', empty_court_arr_json);
+        localStorage.setItem('prepare_PK', prepare_PK_json);
+        localStorage.setItem('game_record', game_record_json);
+        load_data()
+    }
+    function handle_edit_off() {
+        $("#all_data_area").empty()
+    }
+    function speak(text, times = 1, rate = 1) {
+        // 创建 SpeechSynthesisUtterance 对象
+        var msg = new SpeechSynthesisUtterance();
+        //文本速度
+        msg.rate = rate;
+        // 设置要朗读的文本
+        msg.text = text.repeat(times);
+        // 播放语音
+        window.speechSynthesis.speak(msg);
+
+    }
+    function handle_delete_today_data() {
+        //即將棄用 移動到處理輸入邏輯
+        const confirmed = confirm('確定刪除今日的資料嗎？(一般只在存好資料後，要開始打之前刪除，刪除後請套用當日球有資料再開始使用)')
+        if (confirmed) {
+            todayPeople = [];
+            prepare_PK = [];
+            empty_court_arr = [1, 2, 3, 4];
+            game_record = [];
+            bulletin_board_message = []
+            wait_to_register_list = []
+            save_data()
+            load_data()
+        }
+    }
+    function handle_binding() {
+        const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
+        if (choosed_people.length > 4) {
+            return (alert(`當前綁定功能 只能接受最多四人綁定`))
+        }
+        if (choosed_people.length < 2) {
+            return (alert(`當前綁定功能 至少要兩人才可以綁定`))
+        }
+        for (x in choosed_people) {
+            const found = binding_team_list.some(function (row) {
+                return row.includes(choosed_people[x].id);
+            });
+            if (found) {
+                return (alert(`請先移除${choosed_people[x].name}的綁定 再重新進行綁定`))
+            }
+        }
+        if (global_config.albert_fisher == 1) {
+            if (choosed_people.filter(obj => obj.name == "燕羽").length == 1 && choosed_people.filter(obj => obj.name == "阿承").length == 1) {
+                return (show_message("發生不可預期的錯誤", "error"))
+            }
+        }
+
+        const temp_binding = [];
+        choosed_people.forEach(obj => {
+            temp_binding.push(obj.id)
+            obj.choosed = 0;
+        })
+        binding_team_list.push(temp_binding)
+        idle_people_update_to_div()
+        pickPeople()
+    }
+    function handle_go_to_sleep() {
+        const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
+        if (choosed_people.length == 0) {
+            return (show_message("沒有選人 操作無效"))
+        }
+        choosed_people.forEach(obj => {
+            // obj.court = -1;
+            court_change(obj, binding_team_list, -1)
+            obj.choosed = 0;
+        })
+        idle_people_update_to_div()
+    }
+    function handle_go_to_wait() {
+        const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
+        if (choosed_people.length == 0) {
+            return (show_message("沒有選人 操作無效"))
+        }
+        choosed_people.forEach(obj => {
+            obj.court = 0;
+            obj.choosed = 0;
+        })
+        idle_people_update_to_div()
+    }
+    function handle_cancel_binding() {
+        const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
+        const team_id_list = []
+        choosed_people.forEach(obj => team_id_list.push(obj.id))
+        var index = binding_team_list.findIndex(function (row) {
+            return row.every(function (value, i) {
+                return value === team_id_list[i];
+            });
+        });
+        if (index != -1) {
+            binding_team_list.splice(index, 1)
+            choosed_people.forEach(obj => {
+                obj.choosed = 0;
+            })
+            idle_people_update_to_div()
+        } else {
+            return (alert("請正確指定移除綁定對象（必須是同一組的全部人）"))
+        }
+    }
+    function handle_cancel_choosed() {
+        const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
+        choosed_people.forEach(obj => {
+            obj.choosed = 0;
+        })
+        idle_people_update_to_div()
+    }
+    function handle_record_score() {
+        const now_which_game = parseInt($("#which_game").val())
+        const top_team_score = parseInt($("#top_team_score").val())
+        const bottom_team_score = parseInt($("#bottom_team_score").val())
+        if (isNaN(top_team_score) || isNaN(bottom_team_score)) {
+            return (alert("請先填入分數 再進行登記"))
+        }
+        record_score(now_which_game, top_team_score, bottom_team_score)
+        $('#myModal').modal('hide');
+        idle_people_update_to_div();
+        put_todayPeople_to_court();
+    }
+    function record_score(now_which_game_p, top_team_score_p, bottom_team_score_p) {
+        const top_score_line = 1000
+        const bottom_score_line = 100
+        const record_database = database
+        const now_which_game = parseInt(now_which_game_p)
+        const top_team_score = parseInt(top_team_score_p)
+        const bottom_team_score = parseInt(bottom_team_score_p)
+        const player_list = [todayPeople[wait_to_register_list[now_which_game][0] - 1].name, todayPeople[wait_to_register_list[now_which_game][1] - 1].name, todayPeople[wait_to_register_list[now_which_game][2] - 1].name, todayPeople[wait_to_register_list[now_which_game][3] - 1].name]
+        const temp_game_record = []
+        console.log(now_which_game)
+        temp_game_record.push(todayPeople[wait_to_register_list[now_which_game][0] - 1].name)
+        temp_game_record.push(todayPeople[wait_to_register_list[now_which_game][1] - 1].name)
+        temp_game_record.push(todayPeople[wait_to_register_list[now_which_game][2] - 1].name)
+        temp_game_record.push(todayPeople[wait_to_register_list[now_which_game][3] - 1].name)
+        temp_game_record.push(top_team_score)
+        temp_game_record.push(bottom_team_score)
+        temp_game_record.push(new Date())
+
+        game_record.push(temp_game_record)
+
+        const score_diff_scale = score_count == '1' ? 10 : score_count == 2 ? 20 : 10
+        //計算分數：
+        const score_diff = top_team_score - bottom_team_score
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        count_score_function(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
+
+
+        //將雲端登記列表更新
+        record_database.ref(`Chung_Shan_elementary_school/wait_to_register/`).once('value').then(snapshot => {
+            console.log(snapshot.val())
+            const data = snapshot.val()
+            for (const key in data) {
+                if (data[key].player1 == player_list[0] && data[key].player2 == player_list[1] && data[key].player3 == player_list[2] && data[key].player4 == player_list[3]) {
+                    record_database.ref(`Chung_Shan_elementary_school/wait_to_register/${key}`).update({
+                        register_name: "大會",
+                        register_time: get_now_time(),
+                        score_bottom: bottom_team_score,
+                        score_top: top_team_score
+                    }).then((result) => {
+                        console.log("成功的結果：", result);
+                        if (result == undefined) {
+                            show_message("雲端登記分數成功")
+                        }
+                    })
+                        .catch((error) => {
+                            console.log("發生錯誤：", error);
+                            show_message("雲端登記分數出錯啦！")
+                        });
+                }
+            }
+        })
+        wait_to_register_list.splice(now_which_game, 1)
+        show_message("完成登記")
+        idle_people_update_to_div()
+        refresh_wait_to_register_text()
+    }
+    function handle_open_modal_of_record_score() {
+        if (wait_to_register_list.length == 0) {
+            return (alert("沒有需要登記的場次"))
+        }
+        $("#which_game").empty()
+        wait_to_register_list.forEach((obj, index) => {
+            $("#which_game").append(`<option value="${index}">${todayPeople[obj[0] - 1].name} & ${todayPeople[obj[3] - 1].name} V.S. ${todayPeople[obj[1] - 1].name} ${todayPeople[obj[2] - 1].name} </option>`)
+        })
+        $("#player-1-td").html(todayPeople[wait_to_register_list[0][0] - 1].name)
+        $("#player-2-td").html(todayPeople[wait_to_register_list[0][1] - 1].name)
+        $("#player-3-td").html(todayPeople[wait_to_register_list[0][2] - 1].name)
+        $("#player-4-td").html(todayPeople[wait_to_register_list[0][3] - 1].name)
+        $("#which_game").change(handle_which_game_change)
+        $('#myModal').modal('show');
+
+
+    }
+    function handle_which_game_change() {
+        const now_which_game = parseInt($("#which_game").val())
+        $("#player-1-td").html(todayPeople[wait_to_register_list[now_which_game][0] - 1].name)
+        $("#player-2-td").html(todayPeople[wait_to_register_list[now_which_game][1] - 1].name)
+        $("#player-3-td").html(todayPeople[wait_to_register_list[now_which_game][2] - 1].name)
+        $("#player-4-td").html(todayPeople[wait_to_register_list[now_which_game][3] - 1].name)
+    }
+
+    function handle_clear_global_config() {
+        global_config.albert_fisher = 0;
+    }
+
+    function handle_delete_record_score() {
+        const now_which_game = parseInt($("#which_game").val())
+        const confirmed = confirm(`你確定要刪除${todayPeople[wait_to_register_list[now_which_game][0] - 1].name} & ${todayPeople[wait_to_register_list[now_which_game][3] - 1].name} V.S. ${todayPeople[wait_to_register_list[now_which_game][1] - 1].name} ${todayPeople[wait_to_register_list[now_which_game][2] - 1].name} 這個對局的紀錄嗎？ 一般只在按錯場次上場 趕快按下來 要清除這個錯誤使用！`)
+        if (confirmed) {
+            wait_to_register_list.splice(now_which_game, 1)
+            show_message("成功刪除場次紀錄")
+            $('#myModal').modal('hide');
+            refresh_wait_to_register_text()
+        }
+    }
+
+    function handle_backup_data_to_firebase() {
+        //會把資料備份到firebase 
+        //備份目標地址 backup_today_data
+        // origin : server端
+        // 備份資料 ：today_people, game_record 
+        // 資料要完整 請把所有未登記的分數填完 
+        database.ref(`Chung_Shan_elementary_school/backup_today_data/${get_now_time()}`).set({ todayPeople, game_record })
+        show_message("完成備份")
+    }
+
+    function refresh_wait_to_register_text() {
+        $("#wait_to_register_text").html(`待登記: ${wait_to_register_list.length}`)
+    }
+    function handle_go_here() {
+        //手動點人到準備PK區域上
+        const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
+        if (choosed_people.length != 1) {
+            return (show_message('正在選擇的人數必須為"1" 操作才有效', "warning"))
+        }
+        if (prepare_PK.length != 4) {
+            return (show_message('必須先按選人 操作才有效', "warning"))
+        }
+        //檢查 手動派上場的人 是不是不在準備PK區上
+        if (prepare_PK.filter(obj => obj.id == choosed_people[0].id).length != 0) {
+            return show_message("不可以將已經在準備PK的人 在指定到場上", "warning")
+        }
+        if (prepare_PK.filter(obj => obj.id == choosed_people[0].id).length != 0) {
+            return show_message("不可以將已經在準備PK的人 在指定到場上", "warning")
+        }
+        const which_player = $(this).hasClass("player1") ? 1 : $(this).hasClass("player2") ? 2 : $(this).hasClass("player3") ? 3 : $(this).hasClass("player4") ? 4 : -1
+        if (which_player == -1) {
+            return (show_message('which_player 不可預期的錯誤', "error"))
+        }
+        prepare_PK_refresh(choosed_people[0], which_player - 1)
+        choosed_people[0].choosed = 0
+        idle_people_update_to_div()
+        put_todayPeople_to_court()
+        show_message("替換成功")
+    }
+    function handle_go_there() {
+        //手動點人到比賽場地上
+        const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
+        if (choosed_people.length != 1) {
+            return (show_message('正在選擇的人數必須為"1" 操作才有效', "warning"))
+        }
+        //檢查 手動派上場的人 是不是不在其他比賽場上
+        //一般已經在場上的人 也不會被選擇到 所以不應該發生
+        if (todayPeople.filter(obj => obj.id == choosed_people[0] && obj.court != 0).length != 0) {
+            return show_message("不可以將已經在場上的人 在指定到場上", "warning")
+        }
+        // if (prepare_PK.filter(obj => obj.id == choosed_people[0].id).length != 0) {
+        //     return show_message("不可以將已經在準備PK的人 在指定到場上", "warning")
+        // }
+        const which_player = $(this).hasClass("player1") ? 1 : $(this).hasClass("player2") ? 2 : $(this).hasClass("player3") ? 3 : $(this).hasClass("player4") ? 4 : -1
+        const which_court = $(this).hasClass("td-court-1") ? 1 : $(this).hasClass("td-court-2") ? 2 : $(this).hasClass("td-court-3") ? 3 : $(this).hasClass("td-court-4") ? 4 : -1
+        if (which_player == -1) {
+            return (show_message('which_player 不可預期的錯誤', "error"))
+        }
+        if (which_court == -1) {
+            return (show_message('which_court 不可預期的錯誤', "error"))
+        }
+        let confirmed = confirm("確認執行換人操作嗎？")
+        if (!confirmed) {
+            return
+        }
+        const replaced_person = todayPeople.filter(obj => obj.court == which_court && obj.player == which_player)[0]
+        replaced_person.player = 0
+        replaced_person.court = 0
+        replaced_person.idleRounds = 0
+        // prepare_PK_refresh(choosed_people[0], which_player - 1)
+        todayPeople[choosed_people[0].id - 1].court = which_court
+        todayPeople[choosed_people[0].id - 1].player = which_player
+        choosed_people[0].choosed = 0
+        idle_people_update_to_div()
+        put_todayPeople_to_court()
+        pickPeople()
+        show_message("替換成功")
+    }
+    function handle_upload_data_to_firebase() {
+        //TODO: 好像沒必要存在...再想想
+        //prepare data
+        const todayPeople_json = JSON.stringify(todayPeople);
+        const empty_court_arr_json = JSON.stringify(empty_court_arr);
+        const prepare_PK_json = JSON.stringify(prepare_PK);
+        const game_record_json = JSON.stringify(game_record);
+        const bulletin_board_message_json = JSON.stringify(bulletin_board_message);
+        let today = new Date();
+        let month = String(today.getMonth() + 1).padStart(2, '0');
+        let date = String(today.getDate()).padStart(2, '0');
+        let currentDate = month + date;
+        write_today_data_to_firebase(todayPeople_json, game_record_json, bulletin_board_message_json, currentDate);
+    }
+    function get_now_time() {
+        // 取當前時間到毫秒
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const miliseconds = String(now.getMilliseconds()).padStart(2, '0');
+        // 创建包含当前时间的字符串
+        const currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}:${miliseconds}`;
+        return (currentTime)
+    }
+
+    function reset_today_data_to_firebase() {
+        //TODO: reset 之前把舊資料放入一個臨時回收桶
+        database.ref(`Chung_Shan_elementary_school/wait_to_register/`).set(
+            "reset"
+        )
+        database.ref(`Chung_Shan_elementary_school/real_time_data/`).set(
+            "reset"
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("重置今日即時資料成功")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("重置今日即時資料失敗")
+            });
+    }
+    function send_today_play_list_to_firebase(today_play_list) {
+        //此資料建立 是為了讓client端 取得當日的使用者登入名單
+        database.ref(`Chung_Shan_elementary_school/today_play_list/`).set(
+            today_play_list
+        ).then((result) => {
+            //成功的時候 會讓result是undefined
+            if (result == undefined) {
+                show_message("寫入今日上場人員資料成功")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+            });
+    }
+    function send_prepare_PK_to_firebase() {
+        database.ref(`Chung_Shan_elementary_school/real_time_data/prepare_PK`).set(
+            prepare_PK
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入準備上場人員資料成功")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("寫入準備上場人員資料失敗 可能是資料庫問題", "error")
+            });
+    }
+    function add_listener_to_client_do_from_firebase(database) {
+        var userRef = database.ref('Chung_Shan_elementary_school/client_do/');
+        userRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            console.log(data)
+            if (data.action == 'check-in') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    if (action_person[0].court != -1) {
+                        show_message(`收到用戶端${action_person[0].name}的'報到'操作 操作失敗 
+                        因為並不在休息區 可能是已經上場 或是已經在等待區了`, "client_error")
+                    } else {
+                        show_message(`收到用戶端${action_person[0].name}的'報到'操作 操作成功`, "client_ok")
+                        action_person[0].court = 0
+                    }
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'報到'操作 但查無此人`, "client_error")
+                }
+            }
+            if (data.action == 'go_to_sleep') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    if (action_person[0].court != 0) {
+                        show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作失敗 
+                        因為並不在等待區 可能是已經上場 或是已經在休息區了`, "client_error")
+                    } else {
+                        show_message(`收到用戶端${action_person[0].name}的'去休息區'操作 操作成功`, "client_ok")
+                        // action_person[0].court = -1
+                        court_change(action_person[0], binding_team_list, -1)
+                    }
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去休息區'操作 但查無此人`, "client_error")
+                }
+            }
+            if (data.action == 'go_to_wait') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    if (action_person[0].court != -1) {
+                        show_message(`收到用戶端${action_person[0].name}的'去等待區'操作 操作失敗 
+                        因為並不在休息區 可能是已經上場 或是已經在等待區了`, "client_error")
+                    } else {
+                        show_message(`收到用戶端${action_person[0].name}的'去等待區'操作 操作成功`, "client_ok")
+                        action_person[0].court = 0
+                    }
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`, "client_error")
+                }
+            }
+            if (data.action == 'register_score') {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    console.log(`收到來自用戶端 ${action_person[0].name} 的'登記分數操作'操作`, "client_ok")
+                    // 解析要分析的分數登記 是否符合現在的未登記情形
+                    const data_obj = JSON.parse(data.data)
+                    console.log(data_obj)
+                    let check_success = false
+                    wait_to_register_list.forEach((obj, index) => {
+                        const check1 = (data_obj[0] == todayPeople[obj[0] - 1].name)
+                        const check2 = (data_obj[1] == todayPeople[obj[1] - 1].name)
+                        const check3 = (data_obj[2] == todayPeople[obj[2] - 1].name)
+                        const check4 = (data_obj[3] == todayPeople[obj[3] - 1].name)
+                        if (check1 && check2 && check3 && check4) {
+                            //檢查成功 確實有需要登記的場次與資料相符
+                            show_message(`收到登記資料並執行：
+                            ${data_obj[0]}  和 ${data_obj[1]} 對上 ${data_obj[2]} 和 ${data_obj[3]}
+                            分數為 ${data_obj[4]} 比 ${data_obj[5]}`, "client_ok")
+                            record_score(index, data_obj[4], data_obj[5])
+                            check_success = true
+                        }
+                    })
+                    if (check_success == false) {
+                        show_message("收到不存在的場次的分數登記", "client_error")
+                    }
+                    idle_people_update_to_div()
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`, "client_error")
+                }
+            }
+            if (data.action == "off_court") {
+                let action_person = todayPeople.filter(obj => obj.name == data.creater)
+                if (action_person.length == 1) {
+                    //檢查要下場的資料是否正確
+                    console.log(data)
+                    const court_number = data.data[0]
+                    const player_name_list = data.data[1]
+                    const server_player_list = todayPeople.filter(person => person.court == court_number).filter(person => player_name_list.includes(person.name))
+                    if (server_player_list.length == 4) {
+                        show_message(`收到來自來自用戶端 ${data.creater} 的下場請求 資料驗證成功 執行下場`, "client_ok")
+                        off_court_new(court_number)
+                    } else {
+                        show_message(`收到來自來自用戶端 ${data.creater} 的下場請求 資料驗證失敗`, "client_error")
+                    }
+
+
+                } else {
+                    console.log(`收到來自用戶端 ${data.creater} 的'去等待區'操作 但查無此人`, "client_error")
+                }
+
+            }
+
+        })
+    }
+    function handle_add_player_open_modal() {
+        // 新增選手按鈕 會打開modal 
+        // 檢查有無重複名字者 若有則報錯
+        $('#add_player_Modal').modal('show');
+        return
+    }
+    function handle_add_player_confirm() {
+        const add_player_name = $('#add_player_name_input').val()
+        if (add_player_name.length != 2) {
+            alert('錯誤 名字必須兩個字!')
+            return
+        }
+        if (todayPeople.filter(e => e.name == add_player_name).length != 0) {
+            alert('錯誤 名字重複了!')
+            return
+        }
+        const new_player = { id: todayPeople.length + 1, name: add_player_name, score: 400, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 }
+        todayPeople.push(new_player);
+        idle_people_update_to_div();
+        const today_play_list = []
+        for (let i = 1; i <= todayPeople.length; i++) {
+            today_play_list.push(todayPeople[i - 1].name)
+        }
+        send_today_play_list_to_firebase(today_play_list)
+        alert("新增成功");
+        return
+    }
+    function handle_adjust_point_open_modal() {
+        // 調整分數按鈕 會打開modal 
+        $('#adjust_score_select').empty()
+        todayPeople.forEach(e => {
+            $('#adjust_score_select').append(`<option value=${e.id}>${e.name} </option >`)
+        })
+        if (todayPeople.filter(e => e.choosed == 1).length == 1) {
+            const choosed_person = todayPeople.filter(e => e.choosed == 1)[0]
+            $('#adjust_score_select').val(choosed_person.id)
+        }
+        $('#adjust_score_Modal').modal('show');
+    }
+
+    function handle_adjust_point_confirm() {
+        const person_id = parseInt($('#adjust_score_select').val())
+        const target_point = parseInt($("#adjust_target_point_input").val())
+        let confirmed = confirm(`確定將${todayPeople[person_id - 1].name}的分數調整為${target_point}分嗎？`)
+        if (confirmed) {
+            todayPeople[person_id - 1].score = target_point
+        }
+        $('#adjust_score_Modal').modal('hide');
+        idle_people_update_to_div()
+    }
+
+    function count_score_function(person, score, top_score_line, bottom_score_line) {
+        // 分數計算規則：
+        // 高於高分線的分數 增加會以20%的比例增加(降低情況會正常降低)
+        // 低於低分線的分數 會自動回歸低分線的數值
+        if (score > 0) {
+            if (person.score > top_score_line) {
+                person.score = person.score + score / 5
+                return
+            }
+            if (person.score + score > top_score_line) {
+                person.score = parseInt(top_score_line + (person.score + score - top_score_line) / 5)
+                return
+            }
+        }
+        person.score = person.score + score
+        if (person.score < bottom_score_line) {
+            person.score = bottom_score_line
+        }
+        return
+    }
+
+    refresh_wait_to_register_text()
+    idle_people_update_to_div()
+    $("#pickPeople").on("click", pickPeople)
+    $("#go_to_pk").on("click", go_to_PK)
+    $(".gameEnd").on("click", handle_end_game_new)
+    $("#check-info").on("click", handle_check_info)
+    $("#refresh-idle").on("click", idle_people_update_to_div)
+    $("#save-data").on("click", save_data)
+    $("#prepare_to_delete").on("click", prepare_to_delete)
+    $("#hide_score").on("change", handle_hide_score_change)
+    $("#score_count").on("change", handle_score_count_change)
+    $("#simplify_do").on("change", handle_simplify_do_change)
+    $("#off_court_check").on("change", handle_off_court_check_change)
+    $("#show_game_record").on('click', handle_show_game_record)
+    $("#set_personal_record").on('click', handle_set_personal_record)
+    $("#set_personal_record").on('click', handle_set_personal_record)
+    $("#delete_today_data").on('click', handle_delete_today_data)
+    $("#binding").on("click", handle_binding)
+    $("#go_to_sleep").on("click", handle_go_to_sleep)
+    $("#go_to_wait").on("click", handle_go_to_wait)
+    $("#cancel_binding").on("click", handle_cancel_binding)
+    $("#cancel_choosed").on("click", handle_cancel_choosed)
+    $("#record_score").on("click", handle_record_score)
+    $("#open_modal_of_record_score").on("click", handle_open_modal_of_record_score)
+    $("#delete_record_score").on("click", handle_delete_record_score)
+    $(".go_here").click(handle_go_here)
+    $("#one_click_to_wait").click(handle_one_click_to_wait)
+    $("#adjust_point").click(handle_adjust_point_open_modal)
+    $("#adjust_point_confirm_button").click(handle_adjust_point_confirm)
+    $("#add_player").click(handle_add_player_open_modal)
+    $("#add_player_confirm_button").click(handle_add_player_confirm)
+
+
+
+
+    $("#upload_data_to_firebase").click(handle_upload_data_to_firebase)
+
+    $("#clear_global_config").click(handle_clear_global_config)
+
+    add_listener_to_client_do_from_firebase(database)
+
+    $("#backup_data_to_firebase").click(handle_backup_data_to_firebase)
+    $(".td-click").click(handle_go_there)
+
+
+    //通常整天結束的時候 使用這個功能 這個上傳的資料會永久保存 (按日期算) 
+    function write_today_data_to_firebase(today_people_data, game_record_data, bulletin_board_message_data, today_date) {
+        database.ref(`Chung_Shan_elementary_school/Tuesday/date_${today_date}/`).set({
+            today_people: today_people_data,
+            game_record: game_record_data,
+            bulletin_board_message: bulletin_board_message_data
+        }).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功(上傳當日總資料)")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("發生錯誤：write_today_data_to_firebase", "error")
+            });
+    }
+    //上傳wait_to_register到firebase 讓client端可以查看登記 
+    //上傳時機為 結束比賽時（比賽結束按鈕按下去時）
+    function upload_wait_to_register_to_firebase(name_list) {
+        database.ref(`Chung_Shan_elementary_school/wait_to_register/${get_now_time()}`).set({
+            player1: name_list[0],
+            player2: name_list[1],
+            player3: name_list[2],
+            player4: name_list[3],
+            create_time: get_now_time(),
+            score_top: "待登記",
+            score_bottom: "待登記",
+            register_name: "待登記",
+            register_time: "待登記"
+        }
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功(待登記資料)")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("發生錯誤：upload_wait_to_register_to_firebase")
+            });
+    }
+    //目前是放在idle_people_update_to_div()裡面
+    // 可能要視情況調整上傳時機 以避免使用量過大 每日免費配額360MB
+    function upload_real_time_data_to_firebase() {
+        database.ref(`Chung_Shan_elementary_school/real_time_data`).set({
+            todayPeople: todayPeople,
+            prepare_PK: prepare_PK,
+            wait_to_register_list: wait_to_register_list
+        }
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功(即時資料)")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("發生錯誤：upload_real_time_data_to_firebase")
+            });
+    }
+    function upload_real_time_data_todayPeople_to_firebase() {
+        database.ref(`Chung_Shan_elementary_school/real_time_data/todayPeople`).set(
+            todayPeople
+        ).then((result) => {
+            console.log("成功的結果：", result);
+            if (result == undefined) {
+                show_message("寫入資料成功(即時資料-今日人員資料)")
+            }
+        })
+            .catch((error) => {
+                console.log("發生錯誤：", error);
+                show_message("upload_real_time_data_todayPeople_to_firebase", "error")
+            });
+    }
+
+</script>
+
+<script>
+    //計算選人上場邏輯
+    function isOverlap(choice1, choice2) {
+        const set1 = new Set(choice1["號碼清單"]);
+        const set2 = new Set(choice2["號碼清單"]);
+        const intersection = [...set1].filter((x) => set2.has(x));
+        return intersection.length > 0;
+    }
+
+    function fourIdsFormAMatch(peopleReadyFight, ids, binding = [], match_type = '未設定') {
+        let sortedFourPeople = [];
+        if (binding.length === 2) {
+            // console.log('peopleReadyFight', peopleReadyFight);
+            // console.log('第1', sortedFourPeople);
+            for (const id of ids) {
+                for (const person of peopleReadyFight) {
+                    if (person.id === id) {
+                        sortedFourPeople.push(person);
+                        break;
+                    }
+                }
+            }
+            sortedFourPeople.push(sortedFourPeople.shift());
+        } else {
+            // console.log('第2', sortedFourPeople);
+            const theFourPeople = peopleReadyFight.filter((person) =>
+                ids.includes(person.id)
+            );
+            sortedFourPeople = theFourPeople.sort(
+                (a, b) => b.score - a.score
+            );
+        }
+        // console.log('第三', sortedFourPeople);
+        const std = Math.round(
+            math.std(sortedFourPeople.map((person) => person.score))
+        );
+
+        const waitNum = peopleReadyFight
+            .filter((person) => ids.includes(person.id))
+            .reduce((total, person) => total + Math.pow(3, person.idleRounds), 0);
+
+        return {
+            "評分": waitNum - std,
+            "對戰類型": match_type,
+            "1號戰力": sortedFourPeople[0].score,
+            "2號戰力": sortedFourPeople[1].score,
+            "3號戰力": sortedFourPeople[2].score,
+            "4號戰力": sortedFourPeople[3].score,
+            "戰力": `${sortedFourPeople[0].score + sortedFourPeople[3].score} vs ${sortedFourPeople[1].score + sortedFourPeople[2].score
+                }`,
+            "總分": sortedFourPeople.reduce((total, person) => total + person.score, 0),
+            "隊伍差": Math.abs(
+                (sortedFourPeople[0].score + sortedFourPeople[3].score) -
+                (sortedFourPeople[1].score + sortedFourPeople[2].score)
+            ),
+            "標準差": std,
+            "組內差": Math.max(
+                Math.abs(sortedFourPeople[0].score - sortedFourPeople[3].score),
+                Math.abs(sortedFourPeople[1].score - sortedFourPeople[2].score)
+            ),
+            "1號": sortedFourPeople[0].id,
+            "2號": sortedFourPeople[1].id,
+            "3號": sortedFourPeople[2].id,
+            "4號": sortedFourPeople[3].id,
+            "號碼清單": sortedFourPeople.map((person) => person.id),
+            "等待值": waitNum,
+
+        };
+    }
+    function letsPlay(people, partner) {
+        console.log("綁定清單", partner)
+        const flatten_partner = partner.flat();
+
+        // step1: Get the list of people ready to fight
+
+        const people_ready_fight = people.filter(person => person.court === 0);
+        const ids_people_ready_fight = people_ready_fight.map(person => person.id)
+        const people_ready_fight_single = people_ready_fight.filter(person => !flatten_partner.includes(person.id));
+        const ids_people_ready_fight_single = people_ready_fight_single.map(person => person.id)
+
+        const matches = [];
+        console.log(' people', people);
+        console.log(' people_ready_fight', people_ready_fight);
+        console.log(' ids_people_ready_fight', ids_people_ready_fight);
+
+        const sorted_people_ready_fight_single = people_ready_fight_single.sort((person1, person2) => person1.score - person2.score);
+        const ids_sorted_people_ready_fight_single = sorted_people_ready_fight_single.map(person => person.id)
+        console.log(' people_ready_fight_single', people_ready_fight_single);
+        console.log(' ids_people_ready_fight_single', ids_people_ready_fight_single);
+        // step2: Enumerate acceptable matches
+        for (let i = 0; i < sorted_people_ready_fight_single.length - 3; i++) {
+            const ids = sorted_people_ready_fight_single.slice(i, i + 4).map(person => person.id);
+            console.log('ids1533', ids);
+            matches.push(fourIdsFormAMatch(sorted_people_ready_fight_single, ids, [], match_type = '全部單人'));
+        }
+        console.log('basic_matches[0]', matches[0]);
+        console.log('basic_matches[1]', matches[1]);
+        console.log('basic_matches', matches);
+        console.log('basic_matches[0]', matches[0]);
+        console.log('basic_matches[1]', matches[1]);
+        let all_two_binding = []
+        for (const binding of partner) {
+            const length_binding = binding.length;
+            if (!ids_people_ready_fight.includes(binding[0])) {
+                continue;
+            } else if (length_binding === 2) {
+                all_two_binding.push(binding)
+                const matches_for_2 = [];
+                let match_temp = [...binding];
+
+                for (let i = 0; i < people_ready_fight.length; i++) {
+                    for (let j = 0; j < people_ready_fight.length; j++) {
+                        const person1 = people_ready_fight[i];
+                        const person2 = people_ready_fight[j];
+
+                        // console.log('per1', person1);
+                        // console.log('per2', person2);
+                        if (
+                            i >= j ||
+                            match_temp.includes(person1.id) ||
+                            match_temp.includes(person2.id) ||
+                            flatten_partner.includes(person1.id) ||
+                            flatten_partner.includes(person2.id)
+                        ) {
+                            // console.log('AA');
+                            continue;
+                        } else {
+                            // console.log('BB');
+                            match_temp.push(person1.id);
+                            match_temp.push(person2.id);
+                            // console.log('match_temp', match_temp);
+                            // console.log('binding',binding);
+                            const a_match_dict = fourIdsFormAMatch(people_ready_fight, match_temp, binding, match_type = '雙人綁定');
+                            matches_for_2.push(a_match_dict);
+                            match_temp = [...binding];
+                        }
+                    }
+                }
+
+                if (matches_for_2.length === 0) {
+                    console.log('沒有配到！！！');
+                }
+
+                const sorted_matches_for_2 = matches_for_2.sort((match1, match2) => match1.標準差 - match2.標準差);
+                matches.push(sorted_matches_for_2[0]);
+            } else if (length_binding === 3) {
+                const matches_for_3 = [];
+                let match_temp = [...binding];
+
+                for (let i = 0; i < people_ready_fight.length; i++) {
+                    const person1 = people_ready_fight[i];
+
+                    if (match_temp.includes(person1.id) || flatten_partner.includes(person1.id)) {
+                        continue;
+                    } else {
+                        match_temp.push(person1.id);
+                    }
+
+                    const a_match_dict = fourIdsFormAMatch(people_ready_fight, match_temp, [], match_type = '三人綁定');
+                    matches_for_3.push(a_match_dict);
+                    match_temp = [...binding];
+                }
+
+                const sorted_matches_for_3 = matches_for_3.sort((match1, match2) => match1.標準差 - match2.標準差);
+                const min_team_diff = Math.min(...sorted_matches_for_3.map(match => match.隊伍差));
+                const min_team_diff_match = sorted_matches_for_3.filter(match => match.隊伍差 === min_team_diff);
+                const min_sd = Math.min(...min_team_diff_match.map(match => match.標準差));
+
+                for (const match of min_team_diff_match) {
+                    if (match.隊伍差 === min_team_diff && match.標準差 === min_sd) {
+                        if (!matches.includes(match)) {
+                            matches.push(match);
+                        }
+                        break;
+                    }
+                }
+            } else if (length_binding === 4) {
+                const match_temp = [...binding];
+                const a_match_dict = fourIdsFormAMatch(people_ready_fight, match_temp, [], match_type = '四人綁定');
+                matches.push(a_match_dict);
+            }
+        }
+
+        console.log('all_two', all_two_binding);
+        for (const binding_1 of all_two_binding) {
+            for (const binding_2 of all_two_binding) {
+                if (binding_1 != binding_2) {
+                    let binding_temp = []
+                    binding_temp.push(...binding_1)
+                    binding_temp.push(...binding_2)
+                    console.log('找到雙組', binding_temp)
+                    matches.push(fourIdsFormAMatch(people_ready_fight, binding_temp, binding_1, match_type = '兩組對戰'));
+
+
+                }
+            }
+        }
+        // step3: Sort matches
+        const sorted_matches = matches.sort((match1, match2) => match2.評分 - match1.評分);
+
+        // step4: Combinations of matches
+        const solutions = [];
+
+        for (let i = 0; i < sorted_matches.length; i++) {
+            const choice_1 = sorted_matches[i];
+
+            for (let j = 0; j < sorted_matches.length; j++) {
+                const choice_2 = sorted_matches[j];
+
+                if (j <= i) {
+                    continue;
+                }
+
+                if (!isOverlap(choice_1, choice_2)) {
+                    solutions.push({
+                        評分S: choice_1.評分 + choice_2.評分,
+                        評分1: choice_1.評分,
+                        評分2: choice_2.評分,
+                        Choice_1: i,
+                        Choice_2: j,
+                        SD_1: choice_1.標準差,
+                        SD_2: choice_2.標準差,
+                        SD_ALL: choice_1.標準差 + choice_2.標準差,
+                        等待值1: choice_1.等待值,
+                        等待值2: choice_2.等待值,
+                        等待值S: choice_1.等待值 + choice_2.等待值,
+                        等待場次1: people_ready_fight
+                            .filter(person => choice_1.號碼清單.includes(person.id))
+                            .map(person => person.idleRounds),
+                        等待場次2: people_ready_fight
+                            .filter(person => choice_2.號碼清單.includes(person.id))
+                            .map(person => person.idleRounds),
+                    });
+                }
+            }
+        }
+        console.log('sorted_matches', sorted_matches);
+        if (solutions.length < 1) {
+            console.log('sorted_matches[0]', sorted_matches[0]);
+            return sorted_matches[0].號碼清單;
+        } else {
+            // step5: Sort solutions by '評分S'
+            const sorted_solutions = solutions.sort((sol1, sol2) => sol2.評分S - sol1.評分S);
+            console.log('solutions', solutions);
+            console.log('solutions[0]', solutions[0]);
+            console.log('solutions[1]', solutions[1]);
+            // step6: Find the choice with the highest '評分S' and '評分'
+            const the_choice = Math.max(solutions[0].評分1, solutions[0].評分2);
+
+            console.log('sorted_solutions', sorted_solutions);
+            if (solutions[0].評分1 > solutions[0].評分2) {
+                console.log('sorted_matches[solutions[0].Choice_1]', sorted_matches[solutions[0].Choice_1]);
+                return sorted_matches[solutions[0].Choice_1].號碼清單;
+            } else {
+                console.log('sorted_matches[solutions[0].Choice_2]', sorted_matches[solutions[0].Choice_2]);
+                return sorted_matches[solutions[0].Choice_2].號碼清單;
+            }
+        }
+    }
+
+
+</script>
+<script>
+    function pick_weight_count(today_people, binding_list) {
+        // IDLE ROUND WEIGHT 是次方關係  等了4場 會扣5*5*5*5分 (越低分越優先上)
+        const idle_round_weight = 5
+        //count_d_weight 是雙方的分差 舉例 一邊是150+200 另一邊是50+500 分差為200 會在*權重加上去(越高分越不容易上場)
+        const count_d_weight = 10
+        //count_player_in_one_team_weight 是隊內的分差 一般希望越小越好 但是兩隊差距小更重要 所以權重應低於 雙方的分差 
+        const count_player_in_one_team_weight = 1
+        // binding_l_p 是給不符合綁定規則的人巨大的分數 讓不合規則的組合幾乎不會上場
+        const match = []
+        const data = today_people.filter(person => person.court == 0)
+        const all_people_number = data.length
+        for (let player1 = 0; player1 < all_people_number; player1++) {
+            for (let player2 = player1 + 1; player2 < all_people_number; player2++) {
+                if (player1 == player2) {
+                    continue;
+                }
+                for (let player3 = player2 + 1; player3 < all_people_number; player3++) {
+                    if (player1 == player3 || player2 == player3) {
+                        continue;
+                    }
+                    for (let player4 = player1 + 1; player4 < all_people_number; player4++) {
+                        if (player1 == player4 || player2 == player4 || player3 == player4) {
+                            continue;
+                        }
+                        const count_d = count_difference([data[player1], data[player2], data[player3], data[player4]]) * count_d_weight
+                        const count_p14 = Math.abs(data[player1].score - data[player4].score) * count_player_in_one_team_weight
+                        const count_p23 = Math.abs(data[player2].score - data[player3].score) * count_player_in_one_team_weight
+                        const idleRounds_C = idleRounds_count([data[player1], data[player2], data[player3], data[player4]], idle_round_weight)
+                        const binding_l_p = binding_list_point([data[player1].id, data[player2].id, data[player3].id, data[player4].id], binding_list)
+                        match.push([data[player1], data[player2], data[player3], data[player4], count_d + count_p14 + count_p23 - idleRounds_C + binding_l_p, count_d, count_p14, count_p23, idleRounds_C, binding_l_p])
+                    }
+                }
+            }
+        }
+        // console.log(match)
+        const match_sort = match.sort((a, b) => { return a[4] - b[4] })
+        console.log(new Date())
+        console.log(match_sort.slice(0, 10))
+        return ([match_sort[0][0].id, match_sort[0][1].id, match_sort[0][2].id, match_sort[0][3].id])
+    }
+    function count_teammates_difference(teammates_list) {
+        //計算組內差距 傳入的參數 應該為一個list 裡面有todaypeople裡的人兩個
+        //當超過200 會將這個參數放大15倍 
+        const temp = Math.abs(teammates_list[0].score + teammates_list[1].score)
+        return temp > 200 ? temp * 15 : temp;
+    }
+    function count_difference(a) {
+        //計算ｐｋ的兩個隊伍的分數合計差距  傳入的參數 應該為一個list 裡面有todaypeople裡的人4個 
+        // 這四個人當中 1＆4 同一隊 2＆3 同一隊
+        //當超過200 會將這個參數放大1.5倍
+        const temp = Math.abs(a[0].score + a[3].score - a[1].score - a[2].score)
+        return temp > 200 ? temp * 1.5 : temp;
+    }
+    function idleRounds_count(a, p = 10) {
+        // 計算當前的等待場數的分數換算 以等比數列的方式成長 
+        // 有最大值50000 (用扣的 所以當達到最大值時 會很容易上場)
+        const point = Math.pow(p, a[0].idleRounds) + Math.pow(p, a[1].idleRounds) + Math.pow(p, a[2].idleRounds) + Math.pow(p, a[3].idleRounds)
+        return point > 50000 ? 50000 : point
+    }
+    function binding_list_point(a, binding_list) {
+        // 計算 是否為綁定組合的分數 
+        // 如果不符合綁定的規則 會有100萬分 讓這個組合基本上一定不會被選到
+        let num = 0
+        a.forEach(element => {
+            binding_list.forEach(binding => {
+                if (binding.includes(element)) {
+                    binding.forEach(be => {
+                        if (!a.includes(be)) {
+                            num = 999999
+                        }
+                        if (binding.length == 2) {
+                            var index1 = a.indexOf(binding[0]);
+                            var index2 = a.indexOf(binding[1]);
+                            if (index1 + index2 != 3) {
+                                num = 999999
+                            }
+                        }
+                    })
+                }
+            })
+        });
+
+        return num
+    }
+
+</script>

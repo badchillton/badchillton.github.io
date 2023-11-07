@@ -1660,6 +1660,7 @@
             "4號": sortedFourPeople[3].id,
             "號碼清單": sortedFourPeople.map((person) => person.id),
             "等待值": waitNum,
+            "等待清單": sortedFourPeople.map((person) => person.idleRounds),
 
         };
     }
@@ -1792,8 +1793,10 @@
             }
         }
         // step3: Sort matches
-        const sorted_matches = matches.sort((match1, match2) => match2.評分 - match1.評分);
-
+        const ori_sorted_matches = matches.sort((match1, match2) => match2.評分 - match1.評分);
+        console.log("應是全部候選對戰->", ori_sorted_matches);
+        const sorted_matches = ori_sorted_matches.filter(element => !element['等待清單'].includes(1));
+        console.log("刪除1場等待後->", sorted_matches);
         // step4: Combinations of matches
         const solutions = [];
 

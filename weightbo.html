@@ -581,11 +581,12 @@
         const speak_text2 = String(`《${prepare_PK[0].name}》 和 《${prepare_PK[3].name}》 對戰 《${prepare_PK[1].name}》 和 《${prepare_PK[2].name}》，請至第${court}球場比賽。`)
         speak(speak_text2, times = 3, rate = 0.7);
         todayPeople.forEach(person => {
-            if (person.court == 0 || person.court == -1) {
-                person.idleRounds += 1;
-            } else {
-                person.idleRounds = 0;
-            }
+            person.idleRounds += 1;
+            // if (person.court == 0 || person.court == -1) { //0備戰區 -1休息區
+            //     person.idleRounds += 1;
+            // } else {
+            //     person.idleRounds = 0;
+            // }
         })
         prepare_PK_refresh([]);
         idle_people_update_to_div()
@@ -647,9 +648,9 @@
         const idle_people = todayPeople.filter(obj => obj.court === 0 || obj.court === -1).sort((a, b) => b.idleRounds - a.idleRounds)
         $(".person-wait").empty()
         $(".person-sleep").empty()
-        idle_people.forEach(obj => {
+        // idle_people.forEach(obj => {
 
-        })
+        // })
         for (x in idle_people) {
             if (idle_people[x].court == -1) {
                 $(".person-sleep").append(idle_personal_card(idle_people[x]))
@@ -702,7 +703,7 @@
         if (empty_court_arr.includes(court_number)) {
             return (alert(`第${court_number}場還是空的 無法結束比賽`))
         }
-        if (off_court_check == '1') {
+        if (off_court_check == '1') { //結束比賽是否需要確認
             var confirmed = confirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`);
             if (confirmed) {
                 off_court_new(court_number)
@@ -718,6 +719,7 @@
         result.forEach(obj => {
             temp_id_list[Number(obj.player) - 1] = obj.id
             obj.court = 0;
+            obj.idleRounds = 0;
         })
         wait_to_register_list.push(temp_id_list)
         temp_id_list.forEach(obj => temp_name_list.push(todayPeople[obj - 1].name))
@@ -1207,7 +1209,7 @@
         const replaced_person = todayPeople.filter(obj => obj.court == which_court && obj.player == which_player)[0]
         replaced_person.player = 0
         replaced_person.court = 0
-        replaced_person.idleRounds = 0
+        // replaced_person.idleRounds = 0
         // prepare_PK_refresh(choosed_people[0], which_player - 1)
         todayPeople[choosed_people[0].id - 1].court = which_court
         todayPeople[choosed_people[0].id - 1].player = which_player

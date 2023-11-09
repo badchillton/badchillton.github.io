@@ -41,9 +41,6 @@
                 <div class="record_score_area">
                     <select name="ss" id="which_game">
                         <option value="1">1,2 VS 3,4</option>
-                        <option value="1">1,2 VS 3,4</option>
-                        <option value="1">1,2 VS 3,4</option>
-
                     </select>
                     <table class="table">
                         <tr>
@@ -106,26 +103,44 @@
         </div>
 
         <div class="row">
-            <div class="col-4">
+            <div class="col-3">
                 <div>
-                    <button class="btn-primary btn" id="pickPeople"> 選人上場</button>
-                    <button class="go_to_pk btn-primary btn" id="go_to_pk">去？球場比賽</button>
+                    <button class="btn-primary btn" id="pickPeople"> 選人</button>
+                    <button class="go_to_pk btn-primary btn" id="go_to_pk">上場</button>
                     <button id="open_modal_of_record_score" class="btn btn-primary ml-2">登入分數</button>
                     <span class="wait_to_register_text" id="wait_to_register_text">待登記：</span>
                 </div>
-                <div class="col">
+                <div class="col next-player">
                     <table class="table table-bordered court-5 court">
                         <tr>
+                            <td class="backSpace sideSpace"></td>
+                            <td class="backSpace"></td>
+                            <td class="backSpace"></td>
+                            <td class="backSpace sideSpace"></td>
+                        </tr>
+                        <tr>
+                            <td class="backSpace sideSpace"></td>
                             <td class="player1 go_here td-player"></td>
                             <td class="player4 go_here td-player"></td>
+                            <td class="backSpace sideSpace"></td>
                         </tr>
                         <tr>
+                            <td class="backSpace sideSpace"></td>
                             <td class='net top'> </td>
                             <td class='net bottom'> </td>
+                            <td class="backSpace sideSpace"></td>
                         </tr>
                         <tr>
+                            <td class="backSpace sideSpace"></td>
                             <td class="player2 go_here td-player"></td>
                             <td class="player3 go_here td-player"></td>
+                            <td class="backSpace sideSpace"></td>
+                        </tr>
+                        <tr>
+                            <td class="backSpace sideSpace"></td>
+                            <td class="backSpace"></td>
+                            <td class="backSpace"></td>
+                            <td class="backSpace sideSpace"></td>
                         </tr>
                     </table>
                     <div>
@@ -166,7 +181,8 @@
                     </fieldset>
                 </div>
             </div>
-            <div class="col-8">
+            <div class="col-9">
+                <div class="container">
                 <div class="row person-wait card-container"></div>
                 <h2> 操作按鈕區</h2>
                 <div class="row button-group">
@@ -191,6 +207,7 @@
                     <h1>📰公布欄📰</h1>
                     <div id="bulletin_board_message"></div>
                 </div>
+            </div>
             </div>
         </div>
         <div class="row">
@@ -312,8 +329,8 @@
         $(`.court-${court} .bottom`).html(`↓：${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
         if (court == 5) {
             const id_list = [topTeamPlayers[0].id, topTeamPlayers[1].id, bottomTeamPlayers[0].id, bottomTeamPlayers[1].id,]
-            $(".team-color-board").removeClass('team-color-11')
-            id_list.forEach(obj => $(`#${obj}`).addClass('team-color-11'))
+            $(".team-color-board").removeClass('algo-chosen')
+            id_list.forEach(obj => $(`#${obj}`).addClass('algo-chosen'))
         }
     }
     function empty_data_to_court(court) {
@@ -327,7 +344,7 @@
         $(`.court-${court} .top`).empty()
         $(`.court-${court} .bottom`).empty()
         if (court == 5) {
-            $(".team-color-board").removeClass('team-color-11')
+            $(".team-color-board").removeClass('algo-chosen')
         }
     }
     //產生文字檔類
@@ -340,7 +357,7 @@
             show_message("personal card的參數有誤", "error")
             return
         }
-        return (`${person.name}<br>⚔️：${hide_score == 1 ? '???' : person.score}`)
+        return (`${person.name}<br>⚔️${hide_score == 1 ? '???' : person.score}`)
     }
     function court_generate(court_number) {
         if (court_number < 1 || court_number > 5) {
@@ -532,8 +549,8 @@
         <div class='col-md-2'>
         <div class="card selectable team-color-board" id='${person.id}'>
                         <div class="card-body">
-                            <h5 class="card-title">${person.name}</h5>
-                            <p class="card-text">${hide_score == 1 ? '???' : person.score}／${person.idleRounds}</p>
+                            <h3 class="card-title">${person.name}</h3>
+                            <p class="card-text">⚔️${hide_score == 1 ? '???' : person.score}<br>🕒${person.idleRounds}</p>
                         </div>
                     </div>
                     </div>`)

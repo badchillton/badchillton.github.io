@@ -191,6 +191,12 @@
         .choosed {
             background-color: rgb(216, 235, 133);
         }
+        td.backSpace{
+            height: 10%;
+        }
+        td.sideSpace{
+            width: 5%;
+        }
     </style>
 </head>
 
@@ -510,16 +516,34 @@
         return (`<div class="col-sm">
                 <table class="table table-bordered court-${court_number} court">
                     <tr>
+                        <td class="backSpace sideSpace"></td>
+                        <td class="backSpace"></td>
+                        <td class="backSpace"></td>
+                        <td class="backSpace sideSpace"></td>
+                    </tr>
+                    <tr>
+                        <td class="backSpace sideSpace"></td>
                         <td class="player1 td-court-${court_number} td-click"></td>
                         <td class="player4 td-court-${court_number} td-click"></td>
+                        <td class="backSpace sideSpace"></td>
                     </tr>
                     <tr>
+                        <td class="backSpace sideSpace net"></td>
                         <td class='net top'> </td>
                         <td class='net bottom'> </td>
+                        <td class="backSpace sideSpace net"></td>
                     </tr>
                     <tr>
+                        <td class="backSpace sideSpace"></td>
                         <td class="player2 td-court-${court_number} td-click"></td>
                         <td class="player3 td-court-${court_number} td-click"></td>
+                        <td class="backSpace sideSpace"></td>
+                    </tr>
+                    <tr>
+                        <td class="backSpace sideSpace"></td>
+                        <td class="backSpace"></td>
+                        <td class="backSpace"></td>
+                        <td class="backSpace sideSpace"></td>
                     </tr>
                 </table>
                 <button class="gameEnd" id="court${court_number}end">場地${court_number} 比賽結束</button>
@@ -531,10 +555,10 @@
         //觸發時機：當按下選人按鈕 或是 自動簡化模式時 按下下場按鈕時會自動選人
         //主要影響 prepare_PK
         const people = todayPeople.filter(person => person['court'] == 0 && person['idleRounds'] >= 0);
-        if (people.length < 8) {
-            show_message("在備戰區的人數不足8人 演算法失靈", "error")
-            return
-        }
+        // if (people.length < 8) {
+        //     show_message("在備戰區的人數不足8人 演算法失靈", "error")
+        //     return
+        // }
         const four_people = letsPlay(todayPeople, binding_team_list)
         // const four_people = pick_weight_count(todayPeople, binding_team_list)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]

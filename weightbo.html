@@ -28,176 +28,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"
         integrity="sha512-79j1YQOJuI8mLseq9icSQKT6bLlLtWknKwj1OpJZMdPt2pFBry3vQTt+NZuJw7NSd1pHhZlu0s12Ngqfa371EA=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 
-    <style>
-        .team-color-board {
-            border: 3px solid rgb(115, 104, 104);
-            box-shadow: 0 0 0 3px black;
-        }
 
-        .team-color-0 {
-            background-color: #ffd7e9;
-            /* border: 3px solid #ffd7e9; */
-        }
-
-        .team-color-1 {
-            background-color: #d7f2ff;
-        }
-
-        .team-color-2 {
-            background-color: #fff7c7;
-        }
-
-        .team-color-3 {
-            background-color: #c7ffd7;
-        }
-
-        .team-color-4 {
-            background-color: #e7d7ff;
-        }
-
-        .team-color-5 {
-            background-color: #ffe7d7;
-        }
-
-        .team-color-6 {
-            background-color: #f0e3e3;
-        }
-
-        .team-color-7 {
-            background-color: #d7ffeb;
-        }
-
-        .team-color-8 {
-            background-color: #ffd7dc;
-        }
-
-        .team-color-9 {
-            background-color: #d7f7ff;
-        }
-
-        .team-color-10 {
-            background-color: #fff2d7;
-        }
-
-        .team-color-11 {
-            /* background-color: #eaa69d; */
-            border: 10px solid #eaa69d;
-        }
-
-        .selected {
-            background-color: #007bff;
-            color: #fff;
-            border: 2px solid #010b17;
-        }
-
-        .choosed {
-            background-color: yellowgreen;
-        }
-
-        .even {
-            background-color: rgb(122, 176, 223);
-        }
-
-        .odd {
-            background-color: antiquewhite;
-        }
-
-        .court {
-            background-color: rgb(236, 236, 244);
-            border: 2px solid white;
-        }
-
-        .row>div {
-            padding: 5px;
-        }
-
-        .court td {
-            /* margin-top: 10px; */
-            height: 120px;
-        }
-
-        .court .net {
-            background-color: aliceblue;
-            height: 5px;
-        }
-
-        .main-container {
-            background-color: gray;
-        }
-
-        .gameStart {
-            background-color: greenyellow;
-            width: 45%;
-        }
-
-        .gameEnd {
-            background-color: red;
-            width: 100%;
-            color: aliceblue;
-        }
-
-        .person-span {
-            margin: 3px;
-            border: 1px solid black;
-            /* background-color: white; */
-        }
-
-        .court-5 {
-            /* background-color: white; */
-            background-color: burlywood;
-
-        }
-
-        .court-1 {
-            /* background-color: lightcoral; */
-            background-color: MediumSeaGreen;
-
-        }
-
-        .court-2 {
-            background-color: lightgreen;
-        }
-
-        .court-3 {
-            background-color: MediumSeaGreen;
-            /* background-color: lightblue; */
-        }
-
-        .court-4 {
-            /* background-color: lightyellow; */
-            background-color: lightgreen;
-
-        }
-
-        .analysis td {
-            height: auto;
-        }
-
-        .personal_table {
-            background-color: aliceblue;
-            margin: 2px;
-            border-radius: 3px;
-        }
-
-        .json {
-            width: 100%;
-        }
-
-        .simplify_able_true {
-            visibility: hidden;
-        }
-
-        .choosed {
-            background-color: rgb(216, 235, 133);
-        }
-        td.backSpace{
-            height: 10%;
-        }
-        td.sideSpace{
-            width: 5%;
-        }
-    </style>
 </head>
 
 <body>
@@ -283,16 +116,16 @@
                 <div class="col">
                     <table class="table table-bordered court-5 court">
                         <tr>
-                            <td class="player1 go_here"></td>
-                            <td class="player4 go_here"></td>
+                            <td class="player1 go_here td-player"></td>
+                            <td class="player4 go_here td-player"></td>
                         </tr>
                         <tr>
                             <td class='net top'> </td>
                             <td class='net bottom'> </td>
                         </tr>
                         <tr>
-                            <td class="player2 go_here"></td>
-                            <td class="player3 go_here"></td>
+                            <td class="player2 go_here td-player"></td>
+                            <td class="player3 go_here td-player"></td>
                         </tr>
                     </table>
                     <div>
@@ -523,11 +356,11 @@
                     </tr>
                     <tr>
                         <td class="backSpace sideSpace"></td>
-                        <td class="player1 td-court-${court_number} td-click"></td>
-                        <td class="player4 td-court-${court_number} td-click"></td>
+                        <td class="player1 td-court-${court_number} td-click td-player"></td>
+                        <td class="player4 td-court-${court_number} td-click td-player"></td>
                         <td class="backSpace sideSpace"></td>
                     </tr>
-                    <tr>
+                    <tr class="net-wrap">
                         <td class="backSpace sideSpace net"></td>
                         <td class='net top'> </td>
                         <td class='net bottom'> </td>
@@ -535,8 +368,8 @@
                     </tr>
                     <tr>
                         <td class="backSpace sideSpace"></td>
-                        <td class="player2 td-court-${court_number} td-click"></td>
-                        <td class="player3 td-court-${court_number} td-click"></td>
+                        <td class="player2 td-court-${court_number} td-click td-player"></td>
+                        <td class="player3 td-court-${court_number} td-click td-player"></td>
                         <td class="backSpace sideSpace"></td>
                     </tr>
                     <tr>
@@ -1819,7 +1652,12 @@
         // step3: Sort matches
         const ori_sorted_matches = matches.sort((match1, match2) => match2.評分 - match1.評分);
         console.log("應是全部候選對戰->", ori_sorted_matches);
-        const sorted_matches = ori_sorted_matches.filter(element => !element['等待清單'].includes(1));
+
+        const sorted_matches = ori_sorted_matches.filter(element => {
+            const onesCount = element['號碼清單'].filter(number => number === 1).length;
+            return onesCount < 1 || onesCount > 3;
+        });
+        // const sorted_matches = ori_sorted_matches.filter(element => !element['等待清單'].includes(1));
         console.log("刪除1場等待後->", sorted_matches);
         // step4: Combinations of matches
         const solutions = [];

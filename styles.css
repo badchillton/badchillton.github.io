@@ -11,6 +11,7 @@
 
 .card-body {
     transition: all 0.25s;
+    padding: 2px;
 }
 
 .card-body:hover {
@@ -101,7 +102,7 @@ div.algo-chosen {
     background-color: #4A746A;
     border: 2px solid white;
     /* min-height: 350px; */
-    margin-bottom: 2px;
+    margin-bottom: 5px;
 }
 
 .row>div {
@@ -134,8 +135,6 @@ div.btn-wrap {
 .main-container {
     background-color: #97BAA4;
 }
-
-
 
 .person-span {
     margin: 3px;

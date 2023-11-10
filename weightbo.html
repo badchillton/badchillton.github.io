@@ -333,8 +333,8 @@
         // $(`.court-${court} .top`).html(`↑ ${topTeamPlayers[0].score + topTeamPlayers[1].score} ↑`)
         // $(`.court-${court} .bottom`).html(`↓ ${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score} ↓`)
         // $(`.court-${court} .noNet`).html(`${topTeamPlayers[0].score + topTeamPlayers[1].score}<br>${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
-        $(`.court-${court} .left-aligned`).html(`${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
-        $(`.court-${court} .right-aligned`).html(`${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
+        $(`.court-${court} .left-aligned`).html(`&nbsp;${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
+        $(`.court-${court} .right-aligned`).html(`${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}&nbsp;`)
         if (court == 5) {
             const id_list = [topTeamPlayers[0].id, topTeamPlayers[1].id, bottomTeamPlayers[0].id, bottomTeamPlayers[1].id,]
             $(".team-color-board").removeClass('algo-chosen')

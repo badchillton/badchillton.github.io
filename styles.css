@@ -1,20 +1,23 @@
 .team-color-board {
+    height:95%;
+    width: 95%;
     color: black;
-    border: 5px solid white;
+    /* border: 5px solid white; */
     background-color: white;
-    box-shadow: 0 0 0 3px black;
+    box-shadow: 0 0 0 4px black;
     text-align: center;
     align-items: center;
 }
 
 div.selected {
     color: #fff;
-    border: 5px solid #D18237;
-    background-color: #D18237;
+    /* border: 5px solid #D18237; */
+    background-color: SteelBlue  	;
 }
 
 div.algo-chosen {
-    border: 5px solid black;
+    /* border: 5px solid black; */
+    box-shadow: 0 0 0 4px #D66C44  ;
 }
 
 .next-player{

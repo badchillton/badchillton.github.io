@@ -123,28 +123,30 @@
                             <td class=" sideSpace"></td>
                         </tr>
                         <tr class="team-wrap">
-                            <td class=" sideSpace"></td>
+                            <td class="sideSpace"></td>
                             <td class="player1 go_here td-player">&nbsp;<br>&nbsp;</td>
                             <td class="player4 go_here td-player">&nbsp;<br>&nbsp;</td>
-                            <td class=" sideSpace"></td>
+                            <td class="sideSpace"></td>
                         </tr>
-                        <tr>
-                            <td class=" sideSpace"></td>
-                            <td class='net top'>&nbsp;</td>
-                            <td class='net bottom'>&nbsp;</td>
-                            <td class=" sideSpace"></td>
+                        <tr class="net-wrap">
+                            <td class="sideSpace"></td>
+                            <td class='noNet' colspan="2">
+                                <div class="left-aligned"></div>
+                                <div class="right-aligned"></div>
+                            </td>
+                            <td class="sideSpace"></td>
                         </tr>
                         <tr class="team-wrap">
-                            <td class=" sideSpace"></td>
+                            <td class="sideSpace"></td>
                             <td class="player2 go_here td-player">&nbsp;<br>&nbsp;</td>
                             <td class="player3 go_here td-player">&nbsp;<br>&nbsp;</td>
-                            <td class=" sideSpace"></td>
+                            <td class="sideSpace"></td>
                         </tr>
                         <tr class="backSpace">
-                            <td class=" sideSpace"></td>
+                            <td class="sideSpace"></td>
                             <td class=""></td>
                             <td class=""></td>
-                            <td class=" sideSpace"></td>
+                            <td class="sideSpace"></td>
                         </tr>
                     </table>
                     <div>
@@ -188,7 +190,7 @@
             <div class="col-9">
                 <div class="container">
                     <div class="row person-wait card-container"></div>
-                    <h2> 操作按鈕區</h2>
+                    <!-- <h2> 操作按鈕區</h2> -->
                     <div class="row button-group">
                         <button id="binding" class="btn btn-primary ml-2">綁定</button>
                         <button id="go_to_sleep" class="btn btn-primary ml-2">去休息區</button>
@@ -198,7 +200,6 @@
                         <button id="one_click_to_wait" class="btn btn-primary ml-2">一鍵備戰</button>
                         <button id="adjust_point" class="btn btn-primary ml-2">積分調整</button>
                         <button id="add_player" class="btn btn-primary ml-2">新增選手</button>
-
                     </div>
                     <h1> 休息區</h1>
                     <div class="row person-sleep"></div>
@@ -329,8 +330,11 @@
         $(`.court-${court} .player2`).html(personal_card(bottomTeamPlayers[0]))
         $(`.court-${court} .player3`).html(personal_card(bottomTeamPlayers[1]))
         $(`.court-${court} .player4`).html(personal_card(topTeamPlayers[1]))
-        $(`.court-${court} .top`).html(`↑ ${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
-        $(`.court-${court} .bottom`).html(`${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score} ↓`)
+        // $(`.court-${court} .top`).html(`↑ ${topTeamPlayers[0].score + topTeamPlayers[1].score} ↑`)
+        // $(`.court-${court} .bottom`).html(`↓ ${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score} ↓`)
+        // $(`.court-${court} .noNet`).html(`${topTeamPlayers[0].score + topTeamPlayers[1].score}<br>${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
+        $(`.court-${court} .left-aligned`).html(`${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
+        $(`.court-${court} .right-aligned`).html(`${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
         if (court == 5) {
             const id_list = [topTeamPlayers[0].id, topTeamPlayers[1].id, bottomTeamPlayers[0].id, bottomTeamPlayers[1].id,]
             $(".team-color-board").removeClass('algo-chosen')
@@ -345,8 +349,11 @@
         $(`.court-${court} .player2`).html(`&nbsp;<br>&nbsp;`)
         $(`.court-${court} .player3`).html(`&nbsp;<br>&nbsp;`)
         $(`.court-${court} .player4`).html(`&nbsp;<br>&nbsp;`)
-        $(`.court-${court} .top`).html(`&nbsp;`)
-        $(`.court-${court} .bottom`).html(`&nbsp;`)
+        // $(`.court-${court} .top`).html(`&nbsp;`)
+        // $(`.court-${court} .bottom`).html(`&nbsp;`)
+        // $(`.court-${court} .noNet`).html(`&nbsp;<br>&nbsp;`)
+        $(`.court-${court} .left-aligned`).html(`&nbsp;`)
+        $(`.court-${court} .right-aligned`).html(`&nbsp;`)
         if (court == 5) {
             $(".team-color-board").removeClass('algo-chosen')
         }
@@ -382,9 +389,11 @@
                         <td class="sideSpace"></td>
                     </tr>
                     <tr class="net-wrap">
-                        <td class=" sideSpace"></td>
-                        <td class='net top'>&nbsp;</td>
-                        <td class='net bottom'>&nbsp;</td>
+                        <td class="sideSpace"></td>
+                        <td class='noNet' colspan="2">
+                            <div class="left-aligned"></div>
+                            <div class="right-aligned"></div>
+                        </td>
                         <td class=" sideSpace"></td>
                     </tr>
                     <tr class="team-wrap">
@@ -554,15 +563,14 @@
         save_data()
     }
     function idle_personal_card(person) {
-        return (`
-        <div class='col-md-2'>
-        <div class="card selectable team-color-board" id='${person.id}'>
+        return (`<div class='col-md-2'>
+                    <div class="card selectable team-color-board" id='${person.id}'>
                         <div class="card-body">
                             <h3 class="card-title mb-0">${person.name}</h3>
                             <p class="card-text">⚔️ ${hide_score == 1 ? '???' : person.score}<br>🕒 ${person.idleRounds}</p>
                         </div>
                     </div>
-                    </div>`)
+                </div>`)
     }
     function handle_personal_card_click(e) {
         const click_id = parseInt(e.currentTarget.id)
@@ -695,13 +703,13 @@
         const input = document.getElementById('input').value;
         const converted_input = input.replace(/\*/g, '').replaceAll('?', '4').replace(/\([^)]*\)/g, '');
         // 處理輸入
-        console.log(converted_input);
+        console.log('轉換輸入', converted_input);
         // 將資料轉換為陣列 讀取特定資料的格式變成分數數據
         const regex = /(\d+)\.\[(\d*\.?\d*)\](.*)/g;
         const result = [];
         while ((matches = regex.exec(converted_input)) !== null) {
             const id = parseInt(matches[1]);
-            const score = matches[2] !== '' ? parseInt(parseFloat(matches[2]) * 100) : 0;
+            const score = matches[2] !== '' ? parseInt(Math.round(parseFloat(matches[2]) * 100)) : 0;
             const name = matches[3].trim();
             result.push({ id, score, name });
         }

@@ -46,12 +46,18 @@ div.algo-chosen {
     width: 45%;
 }
 
-.gameEnd {
+#court1end,
+#court2end,
+#court3end,
+#court4end {
     background-color: #D18237;
     border-color: #D18237;
 }
 
-.gameEnd:hover {
+#court1end:hover,
+#court2end:hover,
+#court3end:hover,
+#court4end:hover {
     background-color: #f6973f;
     border-color: #f6973f;
 }
@@ -118,6 +124,12 @@ height: 80px;
 .court .net {
     background-color: aliceblue;
     height: fit-content;
+    border-color: aliceblue;
+}
+
+.noNet {
+    /* text-align: center; */
+    color: aliceblue;
 }
 
 tr.net-wrap {
@@ -220,6 +232,17 @@ td.top {
     /* 垂直置中 */
     padding: 0%;
 }
+
+.left-aligned {
+    text-align: left;
+    display: block;
+}
+
+.right-aligned {
+    text-align: right;
+    display: block;
+}
+
 
 
 .team-color-0 {

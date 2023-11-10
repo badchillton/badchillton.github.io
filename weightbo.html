@@ -1671,7 +1671,7 @@
         console.log("應是全部候選對戰->", ori_sorted_matches);
 
         const sorted_matches = ori_sorted_matches.filter(element => {
-            const onesCount = element['號碼清單'].filter(number => number === 0).length;
+            const onesCount = element['等待清單'].filter(number => number === 0).length;
             return onesCount < 1 || onesCount > 3;
         });//包含1~3個0的都不要
         // const sorted_matches = ori_sorted_matches.filter(element => !element['等待清單'].includes(0));

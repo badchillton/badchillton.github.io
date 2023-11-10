@@ -116,7 +116,7 @@ height: 80px;
 
 .court .net {
     background-color: aliceblue;
-    height: 64px;
+    height: fit-content;
 }
 
 tr.net-wrap {

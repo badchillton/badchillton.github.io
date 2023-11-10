@@ -55,6 +55,10 @@ div.algo-chosen {
     border-color: #f6973f;
 }
 
+/* #endGame-container {
+    padding: 0%;
+} */
+
 #open_modal_of_record_score {
     background-color: #D18237;
     border-color: #D18237;
@@ -96,17 +100,19 @@ div.algo-chosen {
 .court {
     background-color: #4A746A;
     border: 2px solid white;
-    min-height: 350px;
+    /* min-height: 350px; */
+    margin-bottom: 2px;
 }
 
 .row>div {
     padding: 5px;
 }
 
-.court td {
-    /* margin-top: 10px; */
-    height: 120px;
+/* .court td {
+
+height: 80px;
 }
+*/
 
 .court .net {
     background-color: aliceblue;
@@ -115,6 +121,10 @@ div.algo-chosen {
 
 tr.net-wrap {
     height: 1%;
+}
+
+tr.team-wrap {
+    height: 10px;
 }
 
 div.btn-wrap {
@@ -162,7 +172,7 @@ div.btn-wrap {
     background-color: rgb(216, 235, 133);
 }
 
-td.backSpace {
+tr.backSpace {
     height: 5%;
     padding: 0%;
 }
@@ -180,6 +190,8 @@ td.td-player {
     vertical-align: middle;
     /* 垂直置中 */
     padding: 0%;
+    height: auto;
+    min-height: 0;
 }
 
 p.card-text {

@@ -102,49 +102,49 @@
         <div class="row court-container">
         </div>
 
-        <div class="row">
+        <div class="row ">
             <div class="col-3">
                 <div class="container">
-                    <div class="row btn-wrap justify-content-around mb-2">
+                    <div class="row btn-wrap justify-content-around mb-1">
                         <button class="col-5 btn-primary btn" id="pickPeople"> 選人</button>
                         <button class="col-5 go_to_pk btn-primary btn" id="go_to_pk">上場</button>
                     </div>
-                    <div class="row btn-wrap justify-content-around mb-2">
+                    <div class="row btn-wrap justify-content-around mb-1">
                         <button class="col-5 btn btn-primary mx-1" id="open_modal_of_record_score">登記分數</button>
                         <span class="col-5 wait_to_register_text mx-1" id="wait_to_register_text">待登記：</span>
                     </div>
                 </div>
                 <div class="col next-player">
                     <table class="table table-bordered court-5 court">
-                        <tr>
-                            <td class="backSpace sideSpace"></td>
-                            <td class="backSpace"></td>
-                            <td class="backSpace"></td>
-                            <td class="backSpace sideSpace"></td>
+                        <tr class="backSpace">
+                            <td class=" sideSpace"></td>
+                            <td class=""></td>
+                            <td class=""></td>
+                            <td class=" sideSpace"></td>
                         </tr>
-                        <tr>
-                            <td class="backSpace sideSpace"></td>
+                        <tr class="team-wrap">
+                            <td class=" sideSpace"></td>
                             <td class="player1 go_here td-player"></td>
                             <td class="player4 go_here td-player"></td>
-                            <td class="backSpace sideSpace"></td>
+                            <td class=" sideSpace"></td>
                         </tr>
                         <tr>
-                            <td class="backSpace sideSpace"></td>
+                            <td class=" sideSpace"></td>
                             <td class='net top'>&nbsp;<br>&nbsp;</td>
                             <td class='net bottom'>&nbsp;<br>&nbsp;</td>
-                            <td class="backSpace sideSpace"></td>
+                            <td class=" sideSpace"></td>
                         </tr>
-                        <tr>
-                            <td class="backSpace sideSpace"></td>
+                        <tr class="team-wrap">
+                            <td class=" sideSpace"></td>
                             <td class="player2 go_here td-player"></td>
                             <td class="player3 go_here td-player"></td>
-                            <td class="backSpace sideSpace"></td>
+                            <td class=" sideSpace"></td>
                         </tr>
-                        <tr>
-                            <td class="backSpace sideSpace"></td>
-                            <td class="backSpace"></td>
-                            <td class="backSpace"></td>
-                            <td class="backSpace sideSpace"></td>
+                        <tr class="backSpace">
+                            <td class=" sideSpace"></td>
+                            <td class=""></td>
+                            <td class=""></td>
+                            <td class=" sideSpace"></td>
                         </tr>
                     </table>
                     <div>
@@ -369,38 +369,38 @@
         }
         return (`<div class="col-md-3">
                 <table class="table table-bordered court-${court_number} court">
-                    <tr>
-                        <td class="backSpace sideSpace"></td>
-                        <td class="backSpace"></td>
-                        <td class="backSpace"></td>
-                        <td class="backSpace sideSpace"></td>
+                    <tr class="backSpace">
+                        <td class=" sideSpace"></td>
+                        <td class=""></td>
+                        <td class=""></td>
+                        <td class=" sideSpace"></td>
                     </tr>
-                    <tr>
-                        <td class="backSpace sideSpace"></td>
-                        <td class="player1 td-court-${court_number} td-click td-player"></td>
-                        <td class="player4 td-court-${court_number} td-click td-player"></td>
-                        <td class="backSpace sideSpace"></td>
+                    <tr class="team-wrap">
+                        <td class="sideSpace"></td>
+                        <td class="player1 td-court-${court_number} td-click td-player">&nbsp;<br>&nbsp;</td>
+                        <td class="player4 td-court-${court_number} td-click td-player">&nbsp;<br>&nbsp;</td>
+                        <td class="sideSpace"></td>
                     </tr>
                     <tr class="net-wrap">
-                        <td class="backSpace sideSpace"></td>
-                        <td class='net top'> </td>
-                        <td class='net bottom'> </td>
-                        <td class="backSpace sideSpace"></td>
+                        <td class=" sideSpace"></td>
+                        <td class='net top'>&nbsp;<br>&nbsp;</td>
+                        <td class='net bottom'>&nbsp;<br>&nbsp;</td>
+                        <td class=" sideSpace"></td>
                     </tr>
-                    <tr>
-                        <td class="backSpace sideSpace"></td>
+                    <tr class="team-wrap">
+                        <td class="sideSpace"></td>
                         <td class="player2 td-court-${court_number} td-click td-player">&nbsp;<br>&nbsp;</td>
                         <td class="player3 td-court-${court_number} td-click td-player">&nbsp;<br>&nbsp;</td>
-                        <td class="backSpace sideSpace"></td>
+                        <td class="sideSpace"></td>
                     </tr>
-                    <tr>
-                        <td class="backSpace sideSpace"></td>
-                        <td class="backSpace"></td>
-                        <td class="backSpace"></td>
-                        <td class="backSpace sideSpace"></td>
+                    <tr class="backSpace">
+                        <td class=" sideSpace"></td>
+                        <td class=""></td>
+                        <td class=""></td>
+                        <td class=" sideSpace"></td>
                     </tr>
                 </table>
-                <div class="container">
+                <div class="container" id="endGame-container">
                     <div class="row justify-content-center">
                         <button class=" col-11 gameEnd btn btn-primary" id="court${court_number}end">場地${court_number}&nbsp;&nbsp;比賽結束</button>
                     </div>
@@ -475,7 +475,6 @@
         prepare_PK_refresh([]);
         idle_people_update_to_div()
     }
-
 
     // 操控 準備上場人員的函數 只要會動到prepare_PK 都應該透過這個函數操作
     function prepare_PK_refresh(pickedPeople, index = -1) {
@@ -575,8 +574,6 @@
             todayPeople[click_id - 1].choosed = 1;
             $(`#${e.currentTarget.id}`).addClass("selected")
         }
-
-
     }
     function handle_end_game_new(e) {
         const str = e.target.id;
@@ -955,7 +952,6 @@
         count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
         count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
         count_score_function(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
-
 
         //將雲端登記列表更新
         record_database.ref(`Chung_Shan_elementary_school/wait_to_register/`).once('value').then(snapshot => {

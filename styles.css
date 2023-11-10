@@ -115,11 +115,13 @@ tr.net-wrap {
 }
 
 td.backSpace {
-    height: 1%;
+    height: 7%;
+    padding: 0%;
 }
 
 td.sideSpace {
-    width: 1%;
+    width: 5%;
+    padding: 0%;
 }
 
 td.td-player {

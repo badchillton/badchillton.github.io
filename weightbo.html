@@ -341,12 +341,12 @@
         if (court < 1 || court > 5) {
             show_message("清空場地發生問題", "error")
         }
-        $(`.court-${court} .player1`).empty()
-        $(`.court-${court} .player2`).empty()
-        $(`.court-${court} .player3`).empty()
-        $(`.court-${court} .player4`).empty()
-        $(`.court-${court} .top`).empty()
-        $(`.court-${court} .bottom`).empty()
+        $(`.court-${court} .player1`).html(`&nbsp;<br>&nbsp;`)
+        $(`.court-${court} .player2`).html(`&nbsp;<br>&nbsp;`)
+        $(`.court-${court} .player3`).html(`&nbsp;<br>&nbsp;`)
+        $(`.court-${court} .player4`).html(`&nbsp;<br>&nbsp;`)
+        $(`.court-${court} .top`).html(`&nbsp;`)
+        $(`.court-${court} .bottom`).html(`&nbsp;`)
         if (court == 5) {
             $(".team-color-board").removeClass('algo-chosen')
         }

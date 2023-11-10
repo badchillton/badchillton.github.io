@@ -361,7 +361,7 @@
             show_message("personal card的參數有誤", "error")
             return
         }
-        return (`${person.name}<br>⚔️${hide_score == 1 ? '???' : person.score}`)
+        return (`${person.name}<br>⚔️ ${hide_score == 1 ? '???' : person.score}`)
     }
     function court_generate(court_number) {
         if (court_number < 1 || court_number > 5) {
@@ -400,7 +400,7 @@
                         <td class="backSpace sideSpace"></td>
                     </tr>
                 </table>
-                <button class="gameEnd" id="court${court_number}end">場地${court_number} 比賽結束</button>
+                <button class="gameEnd btn btn-primary" id="court${court_number}end">場地${court_number} 比賽結束</button>
             </div>`)
     }
 
@@ -556,7 +556,7 @@
         <div class="card selectable team-color-board" id='${person.id}'>
                         <div class="card-body">
                             <h3 class="card-title">${person.name}</h3>
-                            <p class="card-text">⚔️${hide_score == 1 ? '???' : person.score}<br>🕒${person.idleRounds}</p>
+                            <p class="card-text">⚔️ ${hide_score == 1 ? '???' : person.score}<br>🕒 ${person.idleRounds}</p>
                         </div>
                     </div>
                     </div>`)

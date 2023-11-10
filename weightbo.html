@@ -432,9 +432,11 @@
         //!!! prepare_PK 不一定會跟today_people的物件完全綁定！！！
         //故只修改prepare_PK可能造成錯誤
         prepare_PK.forEach((person, index) => {
+            person.choosed = 0;
             person.court = court;
             person.player = index + 1;
             person.game_count += 1;
+            todayPeople[person.id - 1].choosed = 0
             todayPeople[person.id - 1].court = court
             todayPeople[person.id - 1].player = index + 1;
             todayPeople[person.id - 1].game_count += 1;
@@ -894,6 +896,7 @@
                 obj.choosed = 0;
             })
             idle_people_update_to_div()
+            pickPeople()
         } else {
             return (alert("請正確指定移除綁定對象（必須是同一組的全部人）"))
         }

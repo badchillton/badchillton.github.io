@@ -4,6 +4,7 @@
     background-color: white;
     box-shadow: 0 0 0 3px black;
     text-align: center;
+    align-items: center;
 }
 
 div.selected {
@@ -123,7 +124,10 @@ td.td-player {
     font-size: x-large;
     text-align: center;
 }
+p.card-text{
 
+    text-align: left;
+}
 td.bottom {
     color: black;
     font-size: x-large;

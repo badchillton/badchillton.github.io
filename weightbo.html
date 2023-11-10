@@ -126,8 +126,8 @@
                         </tr>
                         <tr>
                             <td class="backSpace sideSpace"></td>
-                            <td class='net top'> </td>
-                            <td class='net bottom'> </td>
+                            <td class='net top'>&nbsp;<br>&nbsp;</td>
+                            <td class='net bottom'>&nbsp;<br>&nbsp;</td>
                             <td class="backSpace sideSpace"></td>
                         </tr>
                         <tr>
@@ -325,8 +325,8 @@
         $(`.court-${court} .player2`).html(personal_card(bottomTeamPlayers[0]))
         $(`.court-${court} .player3`).html(personal_card(bottomTeamPlayers[1]))
         $(`.court-${court} .player4`).html(personal_card(topTeamPlayers[1]))
-        $(`.court-${court} .top`).html(`↑：${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
-        $(`.court-${court} .bottom`).html(`↓：${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
+        $(`.court-${court} .top`).html(`↑<br>${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
+        $(`.court-${court} .bottom`).html(`${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}<br>↓`)
         if (court == 5) {
             const id_list = [topTeamPlayers[0].id, topTeamPlayers[1].id, bottomTeamPlayers[0].id, bottomTeamPlayers[1].id,]
             $(".team-color-board").removeClass('algo-chosen')
@@ -378,15 +378,15 @@
                         <td class="backSpace sideSpace"></td>
                     </tr>
                     <tr class="net-wrap">
-                        <td class="backSpace sideSpace net"></td>
+                        <td class="backSpace sideSpace"></td>
                         <td class='net top'> </td>
                         <td class='net bottom'> </td>
-                        <td class="backSpace sideSpace net"></td>
+                        <td class="backSpace sideSpace"></td>
                     </tr>
                     <tr>
                         <td class="backSpace sideSpace"></td>
-                        <td class="player2 td-court-${court_number} td-click td-player"></td>
-                        <td class="player3 td-court-${court_number} td-click td-player"></td>
+                        <td class="player2 td-court-${court_number} td-click td-player">&nbsp;<br>&nbsp;</td>
+                        <td class="player3 td-court-${court_number} td-click td-player">&nbsp;<br>&nbsp;</td>
                         <td class="backSpace sideSpace"></td>
                     </tr>
                     <tr>

@@ -234,16 +234,16 @@ td.top {
     padding: 0%;
 }
 
-.left-aligned {
+div.left-aligned {
     text-align: left;
     display: block;
-    padding-left: 0.5ch;
+    /* padding-left: 0.5ch; */
 }
 
-.right-aligned {
+div.right-aligned {
     text-align: right;
     display: block;
-    padding-right: 0.5ch;
+    /* padding-right: 0.5ch; */
 }
 
 

@@ -176,8 +176,12 @@ tr.backSpace {
     padding: 0%;
 }
 
+tr.backSpace>td {
+    padding: 2%;
+}
+
 td.sideSpace {
-    width: 7%;
+    width: 5%;
     padding: 0%;
 }
 

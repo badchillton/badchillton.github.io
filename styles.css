@@ -46,7 +46,6 @@ div.algo-chosen {
 .gameEnd {
     background-color: #D18237;
     border-color: #D18237;
-    width: 100%;
 }
 .gameEnd:hover {
     background-color: #f6973f;

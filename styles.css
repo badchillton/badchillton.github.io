@@ -127,9 +127,10 @@ height: 80px;
     border-color: aliceblue;
 }
 
-.noNet {
+td.noNet {
     /* text-align: center; */
     color: aliceblue;
+    padding: 0;
 }
 
 tr.net-wrap {
@@ -236,11 +237,13 @@ td.top {
 .left-aligned {
     text-align: left;
     display: block;
+    padding-left: 0.5ch;
 }
 
 .right-aligned {
     text-align: right;
     display: block;
+    padding-right: 0.5ch;
 }
 
 

@@ -8,6 +8,12 @@
     text-align: center;
     align-items: center;
 }
+.card-body{
+    transition: all 0.25s;
+}
+.card-body:hover {
+    filter: drop-shadow(0 0 2em DarkTurquoise ) drop-shadow(0 0 2em DarkTurquoise ) ;
+  }
 
 div.selected {
     color: #fff;
@@ -64,6 +70,10 @@ tr.net-wrap {
     height: 1%;
 }
 
+div.btn-wrap{
+    align-items: center;
+}
+
 .main-container {
     background-color: #97BAA4;
 }
@@ -115,23 +125,25 @@ tr.net-wrap {
 }
 
 td.backSpace {
-    height: 7%;
+    height: 5%;
     padding: 0%;
 }
 
 td.sideSpace {
-    width: 5%;
+    width: 7%;
     padding: 0%;
 }
 
 td.td-player {
     color: white;
-    font-size:100%;
-    text-align: center;
+    font-size:150%;
+    text-align: center;       /* 水平置中 */
+    vertical-align: middle;   /* 垂直置中 */
 }
 p.card-text{
     text-align: left;
 }
+
 td.bottom {
     color: black;
     font-size: 100%;

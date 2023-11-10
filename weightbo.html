@@ -104,11 +104,15 @@
 
         <div class="row">
             <div class="col-3">
-                <div>
-                    <button class="btn-primary btn  ml-2" id="pickPeople"> 選人</button>
-                    <button class="go_to_pk btn-primary btn  ml-2" id="go_to_pk">上場</button>
-                    <button class="btn btn-primary ml-2" id="open_modal_of_record_score">登入分數</button>
-                    <span class="wait_to_register_text" id="wait_to_register_text">待登記：</span>
+                <div class="container">
+                    <div class="row btn-wrap justify-content-around mb-2">
+                        <button class="col-5 btn-primary btn" id="pickPeople"> 選人</button>
+                        <button class="col-5 go_to_pk btn-primary btn" id="go_to_pk">上場</button>
+                    </div>
+                    <div class="row btn-wrap justify-content-around mb-2">
+                        <button class="col-5 btn btn-primary mx-1" id="open_modal_of_record_score">登記分數</button>
+                        <span class="col-5 wait_to_register_text mx-1" id="wait_to_register_text">待登記：</span>
+                    </div>
                 </div>
                 <div class="col next-player">
                     <table class="table table-bordered court-5 court">

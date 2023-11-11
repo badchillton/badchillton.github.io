@@ -246,7 +246,9 @@ div.right-aligned {
     /* padding-right: 0.5ch; */
 }
 
-
+#wait_to_register_text {
+    text-align: center;
+}
 
 .team-color-0 {
     background-color: #ffd7e9;

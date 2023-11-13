@@ -1537,7 +1537,7 @@
 
         const waitNum = peopleReadyFight
             .filter((person) => ids.includes(person.id))
-            .reduce((total, person) => total + Math.pow(4, person.idleRounds), 0);
+            .reduce((total, person) => total + Math.pow(5, person.idleRounds), 0);
 
         return {
             "評分": waitNum - std,

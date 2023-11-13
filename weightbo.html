@@ -129,12 +129,18 @@
                             <td class="sideSpace"></td>
                         </tr>
                         <tr class="net-wrap">
-                            <td class="sideSpace"></td>
+                            <td class=" sideSpace">
+                                <div class="upSide">&nbsp;</div>
+                                <div></div>
+                            </td>
                             <td class='noNet' colspan="2">
                                 <div class="left-aligned"></div>
                                 <div class="right-aligned"></div>
                             </td>
-                            <td class="sideSpace"></td>
+                            <td class=" sideSpace">
+                                <div class="upSide">&nbsp;</div>
+                                <div></div>
+                            </td>
                         </tr>
                         <tr class="team-wrap">
                             <td class="sideSpace"></td>
@@ -333,8 +339,8 @@
         // $(`.court-${court} .top`).html(`↑ ${topTeamPlayers[0].score + topTeamPlayers[1].score} ↑`)
         // $(`.court-${court} .bottom`).html(`↓ ${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score} ↓`)
         // $(`.court-${court} .noNet`).html(`${topTeamPlayers[0].score + topTeamPlayers[1].score}<br>${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}`)
-        $(`.court-${court} .left-aligned`).html(`&nbsp;${topTeamPlayers[0].score + topTeamPlayers[1].score}`)
-        $(`.court-${court} .right-aligned`).html(`${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}&nbsp;`)
+        $(`.court-${court} .left-aligned`).html(`&nbsp;${topTeamPlayers[0].score + topTeamPlayers[1].score}&nbsp;`)
+        $(`.court-${court} .right-aligned`).html(`&nbsp;${bottomTeamPlayers[0].score + bottomTeamPlayers[1].score}&nbsp;`)
         if (court == 5) {
             const id_list = [topTeamPlayers[0].id, topTeamPlayers[1].id, bottomTeamPlayers[0].id, bottomTeamPlayers[1].id,]
             $(".team-color-board").removeClass('algo-chosen')
@@ -389,12 +395,18 @@
                         <td class="sideSpace"></td>
                     </tr>
                     <tr class="net-wrap">
-                        <td class="sideSpace"></td>
+                        <td class=" sideSpace">
+                            <div class="upSide">&nbsp;</div>
+                            <div></div>
+                        </td>
                         <td class='noNet' colspan="2">
                             <div class="left-aligned"></div>
                             <div class="right-aligned"></div>
                         </td>
-                        <td class=" sideSpace"></td>
+                        <td class=" sideSpace">
+                            <div class="upSide">&nbsp;</div>
+                            <div></div>
+                        </td>
                     </tr>
                     <tr class="team-wrap">
                         <td class="sideSpace"></td>
@@ -533,8 +545,11 @@
     }
 
     function handle_one_click_to_wait() {
-        todayPeople.filter(obj => obj.court == -1).forEach(obj => obj.court = 0)
-        idle_people_update_to_div()
+        const confirmed = confirm(`確認一鍵備戰嗎？`);
+        if (confirmed) {
+            todayPeople.filter(obj => obj.court == -1).forEach(obj => obj.court = 0)
+            idle_people_update_to_div()
+        }
     }
     function idle_people_update_to_div() {
         const idle_people = todayPeople.filter(obj => obj.court === 0 || obj.court === -1).sort((a, b) => b.idleRounds - a.idleRounds)
@@ -593,7 +608,7 @@
             return (alert(`第${court_number}場還是空的 無法結束比賽`))
         }
         if (off_court_check == '1') { //結束比賽是否需要確認
-            var confirmed = confirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`);
+            const confirmed = confirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`);
             if (confirmed) {
                 off_court_new(court_number)
             }

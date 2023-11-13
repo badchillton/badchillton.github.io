@@ -234,14 +234,19 @@ td.top {
     padding: 0%;
 }
 
+div.upSide {
+    border-bottom: white dashed 1px;
+}
+
 div.left-aligned {
-    text-align: left;
+    text-align: center;
     display: block;
     /* padding-left: 0.5ch; */
+    border-bottom: white dashed 1px;
 }
 
 div.right-aligned {
-    text-align: right;
+    text-align: center;
     display: block;
     /* padding-right: 0.5ch; */
 }

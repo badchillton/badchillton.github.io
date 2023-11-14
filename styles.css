@@ -299,3 +299,29 @@ div.right-aligned {
 .team-color-10 {
     background-color: #fff2d7;
 }
+
+@keyframes blink-border {
+    0% {
+        background-color: transparent;
+        border-color: transparent
+    }
+
+    50% {
+        background-color: #D18237;
+        border-color: 1px solid #D18237;
+
+    }
+
+    100% {
+        background-color: transparent;
+        border-color: transparent
+    }
+}
+
+.blinking-border {
+    background-color: #D18237;
+    border-color: 1px solid #D18237;
+    /* 邊框初始樣式 */
+    animation: blink-border 0.5s linear infinite;
+    /* 應用動畫 */
+}

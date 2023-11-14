@@ -24,7 +24,12 @@ div.selected {
     background-color: SteelBlue;
 }
 
-div.algo-chosen {
+div.algo-chosen-top {
+    /* border: 5px solid black; */
+    box-shadow: 0 0 0 4px rgb(1, 136, 247);
+}
+
+div.algo-chosen-bottom {
     /* border: 5px solid black; */
     box-shadow: 0 0 0 4px #D66C44;
 }

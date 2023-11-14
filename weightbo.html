@@ -438,7 +438,13 @@
         //     show_message("在備戰區的人數不足8人 演算法失靈", "error")
         //     return
         // }
-        const four_people = letsPlay(todayPeople, binding_team_list)
+        if (people.length < 8) {
+            const peopleGreater8 = true
+        } else {
+            const peopleGreater8 = false
+        }
+
+        const four_people = letsPlay(todayPeople, binding_team_list, peopleGreater8)
         // const four_people = pick_weight_count(todayPeople, binding_team_list)
         const pickedPeople = [todayPeople[four_people[0] - 1], todayPeople[four_people[1] - 1], todayPeople[four_people[2] - 1], todayPeople[four_people[3] - 1]]
         console.log(todayPeople)
@@ -1568,7 +1574,7 @@
 
         };
     }
-    function letsPlay(people, partner) {
+    function letsPlay(people, partner, peopleGreater8) {
         console.log("綁定清單", partner)
         const flatten_partner = partner.flat();
 
@@ -1700,10 +1706,18 @@
         const ori_sorted_matches = matches.sort((match1, match2) => match2.評分 - match1.評分);
         console.log("應是全部候選對戰->", ori_sorted_matches);
 
-        const sorted_matches = ori_sorted_matches.filter(element => {
+        let sorted_matches = []
+        const temp_matches = ori_sorted_matches.filter(element => {
             const onesCount = element['等待清單'].filter(number => number === 0).length;
             return onesCount < 1 || onesCount > 3;
         });//包含1~3個0的都不要
+        if (temp_matches.length > 0) {
+            sorted_matches = temp_matches;
+        } else {
+            sorted_matches = ori_sorted_matches;
+        }
+
+
         // const sorted_matches = ori_sorted_matches.filter(element => !element['等待清單'].includes(0));
         console.log("刪除1場等待後->", sorted_matches);
         // step4: Combinations of matches

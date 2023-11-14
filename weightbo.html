@@ -460,10 +460,13 @@
         // 把資料改上去 並顯示人員在對的位置
         if (empty_court_arr.length == 0) {
             alert("現在沒有空場 無法進行比賽")
+            toggleFullScreen()
             return
         }
         if (prepare_PK.length != 4) {
-            return (alert("請先選人 再去PK"))
+            alert("請先選人 再去PK")
+            toggleFullScreen()
+            return
         }
         const court = empty_court_arr.shift()
         console.log("court")
@@ -616,10 +619,13 @@
         console.log(empty_court_arr)
         console.log(court_number)
         if (empty_court_arr.includes(court_number)) {
-            return (alert(`第${court_number}場還是空的 無法結束比賽`))
+            alert(`第${court_number}場還是空的 無法結束比賽`)
+            toggleFullScreen()
+            return
         }
         if (off_court_check == '1') { //結束比賽是否需要確認
             const confirmed = confirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`);
+            toggleFullScreen()
             if (confirmed) {
                 off_court_new(court_number)
                 if (wait_to_register_list.length == 0) {
@@ -874,17 +880,23 @@
     function handle_binding() {
         const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
         if (choosed_people.length > 4) {
-            return (alert(`當前綁定功能 只能接受最多四人綁定`))
+            alert(`當前綁定功能 只能接受最多四人綁定`)
+            toggleFullScreen()
+            return
         }
         if (choosed_people.length < 2) {
-            return (alert(`當前綁定功能 至少要兩人才可以綁定`))
+            alert(`當前綁定功能 至少要兩人才可以綁定`)
+            toggleFullScreen()
+            return
         }
         for (x in choosed_people) {
             const found = binding_team_list.some(function (row) {
                 return row.includes(choosed_people[x].id);
             });
             if (found) {
-                return (alert(`請先移除${choosed_people[x].name}的綁定 再重新進行綁定`))
+                alert(`請先移除${choosed_people[x].name}的綁定 再重新進行綁定`)
+                toggleFullScreen()
+                return
             }
         }
         if (global_config.albert_fisher == 1) {
@@ -943,7 +955,9 @@
             idle_people_update_to_div()
             pickPeople()
         } else {
-            return (alert("請正確指定移除綁定對象（必須是同一組的全部人）"))
+            alert("請正確指定移除綁定對象（必須是同一組的全部人）")
+            toggleFullScreen()
+            return
         }
     }
     function handle_cancel_choosed() {
@@ -958,7 +972,9 @@
         const top_team_score = parseInt($("#top_team_score").val())
         const bottom_team_score = parseInt($("#bottom_team_score").val())
         if (isNaN(top_team_score) || isNaN(bottom_team_score)) {
-            return (alert("請先填入分數 再進行登記"))
+            alert("請先填入分數 再進行登記")
+            toggleFullScreen()
+            return
         }
         record_score(now_which_game, top_team_score, bottom_team_score)
         $('#myModal').modal('hide');
@@ -1029,7 +1045,9 @@
     }
     function handle_open_modal_of_record_score() {
         if (wait_to_register_list.length == 0) {
-            return (alert("沒有需要登記的場次"))
+            alert("沒有需要登記的場次")
+            toggleFullScreen()
+            return
         }
         $("#which_game").empty()
         wait_to_register_list.forEach((obj, index) => {
@@ -1336,10 +1354,12 @@
         const add_player_name = $('#add_player_name_input').val()
         if (add_player_name.length != 2) {
             alert('錯誤 名字必須兩個字!')
+            toggleFullScreen()
             return
         }
         if (todayPeople.filter(e => e.name == add_player_name).length != 0) {
             alert('錯誤 名字重複了!')
+            toggleFullScreen()
             return
         }
         const new_player = { id: todayPeople.length + 1, name: add_player_name, score: 400, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 }
@@ -1351,6 +1371,7 @@
         }
         send_today_play_list_to_firebase(today_play_list)
         alert("新增成功");
+        toggleFullScreen()
         return
     }
     function handle_adjust_point_open_modal() {
@@ -1887,30 +1908,6 @@
     }
 
     function toggleFullScreen() {
-        if (!document.fullscreenElement &&    // 標準方法
-            !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {  // 不同瀏覽器的方法
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.mozRequestFullScreen) { /* Firefox */
-                document.documentElement.mozRequestFullScreen();
-            } else if (document.documentElement.webkitRequestFullscreen) { /* Chrome, Safari 和 Opera */
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
-                document.documentElement.msRequestFullscreen();
-            }
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.mozCancelFullScreen) { /* Firefox */
-                document.mozCancelFullScreen();
-            } else if (document.webkitExitFullscreen) { /* Chrome, Safari 和 Opera */
-                document.webkitExitFullscreen();
-            } else if (document.msExitFullscreen) { /* IE/Edge */
-                document.msExitFullscreen();
-            }
-        }
-    }
-    document.getElementById('goFullScreen').addEventListener('click', function () {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
         } else if (document.documentElement.mozRequestFullScreen) { /* Firefox */
@@ -1920,7 +1917,8 @@
         } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
             document.documentElement.msRequestFullscreen();
         }
-    });
+    }
+    document.getElementById('goFullScreen').addEventListener('click', toggleFullScreen);
 
 
 

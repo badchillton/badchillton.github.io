@@ -138,12 +138,13 @@ td.noNet {
     padding: 0;
 }
 
-tr.net-wrap {
+table.court tr.net-wrap {
     height: 1%;
 }
 
-tr.team-wrap {
+table.court tr.team-wrap {
     height: 10px;
+    background-color: transparent;
 }
 
 div.btn-wrap {
@@ -203,7 +204,7 @@ td.sideSpace {
     padding: 0%;
 }
 
-td.td-player {
+table.court td.td-player {
     color: white;
     font-size: 150%;
     text-align: center;
@@ -362,11 +363,12 @@ button {
     background-color: #4CAF50;
     /* 綠色 */
     color: white;
-    padding: 14px 20px;
+    padding: 2px 20px;
     margin: 10px 0;
     border: none;
     cursor: pointer;
     border-radius: 4px;
+    height: 40px;
 }
 
 button:hover {
@@ -386,4 +388,67 @@ button:hover {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+/* 模態視窗樣式 */
+.modal-dialog {
+    max-width: 600px;
+    /* 設置最大寬度 */
+    margin: 30px auto;
+    /* 居中顯示 */
+}
+
+.modal-content {
+    background-color: #fff;
+    /* 設置背景顏色 */
+    border-radius: 8px;
+    /* 圓角邊框 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* 添加陰影 */
+    padding: 20px;
+    /* 內距 */
+}
+
+/* 樣式化按鈕 */
+.btn {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin: 5px;
+    cursor: pointer;
+    /* 鼠標懸停時顯示手形 */
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* 表格樣式 */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table td,
+.table th {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* 下拉選單樣式 */
+select {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
 }

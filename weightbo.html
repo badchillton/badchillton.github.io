@@ -34,6 +34,25 @@
 </head>
 
 <body>
+    <!-- 自定義確認模態視窗 -->
+    <div id="confirmModal" class="boModal" style="display:none;">
+        <div class="boModal-content">
+            <p id="confirm-text">確認嗎？</p>
+            <button id="confirmBtn">確認</button>
+            <button id="cancelBtn">取消</button>
+        </div>
+    </div>
+
+    <!-- 自定義模態視窗 -->
+    <div id="myAlertModal" class="boModal" style="display:none;">
+        <div class="boModal-content">
+            <span class="close-btn">&times;</span>
+            <p id="modal-text">這是一個消息！</p>
+        </div>
+    </div>
+
+
+
     <div class="modal" id="myModal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -97,6 +116,7 @@
         <div class="container">
             <a class="navbar-brand" href="#">羽Chill社 主控台</a>
         </div>
+        <!-- <button id="triggerModal">觸發模態視窗</button> -->
         <button id="goFullScreen">進入全螢幕</button>
     </nav>
     <div class="container-fluid main-container">
@@ -459,13 +479,13 @@
         // 主要影響 todayPeople 的court & player, prepare_PK , empty_court_arr
         // 把資料改上去 並顯示人員在對的位置
         if (empty_court_arr.length == 0) {
-            alert("現在沒有空場 無法進行比賽")
-            toggleFullScreen()
+            customAlert("現在沒有空場 無法進行比賽")
+
             return
         }
         if (prepare_PK.length != 4) {
-            alert("請先選人 再去PK")
-            toggleFullScreen()
+            customAlert("請先選人 再去PK")
+
             return
         }
         const court = empty_court_arr.shift()
@@ -558,11 +578,22 @@
     }
 
     function handle_one_click_to_wait() {
-        const confirmed = confirm(`確認一鍵備戰嗎？`);
-        if (confirmed) {
-            todayPeople.filter(obj => obj.court == -1).forEach(obj => obj.court = 0)
-            idle_people_update_to_div()
-        }
+        // const confirmed = confirm(`確認一鍵備戰嗎？`);
+        // if (confirmed) {
+        //     todayPeople.filter(obj => obj.court == -1).forEach(obj => obj.court = 0)
+        //     idle_people_update_to_div()
+        // }
+        // 使用方式
+        customConfirm("確認一鍵備戰嗎？").then(confirmed => {
+            if (confirmed) {
+                console.log("操作確認");
+                todayPeople.filter(obj => obj.court == -1).forEach(obj => obj.court = 0)
+                idle_people_update_to_div()
+            } else {
+                console.log("操作取消");
+            }
+        });
+
     }
     //備戰區與休息區
     function idle_people_update_to_div() {
@@ -619,21 +650,34 @@
         console.log(empty_court_arr)
         console.log(court_number)
         if (empty_court_arr.includes(court_number)) {
-            alert(`第${court_number}場還是空的 無法結束比賽`)
-            toggleFullScreen()
+            customAlert(`第${court_number}場還是空的 無法結束比賽`)
+
             return
         }
         if (off_court_check == '1') { //結束比賽是否需要確認
-            const confirmed = confirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`);
-            toggleFullScreen()
-            if (confirmed) {
-                off_court_new(court_number)
-                if (wait_to_register_list.length == 0) {
-                    $(`#open_modal_of_record_score`).removeClass('blinking-border')
+            // const confirmed = confirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`);
+            // if (confirmed) {
+            //     off_court_new(court_number)
+            //     if (wait_to_register_list.length == 0) {
+            //         $(`#open_modal_of_record_score`).removeClass('blinking-border')
+            //     } else {
+            //         $(`#open_modal_of_record_score`).addClass('blinking-border')
+            //     }
+            // }
+            // 使用方式
+            customConfirm(`第${court_number}球場的比賽 確認執行結束下場嗎？`).then(confirmed => {
+                if (confirmed) {
+                    console.log("操作確認");
+                    off_court_new(court_number)
+                    if (wait_to_register_list.length == 0) {
+                        $(`#open_modal_of_record_score`).removeClass('blinking-border')
+                    } else {
+                        $(`#open_modal_of_record_score`).addClass('blinking-border')
+                    }
                 } else {
-                    $(`#open_modal_of_record_score`).addClass('blinking-border')
+                    console.log("操作取消");
                 }
-            }
+            });
         } else {
             off_court_new(court_number)
         }
@@ -732,47 +776,57 @@
         //TODO:應該要上傳資料到firebase
     }
     function processInput() {
-        let confirmed = confirm("確定輸入嗎？ 此操作將導致今天的資料重置！")
-        if (confirmed == false) {
-            return
-        }
-        // 獲取輸入框中的內容
-        const input = document.getElementById('input').value;
-        const converted_input = input.replace(/\*/g, '').replaceAll('?', '4').replace(/\([^)]*\)/g, '');
-        // 處理輸入
-        console.log('轉換輸入', converted_input);
-        // 將資料轉換為陣列 讀取特定資料的格式變成分數數據
-        const regex = /(\d+)\.\[(\d*\.?\d*)\](.*)/g;
-        const result = [];
-        while ((matches = regex.exec(converted_input)) !== null) {
-            const id = parseInt(matches[1]);
-            const score = matches[2] !== '' ? parseInt(Math.round(parseFloat(matches[2]) * 100)) : 0;
-            const name = matches[3].trim();
-            result.push({ id, score, name });
-        }
-        //初始化
-        todayPeople = [];
-        prepare_PK = [];
-        empty_court_arr = [1, 2, 3, 4];
-        game_record = [];
-        bulletin_board_message = []
-        wait_to_register_list = []
-        binding_team_list = []
+        // let confirmed = confirm("確定輸入嗎？ 此操作將導致今天的資料重置！")
+        // if (confirmed == false) {
+        //     return
+        // }
+        customConfirm("確定輸入嗎？ 此操作將導致今天的資料重置！").then(confirmed => {
+            if (confirmed) {
+                console.log("操作確認");
+                // 獲取輸入框中的內容
+                const input = document.getElementById('input').value;
+                const converted_input = input.replace(/\*/g, '').replaceAll('?', '4').replace(/\([^)]*\)/g, '');
+                // 處理輸入
+                console.log('轉換輸入', converted_input);
+                // 將資料轉換為陣列 讀取特定資料的格式變成分數數據
+                const regex = /(\d+)\.\[(\d*\.?\d*)\](.*)/g;
+                const result = [];
+                while ((matches = regex.exec(converted_input)) !== null) {
+                    const id = parseInt(matches[1]);
+                    const score = matches[2] !== '' ? parseInt(Math.round(parseFloat(matches[2]) * 100)) : 0;
+                    const name = matches[3].trim();
+                    result.push({ id, score, name });
+                }
+                //初始化
+                todayPeople = [];
+                prepare_PK = [];
+                empty_court_arr = [1, 2, 3, 4];
+                game_record = [];
+                bulletin_board_message = []
+                wait_to_register_list = []
+                binding_team_list = []
 
-        const today_play_list = []
-        for (let i = 1; i <= result.length; i++) {
-            todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
-            today_play_list.push(result[i - 1].name)
-        }
-        for (let i = 1; i < 6; i++) {
-            empty_data_to_court(i)
-        }
-        idle_people_update_to_div()
-        save_data()
-        //上傳firebase 的today_play_list
-        reset_today_data_to_firebase()
-        //TODO: 放人到雲端 要塞到家人功能
-        send_today_play_list_to_firebase(today_play_list)
+                const today_play_list = []
+                for (let i = 1; i <= result.length; i++) {
+                    todayPeople.push({ id: i, name: result[i - 1].name, score: result[i - 1].score, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 });
+                    today_play_list.push(result[i - 1].name)
+                }
+                for (let i = 1; i < 6; i++) {
+                    empty_data_to_court(i)
+                }
+                idle_people_update_to_div()
+                save_data()
+                //上傳firebase 的today_play_list
+                reset_today_data_to_firebase()
+                //TODO: 放人到雲端 要塞到家人功能
+                send_today_play_list_to_firebase(today_play_list)
+            } else {
+                console.log("操作取消");
+                return
+            }
+        });
+
+
     }
     function prepare_to_delete() {
         //即將棄用
@@ -865,28 +919,43 @@
     }
     function handle_delete_today_data() {
         //即將棄用 移動到處理輸入邏輯
-        const confirmed = confirm('確定刪除今日的資料嗎？(一般只在存好資料後，要開始打之前刪除，刪除後請套用當日球有資料再開始使用)')
-        if (confirmed) {
-            todayPeople = [];
-            prepare_PK = [];
-            empty_court_arr = [1, 2, 3, 4];
-            game_record = [];
-            bulletin_board_message = []
-            wait_to_register_list = []
-            save_data()
-            load_data()
-        }
+        // const confirmed = confirm('確定刪除今日的資料嗎？(一般只在存好資料後，要開始打之前刪除，刪除後請套用當日球有資料再開始使用)')
+        // if (confirmed) {
+        //     todayPeople = [];
+        //     prepare_PK = [];
+        //     empty_court_arr = [1, 2, 3, 4];
+        //     game_record = [];
+        //     bulletin_board_message = []
+        //     wait_to_register_list = []
+        //     save_data()
+        //     load_data()
+        // }
+        customConfirm("確定刪除今日的資料嗎？(一般只在存好資料後，要開始打之前刪除，刪除後請套用當日球有資料再開始使用)").then(confirmed => {
+            if (confirmed) {
+                console.log("操作確認");
+                todayPeople = [];
+                prepare_PK = [];
+                empty_court_arr = [1, 2, 3, 4];
+                game_record = [];
+                bulletin_board_message = []
+                wait_to_register_list = []
+                save_data()
+                load_data()
+            } else {
+                console.log("操作取消");
+            }
+        });
     }
     function handle_binding() {
         const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
         if (choosed_people.length > 4) {
-            alert(`當前綁定功能 只能接受最多四人綁定`)
-            toggleFullScreen()
+            customAlert(`當前綁定功能 只能接受最多四人綁定`)
+
             return
         }
         if (choosed_people.length < 2) {
-            alert(`當前綁定功能 至少要兩人才可以綁定`)
-            toggleFullScreen()
+            customAlert(`當前綁定功能 至少要兩人才可以綁定`)
+
             return
         }
         for (x in choosed_people) {
@@ -894,8 +963,8 @@
                 return row.includes(choosed_people[x].id);
             });
             if (found) {
-                alert(`請先移除${choosed_people[x].name}的綁定 再重新進行綁定`)
-                toggleFullScreen()
+                customAlert(`請先移除${choosed_people[x].name}的綁定 再重新進行綁定`)
+
                 return
             }
         }
@@ -937,6 +1006,7 @@
             obj.choosed = 0;
         })
         idle_people_update_to_div()
+        pickPeople()
     }
     function handle_cancel_binding() {
         const choosed_people = todayPeople.filter(obj => obj.choosed == 1)
@@ -955,8 +1025,8 @@
             idle_people_update_to_div()
             pickPeople()
         } else {
-            alert("請正確指定移除綁定對象（必須是同一組的全部人）")
-            toggleFullScreen()
+            customAlert("請正確指定移除綁定對象（必須是同一組的全部人）")
+
             return
         }
     }
@@ -972,8 +1042,8 @@
         const top_team_score = parseInt($("#top_team_score").val())
         const bottom_team_score = parseInt($("#bottom_team_score").val())
         if (isNaN(top_team_score) || isNaN(bottom_team_score)) {
-            alert("請先填入分數 再進行登記")
-            toggleFullScreen()
+            customAlert("請先填入分數 再進行登記")
+
             return
         }
         record_score(now_which_game, top_team_score, bottom_team_score)
@@ -1045,8 +1115,8 @@
     }
     function handle_open_modal_of_record_score() {
         if (wait_to_register_list.length == 0) {
-            alert("沒有需要登記的場次")
-            toggleFullScreen()
+            customAlert("沒有需要登記的場次")
+
             return
         }
         $("#which_game").empty()
@@ -1076,13 +1146,24 @@
 
     function handle_delete_record_score() {
         const now_which_game = parseInt($("#which_game").val())
-        const confirmed = confirm(`你確定要刪除${todayPeople[wait_to_register_list[now_which_game][0] - 1].name} & ${todayPeople[wait_to_register_list[now_which_game][3] - 1].name} V.S. ${todayPeople[wait_to_register_list[now_which_game][1] - 1].name} ${todayPeople[wait_to_register_list[now_which_game][2] - 1].name} 這個對局的紀錄嗎？ 一般只在按錯場次上場 趕快按下來 要清除這個錯誤使用！`)
-        if (confirmed) {
-            wait_to_register_list.splice(now_which_game, 1)
-            show_message("成功刪除場次紀錄")
-            $('#myModal').modal('hide');
-            refresh_wait_to_register_text()
-        }
+        // const confirmed = confirm(`你確定要刪除${todayPeople[wait_to_register_list[now_which_game][0] - 1].name} & ${todayPeople[wait_to_register_list[now_which_game][3] - 1].name} V.S. ${todayPeople[wait_to_register_list[now_which_game][1] - 1].name} ${todayPeople[wait_to_register_list[now_which_game][2] - 1].name} 這個對局的紀錄嗎？ 一般只在按錯場次上場 趕快按下來 要清除這個錯誤使用！`)
+        // if (confirmed) {
+        //     wait_to_register_list.splice(now_which_game, 1)
+        //     show_message("成功刪除場次紀錄")
+        //     $('#myModal').modal('hide');
+        //     refresh_wait_to_register_text()
+        // }
+        customConfirm(`你確定要刪除${todayPeople[wait_to_register_list[now_which_game][0] - 1].name} & ${todayPeople[wait_to_register_list[now_which_game][3] - 1].name} V.S. ${todayPeople[wait_to_register_list[now_which_game][1] - 1].name} ${todayPeople[wait_to_register_list[now_which_game][2] - 1].name} 這個對局的紀錄嗎？ 一般只在按錯場次上場 趕快按下來 要清除這個錯誤使用！`).then(confirmed => {
+            if (confirmed) {
+                console.log("操作確認");
+                wait_to_register_list.splice(now_which_game, 1)
+                show_message("成功刪除場次紀錄")
+                $('#myModal').modal('hide');
+                refresh_wait_to_register_text()
+            } else {
+                console.log("操作取消");
+            }
+        });
     }
 
     function handle_backup_data_to_firebase() {
@@ -1147,22 +1228,31 @@
         if (which_court == -1) {
             return (show_message('which_court 不可預期的錯誤', "error"))
         }
-        let confirmed = confirm("確認執行換人操作嗎？")
-        if (!confirmed) {
-            return
-        }
-        const replaced_person = todayPeople.filter(obj => obj.court == which_court && obj.player == which_player)[0]
-        replaced_person.player = 0
-        replaced_person.court = 0
-        // replaced_person.idleRounds = 0
-        // prepare_PK_refresh(choosed_people[0], which_player - 1)
-        todayPeople[choosed_people[0].id - 1].court = which_court
-        todayPeople[choosed_people[0].id - 1].player = which_player
-        choosed_people[0].choosed = 0
-        idle_people_update_to_div()
-        put_todayPeople_to_court()
-        pickPeople()
-        show_message("替換成功")
+        // let confirmed = confirm("確認執行換人操作嗎？")
+        // if (!confirmed) {
+        //     return
+        // }
+        customConfirm("確認執行換人操作嗎？").then(confirmed => {
+            if (confirmed) {
+                console.log("操作確認");
+                const replaced_person = todayPeople.filter(obj => obj.court == which_court && obj.player == which_player)[0]
+                replaced_person.player = 0
+                replaced_person.court = 0
+                // replaced_person.idleRounds = 0
+                // prepare_PK_refresh(choosed_people[0], which_player - 1)
+                todayPeople[choosed_people[0].id - 1].court = which_court
+                todayPeople[choosed_people[0].id - 1].player = which_player
+                choosed_people[0].choosed = 0
+                idle_people_update_to_div()
+                put_todayPeople_to_court()
+                pickPeople()
+                show_message("替換成功")
+            } else {
+                console.log("操作取消");
+                return
+            }
+        });
+
     }
     function handle_upload_data_to_firebase() {
         //TODO: 好像沒必要存在...再想想
@@ -1353,13 +1443,13 @@
     function handle_add_player_confirm() {
         const add_player_name = $('#add_player_name_input').val()
         if (add_player_name.length != 2) {
-            alert('錯誤 名字必須兩個字!')
-            toggleFullScreen()
+            customAlert('錯誤 名字必須兩個字!')
+
             return
         }
         if (todayPeople.filter(e => e.name == add_player_name).length != 0) {
-            alert('錯誤 名字重複了!')
-            toggleFullScreen()
+            customAlert('錯誤 名字重複了!')
+
             return
         }
         const new_player = { id: todayPeople.length + 1, name: add_player_name, score: 400, court: -1, idleRounds: 0, player: 0, partner_id: 0, choosed: 0, game_count: 0, on_court_time: 0 }
@@ -1370,8 +1460,8 @@
             today_play_list.push(todayPeople[i - 1].name)
         }
         send_today_play_list_to_firebase(today_play_list)
-        alert("新增成功");
-        toggleFullScreen()
+        customAlert("新增成功");
+
         return
     }
     function handle_adjust_point_open_modal() {
@@ -1390,12 +1480,21 @@
     function handle_adjust_point_confirm() {
         const person_id = parseInt($('#adjust_score_select').val())
         const target_point = parseInt($("#adjust_target_point_input").val())
-        let confirmed = confirm(`確定將${todayPeople[person_id - 1].name}的分數調整為${target_point}分嗎？`)
-        if (confirmed) {
-            todayPeople[person_id - 1].score = target_point
-        }
+        // let confirmed = confirm(`確定將${todayPeople[person_id - 1].name}的分數調整為${target_point}分嗎？`)
+        // if (confirmed) {
+        //     todayPeople[person_id - 1].score = target_point
+        // }
+        customConfirm(`確定將${todayPeople[person_id - 1].name}的分數調整為${target_point}分嗎？`).then(confirmed => {
+            if (confirmed) {
+                console.log("操作確認");
+                todayPeople[person_id - 1].score = target_point
+                idle_people_update_to_div()
+            } else {
+                console.log("操作取消");
+            }
+        });
         $('#adjust_score_Modal').modal('hide');
-        idle_people_update_to_div()
+
     }
 
     function count_score_function(person, score, top_score_line, bottom_score_line) {
@@ -1919,6 +2018,72 @@
         }
     }
     document.getElementById('goFullScreen').addEventListener('click', toggleFullScreen);
+
+    function customAlert(msg) {
+        // 設置模態視窗中的文字
+        $("#modal-text").text(msg);
+
+        // 顯示模態視窗
+        $("#myAlertModal").show();
+
+        // 為關閉按鈕添加事件處理程序
+        $(".close-btn").click(function () {
+            $("#myAlertModal").hide();
+        });
+
+        // 點擊模態視窗外部關閉模態視窗
+        $(window).click(function (event) {
+            if ($(event.target).is("#myAlertModal")) {
+                $("#myAlertModal").hide();
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        // 當點擊觸發按鈕時打開模態視窗
+        $("#triggerModal").click(function () {
+            $("#myAlertModal").show();
+        });
+
+        // 當點擊關閉按鈕時關閉模態視窗
+        $(".close-btn").click(function () {
+            $("#myAlertModal").hide();
+        });
+
+        // 點擊模態視窗以外的地方也關閉模態視窗
+        $(window).click(function (event) {
+            if ($(event.target).is("#myAlertModal")) {
+                $("#myAlertModal").hide();
+            }
+        });
+    });
+
+    function customConfirm(msg) {
+        return new Promise((resolve, reject) => {
+            $("#confirm-text").text(msg);
+            $("#confirmModal").show();
+
+            $("#confirmBtn").off('click').click(function () {
+                $("#confirmModal").hide();
+                resolve(true);
+            });
+
+            $("#cancelBtn").off('click').click(function () {
+                $("#confirmModal").hide();
+                resolve(false);
+            });
+        });
+    }
+
+    // customConfirm使用方式
+    // customConfirm("確認要進行這個操作嗎？").then(confirmed => {
+    //     if (confirmed) {
+    //         console.log("操作確認");
+    //     } else {
+    //         console.log("操作取消");
+    //     }
+    // });
+
 
 
 

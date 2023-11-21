@@ -356,6 +356,7 @@ div.boModal-content {
     /* 添加陰影效果 */
     border-radius: 5px;
     /* 圓角邊框 */
+    text-align: center;
 }
 
 /* 按鈕樣式 */
@@ -451,4 +452,12 @@ select {
     border-radius: 4px;
     border: 1px solid #ddd;
     margin-bottom: 10px;
+}
+
+#confirmBtn {
+    background-color: #007bff;
+}
+
+#cancelBtn {
+    background-color: #aaa;
 }

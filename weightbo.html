@@ -36,9 +36,9 @@
     <div id="confirmModal" class="boModal" style="display:none;">
         <div class="boModal-content">
             <p id="confirm-text">確認嗎？</p>
-            <button id="confirmBtn">確認</button>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <button id="cancelBtn">取消</button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button id="confirmBtn">確認</button>
         </div>
     </div>
 
@@ -692,7 +692,7 @@
             obj.court = 0;
             obj.idleRounds = -1;
         })
-        wait_to_register_list.push(temp_id_list)
+        wait_to_register_list.unshift(temp_id_list)
         temp_id_list.forEach(obj => temp_name_list.push(todayPeople[obj - 1].name))
         upload_wait_to_register_to_firebase(temp_name_list)
         empty_data_to_court(court_number)
@@ -1095,7 +1095,6 @@
     function handle_open_modal_of_record_score() {
         if (wait_to_register_list.length == 0) {
             customAlert("沒有需要登記的場次")
-
             return
         }
         $("#which_game").empty()

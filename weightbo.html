@@ -1093,6 +1093,8 @@
         refresh_wait_to_register_text()
     }
     function handle_open_modal_of_record_score() {
+        $("#top_team_score").val("")
+        $("#bottom_team_score").val("")
         if (wait_to_register_list.length == 0) {
             customAlert("沒有需要登記的場次")
             return

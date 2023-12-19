@@ -1036,7 +1036,7 @@
         }
     }
     function record_score(now_which_game_p, top_team_score_p, bottom_team_score_p) {
-        const top_score_line = 1000
+        const top_score_line = 800
         const bottom_score_line = 100
         const record_database = database
         const now_which_game = parseInt(now_which_game_p)
@@ -1058,10 +1058,14 @@
         const score_diff_scale = score_count == '1' ? 10 : score_count == 2 ? 20 : 10
         //計算分數：
         const score_diff = top_team_score - bottom_team_score
-        count_score_function(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
-        count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
-        count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
-        count_score_function(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
+        // count_score_function(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
+        // count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        // count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
+        // count_score_function(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff), true, top_score_line, bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff), false, top_score_line, bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff), false, top_score_line, bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff), true, top_score_line, bottom_score_line)
 
         //將雲端登記列表更新
         record_database.ref(`Chung_Shan_elementary_school/wait_to_register/`).once('value').then(snapshot => {
@@ -1473,6 +1477,34 @@
             person.score = bottom_score_line
         }
         return
+    }
+    function count_score_function_new(person, score_diff, isWin, top_score_line, bottom_score_line) {
+        let inputValue = Math.abs(score_diff)
+
+        let score_change = 0
+        if (inputValue < 7) {
+            let sum = 0;
+            for (let i = 1; i < inputValue - 1; i++) {
+                sum += i;
+            }
+            score_change = (inputValue - 1) * 10 - sum;
+        } else {
+            score_change = 40 + (inputValue - 6) * 5;
+        }
+        // console.log('score_diff', score_diff)
+        // console.log('inputValue', inputValue)
+        // console.log('person.name', person.name)
+        // console.log('person.score', person.score)
+        // console.log('score_change', score_change)
+        if (isWin) {
+            person.score += Math.round(score_change * 0.8);
+        } else {
+            person.score -= Math.round(score_change);
+        }
+        console.log('person.score', person.score)
+        if (person.score < bottom_score_line) {
+            person.score = bottom_score_line
+        }
     }
 
     refresh_wait_to_register_text()

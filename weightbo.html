@@ -1496,11 +1496,17 @@
         // console.log('person.name', person.name)
         // console.log('person.score', person.score)
         // console.log('score_change', score_change)
+        // if (isWin) {
+        //     
+        // } else {
+        //     person.score -= Math.round(score_change);
+        // }
         if (isWin) {
-            person.score += Math.round(score_change * 0.8);
+            person.score += Math.round(score_change) * (score_diff / Math.abs(score_diff));
         } else {
-            person.score -= Math.round(score_change);
+            person.score -= Math.round(score_change) * (score_diff / Math.abs(score_diff));
         }
+
         console.log('person.score', person.score)
         if (person.score < bottom_score_line) {
             person.score = bottom_score_line

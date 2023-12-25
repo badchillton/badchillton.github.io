@@ -1487,9 +1487,9 @@
             for (let i = 1; i < inputValue - 1; i++) {
                 sum += i;
             }
-            score_change = (inputValue - 1) * 10 - sum;
+            score_change = ((inputValue - 1) * 10 - sum) * 1.4;
         } else {
-            score_change = 40 + (inputValue - 6) * 5;
+            score_change = (40 + (inputValue - 6) * 5) * 1.4;
         }
         // console.log('score_diff', score_diff)
         // console.log('inputValue', inputValue)

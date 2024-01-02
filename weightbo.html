@@ -1058,14 +1058,22 @@
         const score_diff_scale = score_count == '1' ? 10 : score_count == 2 ? 20 : 10
         //計算分數：
         const score_diff = top_team_score - bottom_team_score
+        console.log('top_team_score', top_team_score)
+        console.log('bottom_team_score', bottom_team_score)
+        console.log('wait_to_register_list[now_which_game][0]', wait_to_register_list[now_which_game][0])
+        console.log('wait_to_register_list[now_which_game][1]', wait_to_register_list[now_which_game][1])
+        console.log('wait_to_register_list[now_which_game][2]', wait_to_register_list[now_which_game][2])
+        console.log('wait_to_register_list[now_which_game][3]', wait_to_register_list[now_which_game][3])
+
+
         // count_score_function(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
         // count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
         // count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
         // count_score_function(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
-        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff), true, top_score_line, bottom_score_line)
-        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff), false, top_score_line, bottom_score_line)
-        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff), false, top_score_line, bottom_score_line)
-        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff), true, top_score_line, bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff), bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff) * -1, bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff) * -1, bottom_score_line)
+        count_score_function_new(todayPeople[wait_to_register_list[now_which_game][3] - 1], (score_diff), bottom_score_line)
 
         //將雲端登記列表更新
         record_database.ref(`Chung_Shan_elementary_school/wait_to_register/`).once('value').then(snapshot => {
@@ -1478,7 +1486,7 @@
         }
         return
     }
-    function count_score_function_new(person, score_diff, isWin, top_score_line, bottom_score_line) {
+    function count_score_function_new(person, score_diff, isWin, bottom_score_line) {
         let inputValue = Math.abs(score_diff)
 
         let score_change = 0
@@ -1501,11 +1509,8 @@
         // } else {
         //     person.score -= Math.round(score_change);
         // }
-        if (isWin) {
-            person.score += Math.round(score_change) * (score_diff / Math.abs(score_diff));
-        } else {
-            person.score -= Math.round(score_change) * (score_diff / Math.abs(score_diff));
-        }
+        person.score += Math.round(score_change) * (score_diff / Math.abs(score_diff));
+
 
         console.log('person.score', person.score)
         if (person.score < bottom_score_line) {
@@ -1700,7 +1705,7 @@
 
         };
     }
-    function letsPlay(people, partner, peopleGreater8) {
+    function letsPlay(people, partner) {
         console.log("綁定清單", partner)
         const flatten_partner = partner.flat();
 

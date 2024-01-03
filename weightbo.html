@@ -1065,7 +1065,7 @@
         console.log('wait_to_register_list[now_which_game][2]', wait_to_register_list[now_which_game][2])
         console.log('wait_to_register_list[now_which_game][3]', wait_to_register_list[now_which_game][3])
 
-
+        console.log('bottom_score_line', bottom_score_line)
         // count_score_function(todayPeople[wait_to_register_list[now_which_game][0] - 1], (score_diff * score_diff_scale), top_score_line, bottom_score_line)
         // count_score_function(todayPeople[wait_to_register_list[now_which_game][1] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
         // count_score_function(todayPeople[wait_to_register_list[now_which_game][2] - 1], (score_diff * score_diff_scale) * -1, top_score_line, bottom_score_line)
@@ -1486,7 +1486,7 @@
         }
         return
     }
-    function count_score_function_new(person, score_diff, isWin, bottom_score_line) {
+    function count_score_function_new(person, score_diff, bottom_score_line) {
         let inputValue = Math.abs(score_diff)
 
         let score_change = 0
@@ -1495,23 +1495,16 @@
             for (let i = 1; i < inputValue - 1; i++) {
                 sum += i;
             }
-            score_change = ((inputValue - 1) * 10 - sum) * 1.4;
+            score_change = ((inputValue - 1) * 10 - sum);
         } else {
-            score_change = (40 + (inputValue - 6) * 5) * 1.4;
+            score_change = (40 + (inputValue - 6) * 5);
         }
-        // console.log('score_diff', score_diff)
-        // console.log('inputValue', inputValue)
-        // console.log('person.name', person.name)
-        // console.log('person.score', person.score)
-        // console.log('score_change', score_change)
-        // if (isWin) {
-        //     
-        // } else {
-        //     person.score -= Math.round(score_change);
-        // }
-        person.score += Math.round(score_change) * (score_diff / Math.abs(score_diff));
 
-
+        console.log('person.name', person.name)
+        console.log('person.score', person.score)
+        console.log('score_diff', score_diff)
+        console.log('score_change', Math.round(score_diff >= 0 ? score_change * 1.2 : score_change * -1.4))
+        person.score += Math.round(score_diff >= 0 ? score_change * 1.2 : score_change * -1.4);
         console.log('person.score', person.score)
         if (person.score < bottom_score_line) {
             person.score = bottom_score_line

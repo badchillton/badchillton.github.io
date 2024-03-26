@@ -27,6 +27,7 @@
     <button id="check_name_list">check_name_list</button>
     <textarea name="" id="name_list" cols="30" rows="10"></textarea>
     <textarea name="" id="output_name_list" cols="30" rows="10"></textarea>
+    <textarea name="" id="output_name_list_2" cols="30" rows="10"></textarea>
     <button id="backup_today_data">將今日資料備份</button>
     <button id="update_data_to_newest_score_data">將資料更新到newest_score_data</button>
     <button id="convert_generate">轉換區讀取</button>
@@ -112,8 +113,8 @@
             })
         })
     }
-    function del_no_need(str){
-        let withoutSpaces=str;
+    function del_no_need(str) {
+        let withoutSpaces = str;
         withoutSpaces = withoutSpaces.replaceAll("(季打)", "");
         withoutSpaces = withoutSpaces.replaceAll("(正取)", "");
         withoutSpaces = withoutSpaces.replaceAll("(備上)", "");
@@ -124,8 +125,8 @@
         withoutSpaces = withoutSpaces.replaceAll("(備)", "");
         return withoutSpaces;
     }
-    function simple_str(str){
-        let withoutSpaces=str;
+    function simple_str(str) {
+        let withoutSpaces = str;
         withoutSpaces = withoutSpaces.replaceAll("(季打)", "(季)");
         withoutSpaces = withoutSpaces.replaceAll("(正取)", "(正)");
         withoutSpaces = withoutSpaces.replaceAll("(備上)", "(備)");
@@ -137,15 +138,15 @@
         let inputArray = inputString.split('\n');  // 將輸入字串分割為陣列
 
         for (let item of inputArray) {
-        // 使用正則表達式從字串中提取名稱和分數
-        let match = item.match(/\[([\d.]+)\](.+)\((季|正|備)\)/);
-        
-        if (match) {
-            let score = parseInt(parseFloat(match[1]) * 100);  // 轉換分數為整數
-            let name = match[2].trim();
-            result[name] = score;
+            // 使用正則表達式從字串中提取名稱和分數
+            let match = item.match(/\[([\d.]+)\](.+)\((季|正|備)\)/);
+
+            if (match) {
+                let score = parseInt(parseFloat(match[1]) * 100);  // 轉換分數為整數
+                let name = match[2].trim();
+                result[name] = score;
+            }
         }
-    }
         return result;
     }
     // function extractEntries(inputString) {
@@ -187,39 +188,45 @@
     function check_name_list() {
         let data = $("#name_list").val()
         data_result = extractEntries(data)
-        data=data_result.matchedEntries
+        data = data_result.matchedEntries
         let key_in_data = keyInData(data)
         data = data.replace(/\d/g, "").replace(/[^\S\n]+/g, "");
         // 刪除所有數字、刪除所有空格
-        let withoutSpaces = data.replaceAll("?", "").replaceAll(".", "").replaceAll("[]","");
+        let withoutSpaces = data.replaceAll("?", "").replaceAll(".", "").replaceAll("[]", "");
         withoutSpaces = withoutSpaces.replaceAll(",", "").replaceAll(/\n+/g, '\n').replace(/\n+$/, '').replace(/^\n/, '');
         // withoutSpaces = withoutSpaces.replaceAll("(季打)", "");
         // withoutSpaces = withoutSpaces.replaceAll("(正取)", "");
         // withoutSpaces = withoutSpaces.replaceAll("(備上)", "");
         // withoutSpaces = withoutSpaces.replaceAll("(備取)", "");
-        
+
         // withoutSpaces=withoutSpaces.replaceAll(",","").replaceAll("")
         // 以換行符號切割成陣列
         let arr = withoutSpaces.split("\n");
         let empty_arr = []
         let my_str = ""
-        
+        let my_str_2 = ""
+
         database.ref(`${club}/newest_score_data`).once("value").then((snapshot) => {
             const data_in_firebase = snapshot.val()
             // console.log("網路資料",data_in_firebase)
             // console.log("手輸資料",key_in_data)
             arr.forEach((element, index) => {
                 empty_arr.push([element, data_in_firebase[element]])
-                my_str += `${index + 1}.[${key_in_data[del_no_need(element)] ? key_in_data[del_no_need(element)]/100:data_in_firebase[del_no_need(element)] ? data_in_firebase[del_no_need(element)] / 100 : "?"}]${simple_str(element)}\n`
-                if (index==31){my_str += '----------------\n'}
+                my_str += `${index + 1}.[${key_in_data[del_no_need(element)] ? key_in_data[del_no_need(element)] / 100 : data_in_firebase[del_no_need(element)] ? data_in_firebase[del_no_need(element)] / 100 : "?"}]${simple_str(element)}\n`
+                my_str_2 += `${index + 1}${simple_str(element)}${key_in_data[del_no_need(element)] ? key_in_data[del_no_need(element)] / 100 : data_in_firebase[del_no_need(element)] ? data_in_firebase[del_no_need(element)] / 100 : "?"}\n`
+                if (index == 31) { my_str += '----------------\n' }
+                if (index == 31) { my_str_2 += '----------------\n' }
             });
             console.log(empty_arr)
-            my_str=data_result.prefixContent ? data_result.prefixContent+'\n'+my_str:my_str
+            my_str = data_result.prefixContent ? data_result.prefixContent + '\n' + my_str : my_str
+            my_str_2 = data_result.prefixContent ? data_result.prefixContent + '\n' + my_str_2 : my_str_2
             // console.log('arr.lenngth',arr.length
-            if (arr.length<=32){
-                my_str+="所有備取都補上囉"
+            if (arr.length <= 32) {
+                my_str += "所有備取都補上囉"
+                my_str_2 += "所有備取都補上囉"
             }
             $("#output_name_list").val(my_str)
+            $("#output_name_list_2").val(my_str_2)
         })
 
 
